@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { StarRating } from "@/components/StarRating";
-import { getProduct } from "@/lib/products";
+import { getProduct, type Product } from "@/lib/products";
 import { cartStore } from "@/lib/cart-store";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
