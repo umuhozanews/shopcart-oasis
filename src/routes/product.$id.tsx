@@ -4,23 +4,24 @@ import { useState } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { StarRating } from "@/components/StarRating";
-import { getProduct, type Product } from "@/lib/products";
+import { products, type Product } from "@/lib/products";
+import { useProduct } from "@/lib/product-store";
 import { cartStore } from "@/lib/cart-store";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/product/$id")({
   loader: ({ params }): { product: Product } => {
-    const product = getProduct(params.id);
+    const product = products.find((p) => p.id === params.id);
     if (!product) throw notFound();
     return { product };
   },
   head: ({ loaderData }) => ({
     meta: loaderData
       ? [
-          { title: `${loaderData.product.name} — Shopcart` },
+          { title: `${loaderData.product.name} — Hippo Technology` },
           { name: "description", content: loaderData.product.tagline },
-          { property: "og:title", content: `${loaderData.product.name} — Shopcart` },
+          { property: "og:title", content: `${loaderData.product.name} — Hippo Technology` },
           { property: "og:description", content: loaderData.product.tagline },
         ]
       : [],
@@ -44,7 +45,9 @@ export const Route = createFileRoute("/product/$id")({
 });
 
 function PDP() {
-  const { product } = Route.useLoaderData() as { product: Product };
+  const { product: loaderProduct } = Route.useLoaderData() as { product: Product };
+  const liveProduct = useProduct(loaderProduct.id);
+  const product = liveProduct ?? loaderProduct;
   const [colorIdx, setColorIdx] = useState(0);
   const [qty, setQty] = useState(1);
 

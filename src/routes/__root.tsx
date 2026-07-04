@@ -8,9 +8,10 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
+import { Analytics } from "@vercel/analytics/react";
+import { visitorStore } from "@/lib/visitor-store";
 
 import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
 
 function NotFoundComponent() {
   return (
@@ -37,18 +38,15 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
-  useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
-  }, [error]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          This page didn't load
+          Something went wrong
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Something went wrong on our end. You can try refreshing or head back home.
+          An unexpected error occurred. Try refreshing the page.
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
@@ -77,17 +75,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Shopcart — Premium Audio & Electronics" },
+      { title: "Hippo Technology — Premium Audio & Electronics Rwanda" },
       {
         name: "description",
         content:
-          "Shop premium headphones, earbuds, and electronics with free delivery and easy returns at Shopcart.",
+          "Shop premium headphones, earbuds, and electronics at Hippo Technology Rwanda. Free delivery, genuine products, 30-day returns.",
       },
-      { property: "og:title", content: "Shopcart — Premium Audio & Electronics" },
+      { property: "og:title", content: "Hippo Technology — Your World, Upgraded." },
       {
         property: "og:description",
         content:
-          "Shop premium headphones, earbuds, and electronics with free delivery and easy returns at Shopcart.",
+          "Rwanda's premier destination for premium audio and electronics.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -100,7 +98,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap",
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: "/hippo-logo.png", type: "image/png" },
+      { rel: "apple-touch-icon", href: "/hippo-logo.png" },
     ],
   }),
   shellComponent: RootShell,
@@ -126,10 +125,15 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
+  useEffect(() => {
+    // Track page views for admin dashboard
+    visitorStore.record(window.location.pathname);
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
+      <Analytics />
     </QueryClientProvider>
   );
 }
