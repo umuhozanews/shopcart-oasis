@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { Package, ShoppingBag, DollarSign, Clock, Users, TrendingUp } from 'lucide-react';
+import { formatRWF } from '@/lib/currency';
 import { useProducts } from '@/lib/product-store';
 import { useOrders } from '@/lib/order-store';
 import { useVisits, visitorStore } from '@/lib/visitor-store';
@@ -45,7 +46,7 @@ function AdminDashboard() {
   const stats = [
     { label: 'Total Products', value: products.length, icon: Package, color: 'text-blue-600', bg: 'bg-blue-50' },
     { label: 'Total Orders', value: orders.length, icon: ShoppingBag, color: 'text-green-600', bg: 'bg-green-50' },
-    { label: 'Total Revenue', value: `$${revenue.toFixed(2)}`, icon: DollarSign, color: 'text-purple-600', bg: 'bg-purple-50' },
+    { label: 'Total Revenue', value: formatRWF(revenue), icon: DollarSign, color: 'text-purple-600', bg: 'bg-purple-50' },
     { label: 'Pending Orders', value: pending, icon: Clock, color: 'text-orange-600', bg: 'bg-orange-50' },
     { label: 'Visits Today', value: todayVisits, icon: Users, color: 'text-teal-600', bg: 'bg-teal-50' },
     { label: 'Visits This Week', value: weekVisits, icon: TrendingUp, color: 'text-indigo-600', bg: 'bg-indigo-50' },
@@ -93,7 +94,7 @@ function AdminDashboard() {
                     <div className="mt-0.5 truncate text-xs text-muted-foreground">{order.customer.name}</div>
                   </div>
                   <div className="ml-4 flex items-center gap-3 flex-shrink-0">
-                    <span className="text-sm font-semibold">${order.total.toFixed(2)}</span>
+                    <span className="text-sm font-semibold">{formatRWF(order.total)}</span>
                     <StatusBadge status={order.status} />
                   </div>
                 </div>
@@ -153,7 +154,7 @@ function AdminDashboard() {
                   Stock: {p.stock}
                 </div>
               </div>
-              <span className="flex-shrink-0 text-sm font-semibold">${p.price.toFixed(2)}</span>
+              <span className="flex-shrink-0 text-sm font-semibold">{formatRWF(p.price)}</span>
             </div>
           ))}
         </div>

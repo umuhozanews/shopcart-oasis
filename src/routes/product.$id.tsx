@@ -1,55 +1,54 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { ChevronRight, Minus, Plus, Truck, RotateCcw } from "lucide-react";
 import { useState } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { StarRating } from "@/components/StarRating";
-import { products, type Product } from "@/lib/products";
+import { products } from "@/lib/products";
 import { useProduct } from "@/lib/product-store";
 import { cartStore } from "@/lib/cart-store";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
+import { formatRWF } from "@/lib/currency";
 
 export const Route = createFileRoute("/product/$id")({
-  loader: ({ params }): { product: Product } => {
-    const product = products.find((p) => p.id === params.id);
-    if (!product) throw notFound();
-    return { product };
+  loader: ({ params }) => {
+    const product = products.find((p) => p.id === params.id) ?? null;
+    return { product, productId: params.id };
   },
   head: ({ loaderData }) => ({
-    meta: loaderData
+    meta: loaderData?.product
       ? [
           { title: `${loaderData.product.name} — Hippo Technology` },
           { name: "description", content: loaderData.product.tagline },
           { property: "og:title", content: `${loaderData.product.name} — Hippo Technology` },
           { property: "og:description", content: loaderData.product.tagline },
         ]
-      : [],
+      : [{ title: "Product — Hippo Technology" }],
   }),
-  notFoundComponent: () => (
-    <div className="grid min-h-screen place-items-center bg-background">
-      <div className="text-center">
-        <p className="text-lg font-semibold">Product not found</p>
-        <Link to="/" className="mt-3 inline-block text-primary underline">
-          Back to shop
-        </Link>
-      </div>
-    </div>
-  ),
-  errorComponent: () => (
-    <div className="grid min-h-screen place-items-center bg-background">
-      <p>Something went wrong.</p>
-    </div>
-  ),
   component: PDP,
 });
 
 function PDP() {
-  const { product: loaderProduct } = Route.useLoaderData() as { product: Product };
-  const liveProduct = useProduct(loaderProduct.id);
-  const product = liveProduct ?? loaderProduct;
+  const { product: loaderProduct, productId } = Route.useLoaderData();
+  const storeProduct = useProduct(productId);
+  const product = storeProduct ?? loaderProduct;
+
   const [colorIdx, setColorIdx] = useState(0);
   const [qty, setQty] = useState(1);
+
+  if (!product) {
+    return (
+      <div className="grid min-h-screen place-items-center bg-background">
+        <div className="text-center">
+          <p className="text-lg font-semibold">Product not found</p>
+          <Link to="/" className="mt-3 inline-block text-primary underline">
+            Back to shop
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   const activeColor = product.colors?.[colorIdx];
   const mainImage = activeColor?.image ?? product.image;
@@ -85,7 +84,7 @@ function PDP() {
               <ChevronRight size={12} className="opacity-50" />
             </span>
           ))}
-          <span className="font-medium text-foreground">{product.id}</span>
+          <span className="font-medium text-foreground">{product.name}</span>
         </nav>
 
         <div className="mt-6 grid grid-cols-1 gap-10 lg:grid-cols-2">
@@ -142,13 +141,10 @@ function PDP() {
 
             <div>
               <div className="text-2xl font-bold text-foreground">
-                ${product.price.toFixed(2)}
-                {product.monthly && (
-                  <span className="text-foreground/80"> or {product.monthly}/month</span>
-                )}
+                {formatRWF(product.price)}
               </div>
               <p className="mt-2 text-xs text-muted-foreground">
-                Suggested payments with 6 months special financing
+                Free delivery across Rwanda
               </p>
             </div>
 
@@ -225,9 +221,9 @@ function PDP() {
                   <Truck className="mt-0.5 text-primary" size={20} />
                   <div>
                     <div className="text-sm font-semibold">Free Delivery</div>
-                    <a href="#" className="text-xs text-muted-foreground underline">
-                      Enter your Postal code for Delivery Availability
-                    </a>
+                    <p className="text-xs text-muted-foreground">
+                      Free delivery across Rwanda on all orders
+                    </p>
                   </div>
                 </div>
               </div>
@@ -237,10 +233,10 @@ function PDP() {
                   <div>
                     <div className="text-sm font-semibold">Return Delivery</div>
                     <p className="text-xs text-muted-foreground">
-                      Free 30days Delivery Returns.{" "}
-                      <a href="#" className="underline">
+                      Free 30-day returns.{" "}
+                      <Link to="/returns" className="underline">
                         Details
-                      </a>
+                      </Link>
                     </p>
                   </div>
                 </div>

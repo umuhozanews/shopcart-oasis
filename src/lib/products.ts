@@ -1,16 +1,3 @@
-import airpodsPink from "@/assets/airpods-pink.jpg";
-import airpodsGray from "@/assets/airpods-gray.jpg";
-import airpodsGreen from "@/assets/airpods-green.jpg";
-import airpodsSilver from "@/assets/airpods-silver.jpg";
-import airpodsBlue from "@/assets/airpods-blue.jpg";
-import earbudsBlack from "@/assets/earbuds-black.jpg";
-import bose from "@/assets/bose-headphones.jpg";
-import red from "@/assets/red-headphones.jpg";
-import jbl from "@/assets/jbl-headphones.jpg";
-import gaming from "@/assets/gaming-earbuds.jpg";
-import bone from "@/assets/bone-headphones.jpg";
-import kids from "@/assets/kids-headphones.jpg";
-
 export type ColorOption = { name: string; hex: string; image: string };
 
 export type Product = {
@@ -18,7 +5,6 @@ export type Product = {
   name: string;
   tagline: string;
   price: number;
-  monthly?: number;
   rating: number;
   reviews: number;
   image: string;
@@ -30,119 +16,128 @@ export type Product = {
 
 export const products: Product[] = [
   {
-    id: "airpods-max",
-    name: "Airpods Max",
-    tagline:
-      "A perfect balance of exhilarating high-fidelity audio and the effortless magic of AirPods.",
-    price: 549,
-    monthly: 99.99,
+    id: "iphone-16-pro-max",
+    name: "iPhone 16 Pro Max",
+    tagline: "The most powerful iPhone ever. Titanium design, A18 Pro chip, and a pro camera system with 5x optical zoom.",
+    price: 1900000,
     rating: 5,
-    reviews: 121,
-    image: airpodsPink,
-    stock: 12,
-    category: "headphones",
-    breadcrumb: ["Electronics", "Audio", "Headphones"],
+    reviews: 87,
+    image: "https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=800&auto=format&q=80",
+    stock: 8,
+    category: "iphone",
+    breadcrumb: ["Electronics", "Smartphones", "iPhone"],
     colors: [
-      { name: "Pink", hex: "#f4b3ae", image: airpodsPink },
-      { name: "Space Gray", hex: "#3a3a3c", image: airpodsGray },
-      { name: "Green", hex: "#b8cdb3", image: airpodsGreen },
-      { name: "Silver", hex: "#e5e5e5", image: airpodsSilver },
-      { name: "Sky Blue", hex: "#5a7b95", image: airpodsBlue },
+      { name: "Black Titanium", hex: "#3a3a3a", image: "https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=800&auto=format&q=80" },
+      { name: "White Titanium", hex: "#e5e5e5", image: "https://images.unsplash.com/photo-1512054502232-10a0a035d672?w=800&auto=format&q=80" },
+      { name: "Desert Titanium", hex: "#c8a882", image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=800&auto=format&q=80" },
     ],
   },
   {
-    id: "wireless-earbuds-ipx8",
-    name: "Wireless Earbuds IPX8",
-    tagline: "Waterproof wireless earbuds with deep bass and 8-hour playtime.",
-    price: 89.99,
-    rating: 5,
-    reviews: 121,
-    image: earbudsBlack,
-    stock: 24,
-    category: "earbuds",
-    breadcrumb: ["Electronics", "Audio", "Earbuds"],
+    id: "samsung-galaxy-s25-ultra",
+    name: "Samsung Galaxy S25 Ultra",
+    tagline: "AI-powered flagship with built-in S Pen, 200MP camera and Snapdragon 8 Elite for Galaxy.",
+    price: 1650000,
+    rating: 4.9,
+    reviews: 64,
+    image: "https://images.unsplash.com/photo-1580910051074-3eb694886505?w=800&auto=format&q=80",
+    stock: 6,
+    category: "samsung",
+    breadcrumb: ["Electronics", "Smartphones", "Samsung"],
+    colors: [
+      { name: "Titanium Black", hex: "#1a1a1a", image: "https://images.unsplash.com/photo-1580910051074-3eb694886505?w=800&auto=format&q=80" },
+      { name: "Titanium Silver", hex: "#c0c0c0", image: "https://images.unsplash.com/photo-1572435555646-7ad9a149ad91?w=800&auto=format&q=80" },
+    ],
   },
   {
-    id: "bose-bt-earphones",
-    name: "Bose BT Earphones",
-    tagline: "World-class noise cancellation meets legendary Bose sound.",
-    price: 289,
-    rating: 4.5,
-    reviews: 121,
-    image: bose,
-    stock: 8,
-    category: "headphones",
-    breadcrumb: ["Electronics", "Audio", "Headphones"],
+    id: "iphone-15",
+    name: "iPhone 15 128GB",
+    tagline: "Dynamic Island, 48MP main camera and USB-C charging in a beautiful colour-infused glass design.",
+    price: 1250000,
+    rating: 4.8,
+    reviews: 112,
+    image: "https://images.unsplash.com/photo-1512054502232-10a0a035d672?w=800&auto=format&q=80",
+    stock: 14,
+    category: "iphone",
+    breadcrumb: ["Electronics", "Smartphones", "iPhone"],
+    colors: [
+      { name: "Pink", hex: "#f4b3ae", image: "https://images.unsplash.com/photo-1512054502232-10a0a035d672?w=800&auto=format&q=80" },
+      { name: "Yellow", hex: "#f5d86d", image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=800&auto=format&q=80" },
+      { name: "Black", hex: "#1a1a1a", image: "https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=800&auto=format&q=80" },
+    ],
   },
   {
-    id: "vivefox-headphones",
-    name: "VIVEFOX Headphones",
-    tagline: "Wired stereo headset with built-in microphone for crystal-clear calls.",
-    price: 39,
-    rating: 5,
-    reviews: 121,
-    image: red,
-    stock: 30,
-    category: "headphones",
-    breadcrumb: ["Electronics", "Audio", "Headphones"],
-  },
-  {
-    id: "jbl-tune-600btnc",
-    name: "JBL TUNE 600BTNC",
-    tagline: "Active noise cancellation with powerful JBL Pure Bass sound.",
-    price: 59,
-    rating: 5,
-    reviews: 121,
-    image: jbl,
-    stock: 15,
-    category: "headphones",
-    breadcrumb: ["Electronics", "Audio", "Headphones"],
-  },
-  {
-    id: "tagry-bluetooth",
-    name: "TAGRY Bluetooth Earbuds",
-    tagline: "True wireless stereo earbuds with touch control and charging case.",
-    price: 109,
-    rating: 5,
-    reviews: 121,
-    image: gaming,
-    stock: 20,
-    category: "earbuds",
-    breadcrumb: ["Electronics", "Audio", "Earbuds"],
-  },
-  {
-    id: "monster-mnflex",
-    name: "Monster MNFLEX",
-    tagline: "Flex active noise canceling Bluetooth headphones with 30hr battery.",
-    price: 89.75,
-    rating: 5,
-    reviews: 121,
-    image: bone,
+    id: "iphone-14",
+    name: "iPhone 14 128GB",
+    tagline: "Emergency SOS via satellite, Crash Detection and the powerful A15 Bionic chip. Great value.",
+    price: 950000,
+    rating: 4.7,
+    reviews: 143,
+    image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=800&auto=format&q=80",
     stock: 18,
-    category: "headphones",
-    breadcrumb: ["Electronics", "Audio", "Headphones"],
+    category: "iphone",
+    breadcrumb: ["Electronics", "Smartphones", "iPhone"],
   },
   {
-    id: "mpow-ch6",
-    name: "Mpow CH6 Kids Headphones",
-    tagline: "Safe volume-limited headphones designed for children aged 3–15.",
-    price: 29.99,
-    rating: 5,
-    reviews: 121,
-    image: kids,
-    stock: 10,
-    category: "kids",
-    breadcrumb: ["Electronics", "Audio", "Kids"],
+    id: "samsung-galaxy-a55",
+    name: "Samsung Galaxy A55 5G",
+    tagline: "Premium mid-range with 50MP triple camera, 5G, IP67 water resistance and smooth 120Hz display.",
+    price: 650000,
+    rating: 4.6,
+    reviews: 89,
+    image: "https://images.unsplash.com/photo-1572435555646-7ad9a149ad91?w=800&auto=format&q=80",
+    stock: 22,
+    category: "samsung",
+    breadcrumb: ["Electronics", "Smartphones", "Samsung"],
+    colors: [
+      { name: "Awesome Navy", hex: "#1a2a4a", image: "https://images.unsplash.com/photo-1572435555646-7ad9a149ad91?w=800&auto=format&q=80" },
+      { name: "Awesome Lilac", hex: "#b4a0d0", image: "https://images.unsplash.com/photo-1573920111312-04f1b25c6b85?w=800&auto=format&q=80" },
+    ],
+  },
+  {
+    id: "tecno-camon-30-pro",
+    name: "Tecno Camon 30 Pro",
+    tagline: "50MP RGBW portrait camera, vivid AMOLED display and 5000mAh battery built for Africa.",
+    price: 300000,
+    rating: 4.4,
+    reviews: 56,
+    image: "https://images.unsplash.com/photo-1573920111312-04f1b25c6b85?w=800&auto=format&q=80",
+    stock: 30,
+    category: "budget",
+    breadcrumb: ["Electronics", "Smartphones", "Budget"],
+  },
+  {
+    id: "infinix-hot-40-pro",
+    name: "Infinix Hot 40 Pro",
+    tagline: "6.78\" FHD+ display, 108MP camera and massive 5000mAh battery at an unbeatable price.",
+    price: 195000,
+    rating: 4.3,
+    reviews: 74,
+    image: "https://images.unsplash.com/photo-1609921212029-bb5a28e60960?w=800&auto=format&q=80",
+    stock: 40,
+    category: "budget",
+    breadcrumb: ["Electronics", "Smartphones", "Budget"],
+  },
+  {
+    id: "samsung-galaxy-buds3-pro",
+    name: "Samsung Galaxy Buds3 Pro",
+    tagline: "Intelligent ANC, 360° Audio and up to 30 hours total playback. Premium wireless earbuds.",
+    price: 250000,
+    rating: 4.7,
+    reviews: 48,
+    image: "https://images.unsplash.com/photo-1610945264803-c22b62831524?w=800&auto=format&q=80",
+    stock: 25,
+    category: "accessories",
+    breadcrumb: ["Electronics", "Accessories", "Earbuds"],
   },
 ];
 
 export const getProduct = (id: string) => products.find((p) => p.id === id);
 
 export const categories = [
-  { name: "Headphones", slug: "headphones", count: 6 },
-  { name: "Earbuds", slug: "earbuds", count: 2 },
-  { name: "Kids Audio", slug: "kids", count: 1 },
-  { name: "Wireless", slug: "wireless", count: 5 },
-  { name: "Gaming", slug: "gaming", count: 2 },
+  { name: "Smartphones", slug: "smartphones", count: 7 },
+  { name: "iPhone", slug: "iphone", count: 3 },
+  { name: "Samsung", slug: "samsung", count: 3 },
+  { name: "Budget Phones", slug: "budget", count: 2 },
+  { name: "Accessories", slug: "accessories", count: 1 },
   { name: "All Products", slug: "all", count: products.length },
 ];

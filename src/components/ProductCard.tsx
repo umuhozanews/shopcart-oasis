@@ -5,6 +5,7 @@ import type { Product } from "@/lib/products";
 import { cartStore } from "@/lib/cart-store";
 import { StarRating } from "./StarRating";
 import { toast } from "sonner";
+import { formatRWF } from "@/lib/currency";
 
 export function ProductCard({ product }: { product: Product }) {
   const [liked, setLiked] = useState(false);
@@ -50,10 +51,7 @@ export function ProductCard({ product }: { product: Product }) {
           </div>
           <div className="shrink-0 text-right">
             <div className="text-sm font-bold text-foreground">
-              ${Math.floor(product.price)}
-              <sup className="text-[10px] font-medium text-muted-foreground">
-                .{String(product.price.toFixed(2)).split(".")[1]}
-              </sup>
+              {formatRWF(product.price)}
             </div>
           </div>
         </div>

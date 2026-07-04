@@ -12,10 +12,10 @@ import heroWoman from '@/assets/hero-woman.jpg';
 export const Route = createFileRoute('/')({
   head: () => ({
     meta: [
-      { title: 'Hippo Technology — Premium Audio & Electronics Rwanda' },
-      { name: 'description', content: 'Shop premium headphones, earbuds, and electronics at Hippo Technology Rwanda. Free delivery, genuine products, 30-day returns.' },
+      { title: 'Hippo Technology — Phones & Gadgets Rwanda' },
+      { name: 'description', content: 'Shop iPhones, Samsung, Tecno, Infinix and top gadgets at Hippo Technology Rwanda. Free delivery, genuine products, 30-day returns.' },
       { property: 'og:title', content: 'Hippo Technology — Your World, Upgraded.' },
-      { property: 'og:description', content: 'Rwanda\'s premier destination for premium audio and electronics. Free delivery on all orders.' },
+      { property: 'og:description', content: 'Rwanda\'s premier destination for phones and gadgets. Free delivery on all orders.' },
     ],
   }),
   component: Home,
@@ -55,12 +55,12 @@ function Home() {
                 Free Delivery Across Rwanda
               </span>
               <h1 className="max-w-md font-display text-3xl font-extrabold leading-tight tracking-tight text-primary sm:text-4xl md:text-5xl">
-                Grab Up to 50% Off On Selected Headphones
+                Top Phones &amp; Gadgets Delivered Across Rwanda
               </h1>
               <div className="mt-6 flex flex-wrap gap-3">
                 <Link
                   to="/product/$id"
-                  params={{ id: 'airpods-max' }}
+                  params={{ id: 'iphone-16-pro-max' }}
                   className="inline-flex items-center rounded-full bg-primary px-7 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90"
                 >
                   Buy Now
@@ -98,7 +98,7 @@ function Home() {
             >
               All
             </button>
-            {['headphones', 'earbuds', 'kids'].map((slug) => {
+            {['iphone', 'samsung', 'budget', 'accessories'].map((slug) => {
               const cat = categories.find((c) => c.slug === slug);
               return (
                 <button

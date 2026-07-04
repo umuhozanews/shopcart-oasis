@@ -18,9 +18,9 @@ export const Route = createFileRoute('/deals')({
 
 function Deals() {
   const products = useProducts();
-  // Show products under $100 as "deals"
-  const deals = products.filter((p) => p.price < 100);
-  const featured = products.filter((p) => p.price >= 100);
+  // Show products under 500,000 RWF as budget deals
+  const deals = products.filter((p) => p.price < 500000);
+  const featured = products.filter((p) => p.price >= 500000);
 
   return (
     <div className="min-h-screen bg-background">
@@ -34,9 +34,9 @@ function Deals() {
               <Tag size={12} /> Limited Time Offers
             </span>
           </div>
-          <h1 className="text-4xl font-extrabold tracking-tight">Grab Up to 50% Off</h1>
+          <h1 className="text-4xl font-extrabold tracking-tight">Best Deals on Phones &amp; Gadgets</h1>
           <p className="mt-3 opacity-90 max-w-md mx-auto">
-            Premium audio at unbeatable prices. Deals change weekly — don't miss out.
+            iPhones, Samsung, Tecno and more at the best prices in Rwanda. Deals updated weekly.
           </p>
         </section>
 
@@ -44,7 +44,7 @@ function Deals() {
         {deals.length > 0 && (
           <section className="mb-14">
             <div className="flex items-center gap-3 mb-6">
-              <h2 className="text-xl font-bold tracking-tight">Under $100</h2>
+              <h2 className="text-xl font-bold tracking-tight">Under 500,000 RWF</h2>
               <span className="rounded-full bg-destructive/10 px-3 py-1 text-xs font-semibold text-destructive">
                 {deals.length} deals
               </span>

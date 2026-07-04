@@ -38,9 +38,7 @@ function CategoryPage() {
   const cat = categories.find((c) => c.slug === slug);
   const allProducts = useProducts();
 
-  const filtered = slug === 'all' || slug === 'wireless' || slug === 'gaming'
-    ? filterBySlugs(allProducts, slug)
-    : allProducts.filter((p) => p.category === slug);
+  const filtered = filterBySlugs(allProducts, slug);
 
   return (
     <div className="min-h-screen bg-background">
@@ -99,7 +97,6 @@ function CategoryPage() {
 
 function filterBySlugs(products: ReturnType<typeof useProducts>, slug: string) {
   if (slug === 'all') return products;
-  if (slug === 'wireless') return products.filter((p) => p.category === 'headphones' || p.category === 'earbuds');
-  if (slug === 'gaming') return products.filter((p) => p.id.includes('gaming') || p.id.includes('tagry'));
+  if (slug === 'smartphones') return products.filter((p) => p.category !== 'accessories');
   return products.filter((p) => p.category === slug);
 }

@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { formatRWF } from '@/lib/currency';
 import { useState } from 'react';
 import { ChevronDown, ChevronUp, Package } from 'lucide-react';
 import { useOrders, orderStore, type Order } from '@/lib/order-store';
@@ -113,7 +114,7 @@ function AdminOrders() {
                         })}
                       </td>
                       <td className="px-5 py-3.5 text-right font-semibold">
-                        ${order.total.toFixed(2)}
+                        {formatRWF(order.total)}
                       </td>
                       <td className="px-5 py-3.5 text-center">
                         <select
@@ -171,11 +172,11 @@ function AdminOrders() {
                                         )}
                                       </div>
                                       <div className="text-xs text-muted-foreground">
-                                        ${item.price.toFixed(2)} × {item.qty}
+                                        {formatRWF(item.price)} × {item.qty}
                                       </div>
                                     </div>
                                     <span className="flex-shrink-0 text-sm font-semibold">
-                                      ${(item.price * item.qty).toFixed(2)}
+                                      {formatRWF(item.price * item.qty)}
                                     </span>
                                   </div>
                                 ))}
@@ -195,12 +196,8 @@ function AdminOrders() {
                                       {order.customer.address}
                                     </div>
                                   )}
-                                  {(order.customer.city || order.customer.zip) && (
-                                    <div className="text-muted-foreground">
-                                      {[order.customer.city, order.customer.zip]
-                                        .filter(Boolean)
-                                        .join(', ')}
-                                    </div>
+                                  {order.customer.city && (
+                                    <div className="text-muted-foreground">{order.customer.city}</div>
                                   )}
                                   {order.customer.mobile && (
                                     <div className="text-muted-foreground">{order.customer.mobile}</div>
@@ -221,7 +218,7 @@ function AdminOrders() {
                               <div className="rounded-xl bg-background p-3 space-y-1.5">
                                 <div className="flex justify-between text-sm">
                                   <span className="text-muted-foreground">Subtotal</span>
-                                  <span>${order.subtotal.toFixed(2)}</span>
+                                  <span>{formatRWF(order.subtotal)}</span>
                                 </div>
                                 <div className="flex justify-between text-sm">
                                   <span className="text-muted-foreground">Shipping</span>
@@ -229,12 +226,12 @@ function AdminOrders() {
                                 </div>
                                 <div className="flex justify-between text-sm">
                                   <span className="text-muted-foreground">Tax (8%)</span>
-                                  <span>${order.tax.toFixed(2)}</span>
+                                  <span>{formatRWF(order.tax)}</span>
                                 </div>
                                 <div className="my-1.5 h-px bg-border" />
                                 <div className="flex justify-between text-sm font-bold">
                                   <span>Total</span>
-                                  <span>${order.total.toFixed(2)}</span>
+                                  <span>{formatRWF(order.total)}</span>
                                 </div>
                               </div>
                             </div>

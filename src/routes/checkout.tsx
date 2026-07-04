@@ -5,6 +5,7 @@ import { Footer } from "@/components/Footer";
 import { cartStore, useCart } from "@/lib/cart-store";
 import { orderStore } from "@/lib/order-store";
 import { Minus, Plus, Trash2, CheckCircle2 } from "lucide-react";
+import { formatRWF } from "@/lib/currency";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 
@@ -18,14 +19,11 @@ export const Route = createFileRoute("/checkout")({
   component: Checkout,
 });
 
-const PAYMENTS = ["Cash on Delivery", "Shopcart Card", "Paypal", "Credit or Debit card"];
-
 type CustomerForm = {
   name: string;
   mobile: string;
   address: string;
   city: string;
-  zip: string;
   email: string;
 };
 
@@ -34,14 +32,11 @@ const emptyForm: CustomerForm = {
   mobile: "",
   address: "",
   city: "",
-  zip: "",
   email: "",
 };
 
 function Checkout() {
   const items = useCart();
-  const [payment, setPayment] = useState(PAYMENTS[0]);
-  const [coupon, setCoupon] = useState("");
   const [customer, setCustomer] = useState<CustomerForm>(emptyForm);
   const [placed, setPlaced] = useState(false);
   const [orderId, setOrderId] = useState("");
@@ -59,7 +54,7 @@ function Checkout() {
     const order = orderStore.add({
       customer,
       items,
-      paymentMethod: payment,
+      paymentMethod: "Cash on Delivery",
       subtotal,
       tax,
       total,
@@ -195,12 +190,6 @@ function Checkout() {
                   onChange={setField("city")}
                 />
                 <Field
-                  label="Zip Code"
-                  placeholder="00000"
-                  value={customer.zip}
-                  onChange={setField("zip")}
-                />
-                <Field
                   label="Email"
                   placeholder="you@example.com"
                   className="sm:col-span-2"
@@ -210,70 +199,18 @@ function Checkout() {
               </div>
             </section>
 
-            {/* Payment */}
-            <section className="rounded-2xl bg-background p-6 ring-1 ring-border/60">
-              <h2 className="text-sm font-semibold">Payment Details</h2>
-              <div className="mt-4 space-y-2">
-                {PAYMENTS.map((p) => (
-                  <label
-                    key={p}
-                    className={`flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 text-sm transition ${
-                      payment === p
-                        ? "border-primary bg-primary/5"
-                        : "border-border hover:border-primary/40"
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="payment"
-                      checked={payment === p}
-                      onChange={() => setPayment(p)}
-                      className="accent-primary"
-                    />
-                    {p}
-                  </label>
-                ))}
-              </div>
-              {payment === "Credit or Debit card" && (
-                <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <Field
-                    label="Card Number"
-                    placeholder="1234 5678 9012 3456"
-                    className="sm:col-span-2"
-                    value=""
-                    onChange={() => {}}
-                  />
-                  <Field label="Cardholder Name" placeholder="Jane Doe" value="" onChange={() => {}} />
-                  <Field label="Expiry / CVV" placeholder="MM/YY  ·  123" value="" onChange={() => {}} />
-                </div>
-              )}
-            </section>
           </div>
 
           {/* Order summary */}
           <aside className="h-fit space-y-4 rounded-2xl bg-background p-6 ring-1 ring-border/60 lg:sticky lg:top-28">
             <h2 className="text-sm font-semibold">Order Summary</h2>
-            <div className="flex gap-2">
-              <input
-                value={coupon}
-                onChange={(e) => setCoupon(e.target.value)}
-                placeholder="Enter Coupon Code"
-                className="flex-1 rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary"
-              />
-              <button
-                onClick={() => coupon && toast.success("Coupon applied")}
-                className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition"
-              >
-                Apply
-              </button>
-            </div>
 
             <div className="space-y-2 pt-2 text-sm">
-              <Row label="Subtotal" value={`$${subtotal.toFixed(2)}`} />
+              <Row label="Subtotal" value={formatRWF(subtotal)} />
               <Row label="Shipping" value="Free" />
-              <Row label="Tax (8%)" value={`$${tax.toFixed(2)}`} />
+              <Row label="Tax (8%)" value={formatRWF(tax)} />
               <div className="my-3 h-px bg-border" />
-              <Row label="Total" value={`$${total.toFixed(2)}`} bold />
+              <Row label="Total" value={formatRWF(total)} bold />
             </div>
 
             <button

@@ -11,7 +11,6 @@ export type Order = {
     mobile: string;
     address: string;
     city: string;
-    zip: string;
   };
   items: CartItem[];
   paymentMethod: string;
