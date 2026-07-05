@@ -10,6 +10,7 @@ import {
 import { useEffect, type ReactNode } from "react";
 import { Analytics } from "@vercel/analytics/react";
 import { visitorStore } from "@/lib/visitor-store";
+import { WhatsAppButton } from "@/components/WhatsAppButton";
 
 import appCss from "../styles.css?url";
 
@@ -133,6 +134,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <Outlet />
+      <WhatsAppButton />
       <Analytics />
     </QueryClientProvider>
   );

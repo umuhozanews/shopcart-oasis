@@ -1,26 +1,49 @@
 import { Link } from '@tanstack/react-router';
-import { Phone } from 'lucide-react';
+import { Phone, MapPin, MessageCircle, Instagram } from 'lucide-react';
 import hippoLogo from '@/assets/hippo-logo.png';
+import { useSiteSettings } from '@/lib/site-settings-store';
 
 export function Footer() {
+  const s = useSiteSettings();
+  const logoSrc = s.logoData || hippoLogo;
+
   return (
     <footer className="mt-24 bg-primary text-primary-foreground">
       <div className="mx-auto grid max-w-7xl gap-10 px-6 py-14 sm:grid-cols-2 lg:grid-cols-4">
         {/* Brand */}
         <div>
           <div className="flex items-center gap-3">
-            <img src={hippoLogo} alt="Hippo Technology" className="h-14 w-auto object-contain brightness-0 invert" />
+            <img src={logoSrc} alt={s.siteName} className="h-14 w-auto object-contain brightness-0 invert" />
             <div>
-              <div className="text-base font-extrabold leading-tight tracking-tight">HIPPO</div>
-              <div className="text-sm font-bold leading-tight opacity-80">TECHNOLOGY</div>
+              <div className="text-base font-extrabold leading-tight tracking-tight">{s.siteName}</div>
+              <div className="text-sm font-bold leading-tight opacity-80">{s.siteSubtitle}</div>
             </div>
           </div>
-          <p className="mt-4 max-w-xs text-sm opacity-80">
-            Your World, Upgraded. Premium electronics and audio gear, curated for the way you live.
-          </p>
-          <div className="mt-4 flex items-center gap-2 text-sm opacity-90">
-            <Phone size={14} />
-            <a href="tel:0798989741" className="hover:underline">0798989741</a>
+          <p className="mt-4 max-w-xs text-sm opacity-80">{s.siteTagline}</p>
+          <div className="mt-4 flex items-start gap-2 text-sm opacity-90">
+            <MapPin size={16} className="mt-0.5 shrink-0" />
+            <span>{s.address}</span>
+          </div>
+          {/* Social */}
+          <div className="mt-5 flex items-center gap-3">
+            <a
+              href={s.instagramUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Instagram"
+              className="grid h-9 w-9 place-items-center rounded-full bg-primary-foreground/10 transition hover:bg-primary-foreground/20"
+            >
+              <Instagram size={18} />
+            </a>
+            <a
+              href={s.whatsappChannel}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="WhatsApp Channel"
+              className="grid h-9 w-9 place-items-center rounded-full bg-primary-foreground/10 transition hover:bg-primary-foreground/20"
+            >
+              <MessageCircle size={18} />
+            </a>
           </div>
         </div>
 
@@ -28,8 +51,9 @@ export function Footer() {
         <div>
           <h4 className="text-sm font-semibold">Shop</h4>
           <ul className="mt-4 space-y-2 text-sm opacity-80">
-            <li><Link to="/category/$slug" params={{ slug: 'headphones' }} className="hover:opacity-100 hover:underline">Headphones</Link></li>
-            <li><Link to="/category/$slug" params={{ slug: 'earbuds' }} className="hover:opacity-100 hover:underline">Earbuds</Link></li>
+            <li><Link to="/category/$slug" params={{ slug: 'smartphones' }} className="hover:opacity-100 hover:underline">Smartphones</Link></li>
+            <li><Link to="/category/$slug" params={{ slug: 'iphone' }} className="hover:opacity-100 hover:underline">iPhone</Link></li>
+            <li><Link to="/category/$slug" params={{ slug: 'samsung' }} className="hover:opacity-100 hover:underline">Samsung</Link></li>
             <li><Link to="/deals" className="hover:opacity-100 hover:underline">Deals & Offers</Link></li>
             <li><Link to="/category/$slug" params={{ slug: 'all' }} className="hover:opacity-100 hover:underline">All Products</Link></li>
           </ul>
@@ -43,23 +67,55 @@ export function Footer() {
             <li><Link to="/shipping" className="hover:opacity-100 hover:underline">Shipping & Delivery</Link></li>
             <li><Link to="/returns" className="hover:opacity-100 hover:underline">Returns & Warranty</Link></li>
             <li><Link to="/faq" className="hover:opacity-100 hover:underline">FAQ</Link></li>
+            <li><Link to="/about" className="hover:opacity-100 hover:underline">About Us</Link></li>
           </ul>
         </div>
 
-        {/* Company */}
+        {/* Contact */}
         <div>
-          <h4 className="text-sm font-semibold">Company</h4>
+          <h4 className="text-sm font-semibold">Get in Touch</h4>
           <ul className="mt-4 space-y-2 text-sm opacity-80">
-            <li><Link to="/about" className="hover:opacity-100 hover:underline">About Us</Link></li>
-            <li><a href="tel:0798989741" className="hover:opacity-100 hover:underline">0798989741</a></li>
-            <li><a href="mailto:info@hippotech.rw" className="hover:opacity-100 hover:underline">info@hippotech.rw</a></li>
+            {s.phones.map((phone) => (
+              <li key={phone}>
+                <a
+                  href={`tel:${phone.replace(/\s/g, '')}`}
+                  className="flex items-center gap-2 hover:opacity-100 hover:underline"
+                >
+                  <Phone size={14} className="shrink-0" />
+                  {phone}
+                </a>
+              </li>
+            ))}
+            <li>
+              <a
+                href={`mailto:${s.email}`}
+                className="hover:opacity-100 hover:underline"
+              >
+                {s.email}
+              </a>
+            </li>
+            <li>
+              <a
+                href={s.instagramUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 hover:opacity-100 hover:underline"
+              >
+                <Instagram size={14} className="shrink-0" />
+                {s.instagramHandle}
+              </a>
+            </li>
           </ul>
         </div>
       </div>
 
       <div className="border-t border-primary-foreground/10">
-        <div className="mx-auto max-w-7xl px-6 py-5 text-xs opacity-70">
-          © {new Date().getFullYear()} Hippo Technology. All rights reserved. — Your World, Upgraded.
+        <div className="mx-auto flex max-w-7xl flex-col gap-1 px-6 py-5 text-xs opacity-70 sm:flex-row sm:items-center sm:justify-between">
+          <span>© {new Date().getFullYear()} Hippo Technology Ltd. All rights reserved.</span>
+          <span>
+            Website by{' '}
+            <span className="font-semibold opacity-100">GACONDO TECH</span>
+          </span>
         </div>
       </div>
     </footer>

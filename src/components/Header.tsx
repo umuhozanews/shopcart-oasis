@@ -4,18 +4,20 @@ import { ChevronDown, Phone, Search, ShoppingCart, User, X } from 'lucide-react'
 import { useCart } from '@/lib/cart-store';
 import { isAdminAuthenticated } from '@/lib/admin-auth';
 import { categories } from '@/lib/products';
+import { useSiteSettings } from '@/lib/site-settings-store';
 import hippoLogo from '@/assets/hippo-logo.png';
 
 export function TopBar() {
+  const s = useSiteSettings();
   return (
     <div className="hidden bg-primary text-primary-foreground md:block">
       <div className="mx-auto flex h-9 max-w-7xl items-center justify-between px-6 text-xs">
         <div className="flex items-center gap-2 opacity-90">
           <Phone size={12} />
-          <a href="tel:0798989741" className="hover:underline">0798989741</a>
+          <a href={`tel:${s.topbarPhone}`} className="hover:underline">{s.topbarPhone}</a>
         </div>
         <div className="opacity-90">
-          Get 50% Off on Selected Items{' '}
+          {s.topbarPromo}{' '}
           <span className="mx-2 opacity-50">|</span>
           <Link to="/deals" className="underline underline-offset-2">
             Shop Now
@@ -34,6 +36,8 @@ export function Header() {
   const cart = useCart();
   const count = cart.reduce((n, i) => n + i.qty, 0);
   const navigate = useNavigate();
+  const s = useSiteSettings();
+  const logoSrc = s.logoData || hippoLogo;
   const [query, setQuery] = useState('');
   const [showCategories, setShowCategories] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
@@ -69,10 +73,10 @@ export function Header() {
       <div className="mx-auto grid max-w-7xl grid-cols-[auto_1fr_auto] items-center gap-4 px-4 py-3 md:px-6">
         {/* Logo */}
         <Link to="/" className="flex shrink-0 items-center gap-2">
-          <img src={hippoLogo} alt="Hippo Technology" className="h-12 w-auto object-contain" />
+          <img src={logoSrc} alt={s.siteName} className="h-12 w-auto object-contain" />
           <div className="hidden sm:block">
-            <div className="text-base font-extrabold leading-tight tracking-tight text-foreground">HIPPO</div>
-            <div className="text-sm font-bold leading-tight text-primary">TECHNOLOGY</div>
+            <div className="text-base font-extrabold leading-tight tracking-tight text-foreground">{s.siteName}</div>
+            <div className="text-sm font-bold leading-tight text-primary">{s.siteSubtitle}</div>
           </div>
         </Link>
 

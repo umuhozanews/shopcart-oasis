@@ -8,6 +8,8 @@ import { Minus, Plus, Trash2, CheckCircle2 } from "lucide-react";
 import { formatRWF } from "@/lib/currency";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
+import { siteSettingsStore } from "@/lib/site-settings-store";
+import type { CartItem } from "@/lib/cart-store";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
@@ -35,11 +37,51 @@ const emptyForm: CustomerForm = {
   email: "",
 };
 
+function buildOrderMessage(
+  orderId: string,
+  customer: CustomerForm,
+  items: CartItem[],
+  subtotal: number,
+  tax: number,
+  total: number
+): string {
+  const lines = items
+    .map(
+      (i) =>
+        `• ${i.name}${i.color ? ` (${i.color})` : ""} x${i.qty} — ${formatRWF(
+          i.price * i.qty
+        )}`
+    )
+    .join("\n");
+
+  return [
+    `*New Order ${orderId}*`,
+    "",
+    "*Items*",
+    lines,
+    "",
+    `Subtotal: ${formatRWF(subtotal)}`,
+    `Tax (8%): ${formatRWF(tax)}`,
+    `*Total: ${formatRWF(total)}*`,
+    "",
+    "*Customer*",
+    `Name: ${customer.name}`,
+    `Mobile: ${customer.mobile}`,
+    customer.address ? `Address: ${customer.address}` : "",
+    customer.city ? `City: ${customer.city}` : "",
+    customer.email ? `Email: ${customer.email}` : "",
+    "Payment: Cash on Delivery",
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
 function Checkout() {
   const items = useCart();
   const [customer, setCustomer] = useState<CustomerForm>(emptyForm);
   const [placed, setPlaced] = useState(false);
   const [orderId, setOrderId] = useState("");
+  const [waLink, setWaLink] = useState("");
 
   const subtotal = items.reduce((n, i) => n + i.price * i.qty, 0);
   const tax = subtotal * 0.08;
@@ -51,6 +93,11 @@ function Checkout() {
   }
 
   function placeOrder() {
+    if (!customer.name.trim() || !customer.mobile.trim()) {
+      toast.error("Please enter your name and mobile number.");
+      return;
+    }
+
     const order = orderStore.add({
       customer,
       items,
@@ -59,10 +106,26 @@ function Checkout() {
       tax,
       total,
     });
+
+    const message = buildOrderMessage(
+      order.id,
+      customer,
+      items,
+      subtotal,
+      tax,
+      total
+    );
+    const waNumber = siteSettingsStore.get().whatsapp;
+    const link = `https://wa.me/${waNumber}?text=${encodeURIComponent(message)}`;
+
     cartStore.clear();
     setOrderId(order.id);
+    setWaLink(link);
     setPlaced(true);
-    toast.success("Order placed! Thank you for shopping with us.");
+    toast.success("Order placed! Sending details to Hippo Technology…");
+
+    // Forward the order straight to the shop's WhatsApp so the admin is notified.
+    window.open(link, "_blank", "noopener,noreferrer");
   }
 
   if (placed) {
@@ -76,12 +139,27 @@ function Checkout() {
             Your order <span className="font-mono font-semibold text-foreground">{orderId}</span> has
             been placed.
           </p>
-          <Link
-            to="/"
-            className="mt-8 inline-flex items-center rounded-full bg-primary px-8 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition"
-          >
-            Continue Shopping
-          </Link>
+          <p className="mt-2 text-sm text-muted-foreground">
+            To confirm your order and delivery, please send the order details to us on WhatsApp.
+          </p>
+          <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+            {waLink && (
+              <a
+                href={waLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-full bg-[#25D366] px-8 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#1ebe5b]"
+              >
+                Confirm on WhatsApp
+              </a>
+            )}
+            <Link
+              to="/"
+              className="inline-flex items-center rounded-full border border-primary px-8 py-3 text-sm font-semibold text-primary transition hover:bg-primary/5"
+            >
+              Continue Shopping
+            </Link>
+          </div>
         </main>
         <Footer />
       </div>
@@ -145,7 +223,7 @@ function Checkout() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-sm font-bold">${(item.price * item.qty).toFixed(2)}</div>
+                        <div className="text-sm font-bold">{formatRWF(item.price * item.qty)}</div>
                         <button
                           onClick={() => cartStore.remove(item.id, item.color)}
                           className="mt-2 text-muted-foreground hover:text-destructive transition"
@@ -166,32 +244,32 @@ function Checkout() {
               <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <Field
                   label="Name"
-                  placeholder="Jane Doe"
+                  placeholder="Full name"
                   value={customer.name}
                   onChange={setField("name")}
                 />
                 <Field
                   label="Mobile"
-                  placeholder="+1 234 567 890"
+                  placeholder="07XX XXX XXX"
                   value={customer.mobile}
                   onChange={setField("mobile")}
                 />
                 <Field
                   label="Address"
-                  placeholder="Street address"
+                  placeholder="Street / area"
                   className="sm:col-span-2"
                   value={customer.address}
                   onChange={setField("address")}
                 />
                 <Field
                   label="City"
-                  placeholder="City"
+                  placeholder="Kigali"
                   value={customer.city}
                   onChange={setField("city")}
                 />
                 <Field
-                  label="Email"
-                  placeholder="you@example.com"
+                  label="Email (optional)"
+                  placeholder="Email"
                   className="sm:col-span-2"
                   value={customer.email}
                   onChange={setField("email")}
