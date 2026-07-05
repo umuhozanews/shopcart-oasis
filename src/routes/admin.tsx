@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, Link } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
-import { LayoutDashboard, Package, ShoppingBag, LogOut, ExternalLink, Settings } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingBag, LogOut, ExternalLink, Settings, Image } from 'lucide-react';
 import { isAdminAuthenticated, adminLogout } from '@/lib/admin-auth';
 import { useOrders } from '@/lib/order-store';
 import { useSiteSettings } from '@/lib/site-settings-store';
@@ -38,6 +38,7 @@ function AdminLayout() {
     { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true, badge: 0 },
     { href: '/admin/products', label: 'Products', icon: Package, badge: 0 },
     { href: '/admin/orders', label: 'Orders', icon: ShoppingBag, badge: pendingCount },
+    { href: '/admin/banners', label: 'Banners', icon: Image, badge: 0 },
     { href: '/admin/settings', label: 'Settings', icon: Settings, badge: 0 },
   ];
 
@@ -59,7 +60,7 @@ function AdminLayout() {
             return (
               <Link
                 key={href}
-                to={href as '/admin' | '/admin/products' | '/admin/orders' | '/admin/settings'}
+                to={href as '/admin' | '/admin/products' | '/admin/orders' | '/admin/banners' | '/admin/settings'}
                 className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${
                   active
                     ? 'bg-primary/10 text-primary'
@@ -119,7 +120,7 @@ function AdminLayout() {
             return (
               <Link
                 key={href}
-                to={href as '/admin' | '/admin/products' | '/admin/orders' | '/admin/settings'}
+                to={href as '/admin' | '/admin/products' | '/admin/orders' | '/admin/banners' | '/admin/settings'}
                 className={`relative flex flex-1 flex-col items-center gap-0.5 py-2.5 text-xs font-medium transition border-b-2 ${
                   active
                     ? 'border-primary text-primary'

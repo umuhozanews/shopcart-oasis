@@ -4,11 +4,12 @@ import { ChevronDown, SlidersHorizontal } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { ProductCard } from '@/components/ProductCard';
+import { HeroSlider } from '@/components/HeroSlider';
+import { StockPopup } from '@/components/StockPopup';
 import { categories } from '@/lib/products';
 import { useProducts } from '@/lib/product-store';
 import { Toaster } from '@/components/ui/sonner';
 import { JsonLd, SITE_URL } from '@/components/JsonLd';
-import heroWoman from '@/assets/hero-woman.jpg';
 
 export const Route = createFileRoute('/')({
   head: () => ({
@@ -72,43 +73,9 @@ function Home() {
       <Header />
 
       <main className="mx-auto max-w-7xl px-4 pt-6 md:px-6">
-        {/* Hero */}
-        <section className="relative overflow-hidden rounded-3xl bg-accent">
-          <div className="grid grid-cols-1 items-center gap-6 p-8 md:grid-cols-2 md:p-14">
-            <div>
-              <span className="inline-block rounded-full bg-primary/10 px-4 py-1.5 text-xs font-semibold text-primary mb-4">
-                Free Delivery Across Rwanda
-              </span>
-              <h1 className="max-w-md font-display text-3xl font-extrabold leading-tight tracking-tight text-primary sm:text-4xl md:text-5xl">
-                Top Phones &amp; Gadgets Delivered Across Rwanda
-              </h1>
-              <div className="mt-6 flex flex-wrap gap-3">
-                <Link
-                  to="/product/$id"
-                  params={{ id: 'iphone-16-pro-max' }}
-                  className="inline-flex items-center rounded-full bg-primary px-7 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90"
-                >
-                  Buy Now
-                </Link>
-                <Link
-                  to="/deals"
-                  className="inline-flex items-center rounded-full border border-primary px-7 py-3 text-sm font-semibold text-primary transition hover:bg-primary/5"
-                >
-                  See All Deals
-                </Link>
-              </div>
-            </div>
-            <div className="relative flex justify-end">
-              <img
-                src={heroWoman}
-                alt="Woman wearing premium headphones"
-                width={640}
-                height={640}
-                className="h-64 w-64 rounded-3xl object-cover shadow-lg sm:h-80 sm:w-80 md:h-96 md:w-96"
-              />
-            </div>
-          </div>
-        </section>
+        {/* Hero Slider */}
+        <HeroSlider />
+        <StockPopup />
 
         {/* Category filter pills */}
         <section className="mt-8 flex flex-wrap items-center justify-between gap-3">
