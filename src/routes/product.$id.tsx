@@ -122,7 +122,7 @@ function PDP() {
       <main className="mx-auto max-w-7xl px-4 py-8 md:px-6">
         {/* Breadcrumbs */}
         <nav className="flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
-          {product.breadcrumb.map((b, i) => (
+          {product.breadcrumb.map((b: string, i: number) => (
             <span key={i} className="flex items-center gap-1">
               <Link to="/" className="hover:text-primary">
                 {b}
@@ -148,7 +148,7 @@ function PDP() {
             </div>
             {product.colors && (
               <div className="mt-4 grid grid-cols-4 gap-3 sm:grid-cols-5">
-                {product.colors.map((c, i) => (
+                {product.colors.map((c: { name: string; hex: string; image: string }, i: number) => (
                   <button
                     key={c.name}
                     onClick={() => setColorIdx(i)}
@@ -200,7 +200,7 @@ function PDP() {
               <div>
                 <h3 className="text-sm font-semibold">Choose a Color</h3>
                 <div className="mt-3 flex flex-wrap items-center gap-3">
-                  {product.colors.map((c, i) => (
+                  {product.colors.map((c: { name: string; hex: string; image: string }, i: number) => (
                     <button
                       key={c.name}
                       onClick={() => setColorIdx(i)}
