@@ -7,6 +7,7 @@ import { ProductCard } from '@/components/ProductCard';
 import { categories } from '@/lib/products';
 import { useProducts } from '@/lib/product-store';
 import { Toaster } from '@/components/ui/sonner';
+import { JsonLd, SITE_URL } from '@/components/JsonLd';
 import heroWoman from '@/assets/hero-woman.jpg';
 
 export const Route = createFileRoute('/')({
@@ -16,10 +17,33 @@ export const Route = createFileRoute('/')({
       { name: 'description', content: 'Shop iPhones, Samsung, Tecno, Infinix and top gadgets at Hippo Technology Rwanda. Free delivery, genuine products, 30-day returns.' },
       { property: 'og:title', content: 'Hippo Technology — Your World, Upgraded.' },
       { property: 'og:description', content: 'Rwanda\'s premier destination for phones and gadgets. Free delivery on all orders.' },
+      { property: 'og:url', content: SITE_URL },
     ],
+    links: [{ rel: 'canonical', href: `${SITE_URL}/` }],
   }),
   component: Home,
 });
+
+const siteLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'Hippo Technology',
+    url: SITE_URL,
+    logo: `${SITE_URL}/hippo-logo.png`,
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Hippo Technology',
+    url: SITE_URL,
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: `${SITE_URL}/search?q={search_term_string}`,
+      'query-input': 'required name=search_term_string',
+    },
+  },
+];
 
 const SORT_OPTIONS = ['Featured', 'Price: Low to High', 'Price: High to Low', 'Top Rated'];
 
@@ -43,6 +67,7 @@ function Home() {
 
   return (
     <div className="min-h-screen bg-background">
+      <JsonLd data={siteLd} />
       <Toaster position="top-right" />
       <Header />
 

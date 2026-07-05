@@ -10,6 +10,16 @@ import { cartStore } from "@/lib/cart-store";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import { formatRWF } from "@/lib/currency";
+import { JsonLd, SITE_URL } from "@/components/JsonLd";
+
+function brandFor(name: string): string {
+  const n = name.toLowerCase();
+  if (n.includes("iphone")) return "Apple";
+  if (n.includes("samsung") || n.includes("galaxy")) return "Samsung";
+  if (n.includes("tecno")) return "Tecno";
+  if (n.includes("infinix")) return "Infinix";
+  return "Hippo Technology";
+}
 
 export const Route = createFileRoute("/product/$id")({
   loader: ({ params }) => {
@@ -23,8 +33,14 @@ export const Route = createFileRoute("/product/$id")({
           { name: "description", content: loaderData.product.tagline },
           { property: "og:title", content: `${loaderData.product.name} — Hippo Technology` },
           { property: "og:description", content: loaderData.product.tagline },
+          { property: "og:type", content: "product" },
+          { property: "og:image", content: loaderData.product.image },
+          { property: "og:url", content: `${SITE_URL}/product/${loaderData.product.id}` },
         ]
       : [{ title: "Product — Hippo Technology" }],
+    links: loaderData?.product
+      ? [{ rel: "canonical", href: `${SITE_URL}/product/${loaderData.product.id}` }]
+      : [],
   }),
   component: PDP,
 });
@@ -53,6 +69,35 @@ function PDP() {
   const activeColor = product.colors?.[colorIdx];
   const mainImage = activeColor?.image ?? product.image;
 
+  const productLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: product.tagline,
+    image: product.image,
+    sku: product.id,
+    brand: { "@type": "Brand", name: brandFor(product.name) },
+    ...(product.reviews > 0
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: product.rating,
+            reviewCount: product.reviews,
+          },
+        }
+      : {}),
+    offers: {
+      "@type": "Offer",
+      url: `${SITE_URL}/product/${product.id}`,
+      priceCurrency: "RWF",
+      price: product.price,
+      availability:
+        product.stock > 0
+          ? "https://schema.org/InStock"
+          : "https://schema.org/OutOfStock",
+    },
+  };
+
   const addToCart = (buyNow?: boolean) => {
     cartStore.add(
       {
@@ -70,6 +115,7 @@ function PDP() {
 
   return (
     <div className="min-h-screen bg-background">
+      <JsonLd data={productLd} />
       <Toaster position="top-right" />
       <Header />
 
