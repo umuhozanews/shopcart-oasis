@@ -198,8 +198,15 @@ function Home() {
                 params={{ slug: c.slug }}
                 className="flex items-center gap-3 rounded-2xl bg-surface-muted p-4 ring-1 ring-border/60 transition hover:ring-primary/40 hover:shadow-sm"
               >
-                <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-background text-primary">
-                  <span className="text-xs font-bold">{c.name.slice(0, 2).toUpperCase()}</span>
+                <div className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-xl bg-background ring-1 ring-border/60">
+                  <img
+                    src={c.image}
+                    alt={c.name}
+                    loading="lazy"
+                    width={112}
+                    height={112}
+                    className="h-full w-full object-contain p-1.5"
+                  />
                 </div>
                 <div className="min-w-0">
                   <div className="truncate text-sm font-semibold">{c.name}</div>

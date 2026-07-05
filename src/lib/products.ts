@@ -1,3 +1,18 @@
+import iphone16BlackImg from "@/assets/phones/iphone-16-pro-max-black.jpg";
+import iphone16WhiteImg from "@/assets/phones/iphone-16-pro-max-white.jpg";
+import iphone16DesertImg from "@/assets/phones/iphone-16-pro-max-desert.jpg";
+import samsungS25BlackImg from "@/assets/phones/samsung-s25-ultra-black.jpg";
+import samsungS25SilverImg from "@/assets/phones/samsung-s25-ultra-silver.jpg";
+import iphone15PinkImg from "@/assets/phones/iphone-15-pink.jpg";
+import iphone15YellowImg from "@/assets/phones/iphone-15-yellow.jpg";
+import iphone15BlackImg from "@/assets/phones/iphone-15-black.jpg";
+import iphone14Img from "@/assets/phones/iphone-14.jpg";
+import samsungA55NavyImg from "@/assets/phones/samsung-a55-navy.jpg";
+import samsungA55LilacImg from "@/assets/phones/samsung-a55-lilac.jpg";
+import tecnoCamon30ProImg from "@/assets/phones/tecno-camon-30-pro.jpg";
+import infinixHot40ProImg from "@/assets/phones/infinix-hot-40-pro.jpg";
+import galaxyBuds3ProImg from "@/assets/phones/galaxy-buds3-pro.jpg";
+
 export type ColorOption = { name: string; hex: string; image: string };
 
 export type Product = {
@@ -22,14 +37,14 @@ export const products: Product[] = [
     price: 1900000,
     rating: 5,
     reviews: 87,
-    image: "https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=800&auto=format&q=80",
+    image: iphone16BlackImg,
     stock: 8,
     category: "iphone",
     breadcrumb: ["Electronics", "Smartphones", "iPhone"],
     colors: [
-      { name: "Black Titanium", hex: "#3a3a3a", image: "https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=800&auto=format&q=80" },
-      { name: "White Titanium", hex: "#e5e5e5", image: "https://images.unsplash.com/photo-1512054502232-10a0a035d672?w=800&auto=format&q=80" },
-      { name: "Desert Titanium", hex: "#c8a882", image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=800&auto=format&q=80" },
+      { name: "Black Titanium", hex: "#3a3a3a", image: iphone16BlackImg },
+      { name: "White Titanium", hex: "#e5e5e5", image: iphone16WhiteImg },
+      { name: "Desert Titanium", hex: "#c8a882", image: iphone16DesertImg },
     ],
   },
   {
@@ -39,13 +54,13 @@ export const products: Product[] = [
     price: 1650000,
     rating: 4.9,
     reviews: 64,
-    image: "https://images.unsplash.com/photo-1580910051074-3eb694886505?w=800&auto=format&q=80",
+    image: samsungS25BlackImg,
     stock: 6,
     category: "samsung",
     breadcrumb: ["Electronics", "Smartphones", "Samsung"],
     colors: [
-      { name: "Titanium Black", hex: "#1a1a1a", image: "https://images.unsplash.com/photo-1580910051074-3eb694886505?w=800&auto=format&q=80" },
-      { name: "Titanium Silver", hex: "#c0c0c0", image: "https://images.unsplash.com/photo-1572435555646-7ad9a149ad91?w=800&auto=format&q=80" },
+      { name: "Titanium Black", hex: "#1a1a1a", image: samsungS25BlackImg },
+      { name: "Titanium Silver", hex: "#c0c0c0", image: samsungS25SilverImg },
     ],
   },
   {
@@ -55,14 +70,14 @@ export const products: Product[] = [
     price: 1250000,
     rating: 4.8,
     reviews: 112,
-    image: "https://images.unsplash.com/photo-1512054502232-10a0a035d672?w=800&auto=format&q=80",
+    image: iphone15PinkImg,
     stock: 14,
     category: "iphone",
     breadcrumb: ["Electronics", "Smartphones", "iPhone"],
     colors: [
-      { name: "Pink", hex: "#f4b3ae", image: "https://images.unsplash.com/photo-1512054502232-10a0a035d672?w=800&auto=format&q=80" },
-      { name: "Yellow", hex: "#f5d86d", image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=800&auto=format&q=80" },
-      { name: "Black", hex: "#1a1a1a", image: "https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=800&auto=format&q=80" },
+      { name: "Pink", hex: "#f4b3ae", image: iphone15PinkImg },
+      { name: "Yellow", hex: "#f5d86d", image: iphone15YellowImg },
+      { name: "Black", hex: "#1a1a1a", image: iphone15BlackImg },
     ],
   },
   {
@@ -72,7 +87,7 @@ export const products: Product[] = [
     price: 950000,
     rating: 4.7,
     reviews: 143,
-    image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=800&auto=format&q=80",
+    image: iphone14Img,
     stock: 18,
     category: "iphone",
     breadcrumb: ["Electronics", "Smartphones", "iPhone"],
@@ -84,13 +99,13 @@ export const products: Product[] = [
     price: 650000,
     rating: 4.6,
     reviews: 89,
-    image: "https://images.unsplash.com/photo-1572435555646-7ad9a149ad91?w=800&auto=format&q=80",
+    image: samsungA55NavyImg,
     stock: 22,
     category: "samsung",
     breadcrumb: ["Electronics", "Smartphones", "Samsung"],
     colors: [
-      { name: "Awesome Navy", hex: "#1a2a4a", image: "https://images.unsplash.com/photo-1572435555646-7ad9a149ad91?w=800&auto=format&q=80" },
-      { name: "Awesome Lilac", hex: "#b4a0d0", image: "https://images.unsplash.com/photo-1573920111312-04f1b25c6b85?w=800&auto=format&q=80" },
+      { name: "Awesome Navy", hex: "#1a2a4a", image: samsungA55NavyImg },
+      { name: "Awesome Lilac", hex: "#b4a0d0", image: samsungA55LilacImg },
     ],
   },
   {
@@ -100,7 +115,7 @@ export const products: Product[] = [
     price: 300000,
     rating: 4.4,
     reviews: 56,
-    image: "https://images.unsplash.com/photo-1573920111312-04f1b25c6b85?w=800&auto=format&q=80",
+    image: tecnoCamon30ProImg,
     stock: 30,
     category: "budget",
     breadcrumb: ["Electronics", "Smartphones", "Budget"],
@@ -112,7 +127,7 @@ export const products: Product[] = [
     price: 195000,
     rating: 4.3,
     reviews: 74,
-    image: "https://images.unsplash.com/photo-1609921212029-bb5a28e60960?w=800&auto=format&q=80",
+    image: infinixHot40ProImg,
     stock: 40,
     category: "budget",
     breadcrumb: ["Electronics", "Smartphones", "Budget"],
@@ -124,7 +139,7 @@ export const products: Product[] = [
     price: 250000,
     rating: 4.7,
     reviews: 48,
-    image: "https://images.unsplash.com/photo-1610945264803-c22b62831524?w=800&auto=format&q=80",
+    image: galaxyBuds3ProImg,
     stock: 25,
     category: "accessories",
     breadcrumb: ["Electronics", "Accessories", "Earbuds"],
@@ -134,10 +149,10 @@ export const products: Product[] = [
 export const getProduct = (id: string) => products.find((p) => p.id === id);
 
 export const categories = [
-  { name: "Smartphones", slug: "smartphones", count: 7 },
-  { name: "iPhone", slug: "iphone", count: 3 },
-  { name: "Samsung", slug: "samsung", count: 3 },
-  { name: "Budget Phones", slug: "budget", count: 2 },
-  { name: "Accessories", slug: "accessories", count: 1 },
-  { name: "All Products", slug: "all", count: products.length },
+  { name: "Smartphones", slug: "smartphones", count: 7, image: iphone16BlackImg },
+  { name: "iPhone", slug: "iphone", count: 3, image: iphone15PinkImg },
+  { name: "Samsung", slug: "samsung", count: 3, image: samsungS25SilverImg },
+  { name: "Budget Phones", slug: "budget", count: 2, image: infinixHot40ProImg },
+  { name: "Accessories", slug: "accessories", count: 1, image: galaxyBuds3ProImg },
+  { name: "All Products", slug: "all", count: products.length, image: samsungS25BlackImg },
 ];
