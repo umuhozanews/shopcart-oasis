@@ -134,23 +134,8 @@ export function Footer() {
               : `© ${new Date().getFullYear()} ${s.siteName} ${s.siteSubtitle} Ltd. All rights reserved.`}
           </span>
           <span>
-            {s.footerDeveloperName && (
-              <>
-                Website by{' '}
-                {s.footerDeveloperUrl ? (
-                  <a
-                    href={s.footerDeveloperUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-semibold opacity-100 hover:underline"
-                  >
-                    {s.footerDeveloperName}
-                  </a>
-                ) : (
-                  <span className="font-semibold opacity-100">{s.footerDeveloperName}</span>
-                )}
-              </>
-            )}
+            Website by{' '}
+            <span className="font-semibold opacity-100">GACONDO TECH</span>
           </span>
         </div>
       </div>

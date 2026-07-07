@@ -22,8 +22,6 @@ export type SiteSettings = {
   instagramHandle: string;
   tiktokUrl: string;
   footerCopyright: string;
-  footerDeveloperName: string;
-  footerDeveloperUrl: string;
   aboutHeroTitle: string;
   aboutHeroDesc: string;
   aboutStoryTitle: string;
@@ -48,8 +46,6 @@ export const SETTINGS_DEFAULTS: SiteSettings = {
   instagramHandle: '@hippotechnologyltd',
   tiktokUrl: 'https://vm.tiktok.com/ZS9MMny4QCwP5-DBcAo/',
   footerCopyright: '© {year} Hippo Technology Ltd. All rights reserved.',
-  footerDeveloperName: 'GACONDO TECH',
-  footerDeveloperUrl: '',
   aboutHeroTitle: 'Your World, Upgraded.',
   aboutHeroDesc: "Hippo Technology is Rwanda's leading destination for premium audio gear, electronics, and tech accessories — curated for how you live, work, and play.",
   aboutStoryTitle: 'Our Story',

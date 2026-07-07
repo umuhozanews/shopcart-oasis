@@ -460,20 +460,6 @@ function AdminSettings() {
             onChange={(v) => set('footerCopyright', v)}
             placeholder="© {year} Hippo Technology Ltd. All rights reserved."
           />
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Field
-              label="Developer Credit Name"
-              value={form.footerDeveloperName}
-              onChange={(v) => set('footerDeveloperName', v)}
-              placeholder="GACONDO TECH"
-            />
-            <Field
-              label="Developer Link URL"
-              value={form.footerDeveloperUrl}
-              onChange={(v) => set('footerDeveloperUrl', v)}
-              placeholder="https://gacondo.rw"
-            />
-          </div>
         </div>
       </Section>
 
