@@ -3,6 +3,7 @@ import { useState, useRef } from 'react';
 import { Check, Plus, Trash2, Upload, ImageIcon, X, RotateCcw } from 'lucide-react';
 import { useSiteSettings, siteSettingsStore, SETTINGS_DEFAULTS } from '@/lib/site-settings-store';
 import hippoLogo from '@/assets/hippo-logo.png';
+import heroWomanImg from '@/assets/hero-woman.jpg';
 
 export const Route = createFileRoute('/admin/settings')({
   component: AdminSettings,
@@ -71,6 +72,10 @@ function AdminSettings() {
   const [logoError, setLogoError] = useState('');
   const logoRef = useRef<HTMLInputElement>(null);
 
+  const [aboutStoryImageUploading, setAboutStoryImageUploading] = useState(false);
+  const [aboutStoryImageError, setAboutStoryImageError] = useState('');
+  const aboutStoryImageRef = useRef<HTMLInputElement>(null);
+
   function set<K extends keyof typeof form>(key: K, value: typeof form[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
     setDirty(true);
@@ -101,6 +106,23 @@ function AdminSettings() {
       setLogoError('Failed to process image. Try another file.');
     } finally {
       setLogoUploading(false);
+    }
+  }
+
+  async function handleAboutStoryImageFile(file: File) {
+    if (!file.type.startsWith('image/')) {
+      setAboutStoryImageError('Please select an image file.');
+      return;
+    }
+    setAboutStoryImageError('');
+    setAboutStoryImageUploading(true);
+    try {
+      const data = await processImage(file);
+      set('aboutStoryImageData', data);
+    } catch {
+      setAboutStoryImageError('Failed to process image. Try another file.');
+    } finally {
+      setAboutStoryImageUploading(false);
     }
   }
 
@@ -327,6 +349,105 @@ function AdminSettings() {
             onChange={(v) => set('tiktokUrl', v)}
             placeholder="https://vm.tiktok.com/..."
           />
+        </div>
+      </Section>
+
+      {/* About Page Customization */}
+      <Section title="About Page Customization">
+        <div className="space-y-5">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <Field
+              label="Hero Title"
+              value={form.aboutHeroTitle}
+              onChange={(v) => set('aboutHeroTitle', v)}
+              placeholder="Your World, Upgraded."
+            />
+            <Field
+              label="Story Title"
+              value={form.aboutStoryTitle}
+              onChange={(v) => set('aboutStoryTitle', v)}
+              placeholder="Our Story"
+            />
+          </div>
+
+          <div>
+            <label className="block">
+              <span className="text-xs font-medium text-muted-foreground">Hero Description</span>
+              <textarea
+                value={form.aboutHeroDesc}
+                onChange={(e) => set('aboutHeroDesc', e.target.value)}
+                rows={2}
+                placeholder="Short description shown under the hero title"
+                className="mt-1 w-full resize-none rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary transition"
+              />
+            </label>
+          </div>
+
+          <div>
+            <label className="block">
+              <span className="text-xs font-medium text-muted-foreground">Story Text Content (separate paragraphs with blank lines)</span>
+              <textarea
+                value={form.aboutStoryText}
+                onChange={(e) => set('aboutStoryText', e.target.value)}
+                rows={6}
+                placeholder="Write your company story here..."
+                className="mt-1 w-full resize-y rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary transition"
+              />
+            </label>
+          </div>
+
+          {/* About Page Story Image */}
+          <div>
+            <span className="block text-xs font-medium text-muted-foreground mb-2">Story Image</span>
+            <input
+              ref={aboutStoryImageRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) handleAboutStoryImageFile(f);
+                e.target.value = '';
+              }}
+            />
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+              <div className="relative h-32 aspect-video sm:h-36 flex-shrink-0 rounded-xl border border-border bg-surface-muted overflow-hidden">
+                <img
+                  src={form.aboutStoryImageData || heroWomanImg}
+                  alt="Story preview"
+                  className="h-full w-full object-cover"
+                />
+                {form.aboutStoryImageData && (
+                  <button
+                    type="button"
+                    onClick={() => set('aboutStoryImageData', '')}
+                    className="absolute top-1 right-1 grid h-5 w-5 place-items-center rounded-full bg-destructive text-white hover:bg-destructive/80 transition"
+                  >
+                    <X size={10} />
+                  </button>
+                )}
+              </div>
+              <div className="flex flex-col gap-2">
+                <button
+                  type="button"
+                  onClick={() => aboutStoryImageRef.current?.click()}
+                  disabled={aboutStoryImageUploading}
+                  className="flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-surface-muted transition"
+                >
+                  {aboutStoryImageUploading ? (
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                  ) : (
+                    <Upload size={14} />
+                  )}
+                  {aboutStoryImageUploading ? 'Processing…' : 'Upload Story Image'}
+                </button>
+                <p className="text-[11px] text-muted-foreground">
+                  PNG or JPG recommended. Displays as a premium cover image next to your story.
+                </p>
+                {aboutStoryImageError && <p className="text-xs text-destructive">{aboutStoryImageError}</p>}
+              </div>
+            </div>
+          </div>
         </div>
       </Section>
 

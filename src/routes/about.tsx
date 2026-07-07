@@ -2,6 +2,8 @@ import { createFileRoute, Link } from '@tanstack/react-router';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { Shield, Truck, HeadphonesIcon, Star } from 'lucide-react';
+import { useSiteSettings } from '@/lib/site-settings-store';
+import heroWomanImg from '@/assets/hero-woman.jpg';
 
 export const Route = createFileRoute('/about')({
   head: () => ({
@@ -14,6 +16,10 @@ export const Route = createFileRoute('/about')({
 });
 
 function About() {
+  const s = useSiteSettings();
+  const storyImage = s.aboutStoryImageData || heroWomanImg;
+  const storyParagraphs = s.aboutStoryText.split('\n\n').filter(Boolean);
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -22,11 +28,10 @@ function About() {
         <section className="bg-primary text-primary-foreground py-20 px-4">
           <div className="mx-auto max-w-3xl text-center">
             <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl">
-              Your World, Upgraded.
+              {s.aboutHeroTitle}
             </h1>
             <p className="mt-5 text-lg opacity-90 max-w-xl mx-auto">
-              Hippo Technology is Rwanda's leading destination for premium audio gear, electronics, and
-              tech accessories — curated for how you live, work, and play.
+              {s.aboutHeroDesc}
             </p>
           </div>
         </section>
@@ -54,22 +59,26 @@ function About() {
 
         {/* Story */}
         <section className="bg-surface-muted py-20 px-4">
-          <div className="mx-auto max-w-3xl">
-            <h2 className="text-2xl font-bold tracking-tight">Our Story</h2>
-            <div className="mt-6 space-y-4 text-muted-foreground leading-relaxed">
-              <p>
-                Hippo Technology was founded with a simple mission: make world-class electronics accessible to
-                everyone in Rwanda. We noticed that premium audio products — the kind that genuinely improve
-                your day — were hard to find locally, often counterfeit, or massively overpriced.
-              </p>
-              <p>
-                We changed that. By building direct relationships with authorized distributors and manufacturers,
-                we bring you authentic products at fair prices, backed by real warranties and real support.
-              </p>
-              <p>
-                Today we serve thousands of customers across Rwanda, from Kigali to the countryside, with a
-                growing catalog of headphones, earbuds, speakers, and accessories. We're just getting started.
-              </p>
+          <div className="mx-auto max-w-6xl">
+            <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 items-center">
+              {/* Left Column: Text */}
+              <div className="space-y-6">
+                <h2 className="text-2xl font-bold tracking-tight text-foreground">{s.aboutStoryTitle}</h2>
+                <div className="space-y-4 text-muted-foreground leading-relaxed">
+                  {storyParagraphs.map((p, idx) => (
+                    <p key={idx}>{p}</p>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Right Column: Custom Image */}
+              <div className="relative aspect-video lg:aspect-square w-full rounded-2xl overflow-hidden border border-border/80 bg-background shadow-md">
+                <img
+                  src={storyImage}
+                  alt={s.aboutStoryTitle}
+                  className="h-full w-full object-cover"
+                />
+              </div>
             </div>
           </div>
         </section>

@@ -24,6 +24,11 @@ export type SiteSettings = {
   footerCopyright: string;
   footerDeveloperName: string;
   footerDeveloperUrl: string;
+  aboutHeroTitle: string;
+  aboutHeroDesc: string;
+  aboutStoryTitle: string;
+  aboutStoryText: string;
+  aboutStoryImageData: string;
   email: string;
   address: string;
 };
@@ -45,6 +50,11 @@ export const SETTINGS_DEFAULTS: SiteSettings = {
   footerCopyright: '© {year} Hippo Technology Ltd. All rights reserved.',
   footerDeveloperName: 'GACONDO TECH',
   footerDeveloperUrl: '',
+  aboutHeroTitle: 'Your World, Upgraded.',
+  aboutHeroDesc: "Hippo Technology is Rwanda's leading destination for premium audio gear, electronics, and tech accessories — curated for how you live, work, and play.",
+  aboutStoryTitle: 'Our Story',
+  aboutStoryText: 'Hippo Technology was founded with a simple mission: make world-class electronics accessible to everyone in Rwanda. We noticed that premium audio products — the kind that genuinely improve your day — were hard to find locally, often counterfeit, or massively overpriced.\n\nWe changed that. By building direct relationships with authorized distributors and manufacturers, we bring you authentic products at fair prices, backed by real warranties and real support.\n\nToday we serve thousands of customers across Rwanda, from Kigali to the countryside, with a growing catalog of headphones, earbuds, speakers, and accessories. We\'re just getting started.',
+  aboutStoryImageData: '',
   email: 'info@hippotech.rw',
   address: SHOP_ADDRESS,
 };
