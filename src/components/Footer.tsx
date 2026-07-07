@@ -44,6 +44,19 @@ export function Footer() {
             >
               <MessageCircle size={18} />
             </a>
+            {s.tiktokUrl && (
+              <a
+                href={s.tiktokUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="TikTok"
+                className="grid h-9 w-9 place-items-center rounded-full bg-primary-foreground/10 transition hover:bg-primary-foreground/20"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-[18px] w-[18px]">
+                  <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" />
+                </svg>
+              </a>
+            )}
           </div>
         </div>
 

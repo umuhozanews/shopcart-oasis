@@ -321,6 +321,12 @@ function AdminSettings() {
             onChange={(v) => set('instagramHandle', v)}
             placeholder="@hippotechnologyltd"
           />
+          <Field
+            label="TikTok URL"
+            value={form.tiktokUrl}
+            onChange={(v) => set('tiktokUrl', v)}
+            placeholder="https://vm.tiktok.com/..."
+          />
         </div>
       </Section>
 

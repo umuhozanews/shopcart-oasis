@@ -20,6 +20,7 @@ export type SiteSettings = {
   whatsappChannel: string;
   instagramUrl: string;
   instagramHandle: string;
+  tiktokUrl: string;
   email: string;
   address: string;
 };
@@ -37,6 +38,7 @@ export const SETTINGS_DEFAULTS: SiteSettings = {
   whatsappChannel: WHATSAPP_CHANNEL,
   instagramUrl: INSTAGRAM_URL,
   instagramHandle: '@hippotechnologyltd',
+  tiktokUrl: 'https://vm.tiktok.com/ZS9MMny4QCwP5-DBcAo/',
   email: 'info@hippotech.rw',
   address: SHOP_ADDRESS,
 };
