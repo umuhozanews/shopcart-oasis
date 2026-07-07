@@ -128,10 +128,29 @@ export function Footer() {
 
       <div className="border-t border-primary-foreground/10">
         <div className="mx-auto flex max-w-7xl flex-col gap-1 px-6 py-5 text-xs opacity-70 sm:flex-row sm:items-center sm:justify-between">
-          <span>© {new Date().getFullYear()} Hippo Technology Ltd. All rights reserved.</span>
           <span>
-            Website by{' '}
-            <span className="font-semibold opacity-100">GACONDO TECH</span>
+            {s.footerCopyright
+              ? s.footerCopyright.replace('{year}', String(new Date().getFullYear()))
+              : `© ${new Date().getFullYear()} ${s.siteName} ${s.siteSubtitle} Ltd. All rights reserved.`}
+          </span>
+          <span>
+            {s.footerDeveloperName && (
+              <>
+                Website by{' '}
+                {s.footerDeveloperUrl ? (
+                  <a
+                    href={s.footerDeveloperUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-semibold opacity-100 hover:underline"
+                  >
+                    {s.footerDeveloperName}
+                  </a>
+                ) : (
+                  <span className="font-semibold opacity-100">{s.footerDeveloperName}</span>
+                )}
+              </>
+            )}
           </span>
         </div>
       </div>

@@ -21,6 +21,9 @@ export type SiteSettings = {
   instagramUrl: string;
   instagramHandle: string;
   tiktokUrl: string;
+  footerCopyright: string;
+  footerDeveloperName: string;
+  footerDeveloperUrl: string;
   email: string;
   address: string;
 };
@@ -39,6 +42,9 @@ export const SETTINGS_DEFAULTS: SiteSettings = {
   instagramUrl: INSTAGRAM_URL,
   instagramHandle: '@hippotechnologyltd',
   tiktokUrl: 'https://vm.tiktok.com/ZS9MMny4QCwP5-DBcAo/',
+  footerCopyright: '© {year} Hippo Technology Ltd. All rights reserved.',
+  footerDeveloperName: 'GACONDO TECH',
+  footerDeveloperUrl: '',
   email: 'info@hippotech.rw',
   address: SHOP_ADDRESS,
 };

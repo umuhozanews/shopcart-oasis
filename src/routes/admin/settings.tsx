@@ -330,6 +330,32 @@ function AdminSettings() {
         </div>
       </Section>
 
+      {/* Footer Customization */}
+      <Section title="Footer Customization">
+        <div className="space-y-4">
+          <Field
+            label="Copyright Text (use {year} for current year)"
+            value={form.footerCopyright}
+            onChange={(v) => set('footerCopyright', v)}
+            placeholder="© {year} Hippo Technology Ltd. All rights reserved."
+          />
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Field
+              label="Developer Credit Name"
+              value={form.footerDeveloperName}
+              onChange={(v) => set('footerDeveloperName', v)}
+              placeholder="GACONDO TECH"
+            />
+            <Field
+              label="Developer Link URL"
+              value={form.footerDeveloperUrl}
+              onChange={(v) => set('footerDeveloperUrl', v)}
+              placeholder="https://gacondo.rw"
+            />
+          </div>
+        </div>
+      </Section>
+
       {/* Sticky save bar when dirty */}
       {dirty && (
         <div className="sticky bottom-4 flex justify-end">
