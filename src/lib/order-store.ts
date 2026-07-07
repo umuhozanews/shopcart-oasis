@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from 'react';
 import type { CartItem } from './cart-store';
+import { saveServerDb } from './server-db';
 
 export type Order = {
   id: string;
@@ -44,6 +45,9 @@ function write(orders: Order[]): void {
 
 export const orderStore = {
   getAll: read,
+  sync(orders: Order[]) {
+    write(orders);
+  },
   add(order: Omit<Order, 'id' | 'date' | 'status'>): Order {
     const newOrder: Order = {
       ...order,
@@ -51,11 +55,19 @@ export const orderStore = {
       date: new Date().toISOString(),
       status: 'pending',
     };
-    write([newOrder, ...read()]);
+    const updated = [newOrder, ...read()];
+    write(updated);
+    saveServerDb({ orders: updated }).catch((err) =>
+      console.error('Failed to sync added order to server:', err)
+    );
     return newOrder;
   },
   updateStatus(id: string, status: Order['status']): void {
-    write(read().map((o) => (o.id === id ? { ...o, status } : o)));
+    const updated = read().map((o) => (o.id === id ? { ...o, status } : o));
+    write(updated);
+    saveServerDb({ orders: updated }).catch((err) =>
+      console.error('Failed to sync updated order to server:', err)
+    );
   },
   subscribe(l: () => void) {
     listeners.add(l);

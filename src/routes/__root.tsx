@@ -11,6 +11,11 @@ import { useEffect, type ReactNode } from "react";
 import { Analytics } from "@vercel/analytics/react";
 import { visitorStore } from "@/lib/visitor-store";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
+import { getServerDb } from "@/lib/server-db";
+import { productStore } from "@/lib/product-store";
+import { siteSettingsStore } from "@/lib/site-settings-store";
+import { bannerStore } from "@/lib/banner-store";
+import { orderStore } from "@/lib/order-store";
 
 import appCss from "../styles.css?url";
 
@@ -127,6 +132,20 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   useEffect(() => {
+    // Sync stores with server database on startup
+    async function syncDatabase() {
+      try {
+        const db = await getServerDb();
+        productStore.sync(db.products);
+        siteSettingsStore.sync(db.settings);
+        bannerStore.sync(db.slides, db.popup);
+        orderStore.sync(db.orders);
+      } catch (err) {
+        console.error('Failed to sync database with server:', err);
+      }
+    }
+    syncDatabase();
+
     // Track page views for admin dashboard
     visitorStore.record(window.location.pathname);
   }, []);

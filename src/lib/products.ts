@@ -12,6 +12,7 @@ import samsungA55LilacImg from "@/assets/phones/samsung-a55-lilac.jpg";
 import tecnoCamon30ProImg from "@/assets/phones/tecno-camon-30-pro.jpg";
 import infinixHot40ProImg from "@/assets/phones/infinix-hot-40-pro.jpg";
 import galaxyBuds3ProImg from "@/assets/phones/galaxy-buds3-pro.jpg";
+import computerImg from "@/assets/computer.jpg";
 
 export type ColorOption = { name: string; hex: string; image: string };
 
@@ -39,8 +40,8 @@ export const products: Product[] = [
     reviews: 87,
     image: iphone16BlackImg,
     stock: 8,
-    category: "iphone",
-    breadcrumb: ["Electronics", "Smartphones", "iPhone"],
+    category: "phones",
+    breadcrumb: ["Electronics", "Phones"],
     colors: [
       { name: "Black Titanium", hex: "#3a3a3a", image: iphone16BlackImg },
       { name: "White Titanium", hex: "#e5e5e5", image: iphone16WhiteImg },
@@ -56,8 +57,8 @@ export const products: Product[] = [
     reviews: 64,
     image: samsungS25BlackImg,
     stock: 6,
-    category: "samsung",
-    breadcrumb: ["Electronics", "Smartphones", "Samsung"],
+    category: "phones",
+    breadcrumb: ["Electronics", "Phones"],
     colors: [
       { name: "Titanium Black", hex: "#1a1a1a", image: samsungS25BlackImg },
       { name: "Titanium Silver", hex: "#c0c0c0", image: samsungS25SilverImg },
@@ -72,8 +73,8 @@ export const products: Product[] = [
     reviews: 112,
     image: iphone15PinkImg,
     stock: 14,
-    category: "iphone",
-    breadcrumb: ["Electronics", "Smartphones", "iPhone"],
+    category: "phones",
+    breadcrumb: ["Electronics", "Phones"],
     colors: [
       { name: "Pink", hex: "#f4b3ae", image: iphone15PinkImg },
       { name: "Yellow", hex: "#f5d86d", image: iphone15YellowImg },
@@ -89,8 +90,8 @@ export const products: Product[] = [
     reviews: 143,
     image: iphone14Img,
     stock: 18,
-    category: "iphone",
-    breadcrumb: ["Electronics", "Smartphones", "iPhone"],
+    category: "phones",
+    breadcrumb: ["Electronics", "Phones"],
   },
   {
     id: "samsung-galaxy-a55",
@@ -101,8 +102,8 @@ export const products: Product[] = [
     reviews: 89,
     image: samsungA55NavyImg,
     stock: 22,
-    category: "samsung",
-    breadcrumb: ["Electronics", "Smartphones", "Samsung"],
+    category: "phones",
+    breadcrumb: ["Electronics", "Phones"],
     colors: [
       { name: "Awesome Navy", hex: "#1a2a4a", image: samsungA55NavyImg },
       { name: "Awesome Lilac", hex: "#b4a0d0", image: samsungA55LilacImg },
@@ -117,8 +118,8 @@ export const products: Product[] = [
     reviews: 56,
     image: tecnoCamon30ProImg,
     stock: 30,
-    category: "budget",
-    breadcrumb: ["Electronics", "Smartphones", "Budget"],
+    category: "phones",
+    breadcrumb: ["Electronics", "Phones"],
   },
   {
     id: "infinix-hot-40-pro",
@@ -129,8 +130,8 @@ export const products: Product[] = [
     reviews: 74,
     image: infinixHot40ProImg,
     stock: 40,
-    category: "budget",
-    breadcrumb: ["Electronics", "Smartphones", "Budget"],
+    category: "phones",
+    breadcrumb: ["Electronics", "Phones"],
   },
   {
     id: "samsung-galaxy-buds3-pro",
@@ -142,17 +143,15 @@ export const products: Product[] = [
     image: galaxyBuds3ProImg,
     stock: 25,
     category: "accessories",
-    breadcrumb: ["Electronics", "Accessories", "Earbuds"],
+    breadcrumb: ["Electronics", "Accessories"],
   },
 ];
 
 export const getProduct = (id: string) => products.find((p) => p.id === id);
 
 export const categories = [
-  { name: "Smartphones", slug: "smartphones", count: 7, image: iphone16BlackImg },
-  { name: "iPhone", slug: "iphone", count: 3, image: iphone15PinkImg },
-  { name: "Samsung", slug: "samsung", count: 3, image: samsungS25SilverImg },
-  { name: "Budget Phones", slug: "budget", count: 2, image: infinixHot40ProImg },
+  { name: "Phones", slug: "phones", count: 7, image: iphone16BlackImg },
+  { name: "Computer", slug: "computer", count: 0, image: computerImg },
   { name: "Accessories", slug: "accessories", count: 1, image: galaxyBuds3ProImg },
   { name: "All Products", slug: "all", count: products.length, image: samsungS25BlackImg },
 ];

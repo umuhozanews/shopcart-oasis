@@ -8,12 +8,20 @@ import { categories } from '@/lib/products';
 
 export const Route = createFileRoute('/category/$slug')({
   loader: ({ params }) => {
-    const cat = categories.find((c) => c.slug === params.slug);
-    if (!cat && params.slug !== 'all') throw notFound();
-    return { slug: params.slug };
+    let slug = params.slug;
+    if (slug === 'iphone' || slug === 'samsung' || slug === 'budget' || slug === 'smartphones') {
+      slug = 'phones';
+    }
+    const cat = categories.find((c) => c.slug === slug);
+    if (!cat && slug !== 'all') throw notFound();
+    return { slug };
   },
   head: ({ loaderData }) => {
-    const cat = categories.find((c) => c.slug === loaderData?.slug);
+    let slug = loaderData?.slug;
+    if (slug === 'iphone' || slug === 'samsung' || slug === 'budget' || slug === 'smartphones') {
+      slug = 'phones';
+    }
+    const cat = categories.find((c) => c.slug === slug);
     const name = cat?.name ?? 'All Products';
     return {
       meta: [
@@ -35,10 +43,21 @@ export const Route = createFileRoute('/category/$slug')({
 
 function CategoryPage() {
   const { slug } = Route.useLoaderData();
-  const cat = categories.find((c) => c.slug === slug);
+  let normalizedSlug = slug;
+  if (slug === 'iphone' || slug === 'samsung' || slug === 'budget' || slug === 'smartphones') {
+    normalizedSlug = 'phones';
+  }
+  const cat = categories.find((c) => c.slug === normalizedSlug);
   const allProducts = useProducts();
 
-  const filtered = filterBySlugs(allProducts, slug);
+  const categoriesWithCounts = categories.map((c) => ({
+    ...c,
+    count: c.slug === 'all'
+      ? allProducts.length
+      : allProducts.filter((p) => p.category === c.slug).length,
+  }));
+
+  const filtered = filterBySlugs(allProducts, normalizedSlug);
 
   return (
     <div className="min-h-screen bg-background">
@@ -61,13 +80,13 @@ function CategoryPage() {
 
         {/* Category links */}
         <div className="mb-8 flex flex-wrap gap-2">
-          {categories.map((c) => (
+          {categoriesWithCounts.map((c) => (
             <Link
               key={c.slug}
               to="/category/$slug"
               params={{ slug: c.slug }}
               className={`rounded-full px-4 py-1.5 text-xs font-medium transition ${
-                c.slug === slug
+                c.slug === normalizedSlug
                   ? 'bg-primary text-primary-foreground'
                   : 'bg-surface-muted text-foreground hover:bg-primary/10 hover:text-primary ring-1 ring-border/60'
               }`}
@@ -97,6 +116,9 @@ function CategoryPage() {
 
 function filterBySlugs(products: ReturnType<typeof useProducts>, slug: string) {
   if (slug === 'all') return products;
-  if (slug === 'smartphones') return products.filter((p) => p.category !== 'accessories');
-  return products.filter((p) => p.category === slug);
+  let normalizedSlug = slug;
+  if (slug === 'smartphones' || slug === 'iphone' || slug === 'samsung' || slug === 'budget') {
+    normalizedSlug = 'phones';
+  }
+  return products.filter((p) => p.category === normalizedSlug);
 }

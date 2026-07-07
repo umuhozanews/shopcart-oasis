@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from 'react';
+import { saveServerDb } from './server-db';
 
 export type HeroSlide = {
   id: string;
@@ -75,14 +76,29 @@ function write(data: BannerData): void {
 
 export const bannerStore = {
   get: read,
+  sync(slides: HeroSlide[], popup: StockPopup) {
+    write({ slides, popup });
+  },
   save(patch: Partial<BannerData>) {
-    write({ ...read(), ...patch });
+    const updated = { ...read(), ...patch };
+    write(updated);
+    saveServerDb({ slides: updated.slides, popup: updated.popup }).catch((err) =>
+      console.error('Failed to sync banners changes to server:', err)
+    );
   },
   saveSlides(slides: HeroSlide[]) {
-    write({ ...read(), slides });
+    const updated = { ...read(), slides };
+    write(updated);
+    saveServerDb({ slides }).catch((err) =>
+      console.error('Failed to sync slides changes to server:', err)
+    );
   },
   savePopup(popup: StockPopup) {
-    write({ ...read(), popup });
+    const updated = { ...read(), popup };
+    write(updated);
+    saveServerDb({ popup }).catch((err) =>
+      console.error('Failed to sync popup changes to server:', err)
+    );
   },
   subscribe(l: () => void) {
     listeners.add(l);

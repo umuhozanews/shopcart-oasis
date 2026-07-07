@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from 'react';
 import { products as staticProducts, type Product } from './products';
+import { saveServerDb } from './server-db';
 
 const KEY = 'shopcart_products_v2';
 const listeners = new Set<() => void>();
@@ -10,7 +11,37 @@ function read(): Product[] {
   if (typeof window === 'undefined') return staticProducts;
   try {
     const raw = localStorage.getItem(KEY);
-    cache = raw ? (JSON.parse(raw) as Product[]) : staticProducts;
+    let products = raw ? (JSON.parse(raw) as Product[]) : staticProducts;
+    
+    // Migrate old legacy categories to new ones so the site won't break
+    let migrated = false;
+    products = products.map((p) => {
+      let category = p.category;
+      let breadcrumb = p.breadcrumb || [];
+      if (category === 'iphone' || category === 'samsung' || category === 'budget' || category === 'smartphones') {
+        category = 'phones';
+        breadcrumb = ['Electronics', 'Phones'];
+        migrated = true;
+      } else if (category === 'headphones') {
+        category = 'accessories';
+        breadcrumb = ['Electronics', 'Accessories'];
+        migrated = true;
+      } else if (category !== 'phones' && category !== 'computer' && category !== 'accessories') {
+        category = 'phones';
+        breadcrumb = ['Electronics', 'Phones'];
+        migrated = true;
+      }
+      if (migrated) {
+        return { ...p, category, breadcrumb };
+      }
+      return p;
+    });
+
+    if (migrated) {
+      localStorage.setItem(KEY, JSON.stringify(products));
+    }
+
+    cache = products;
     return cache;
   } catch {
     cache = staticProducts;
@@ -27,14 +58,29 @@ function write(products: Product[]): void {
 export const productStore = {
   getAll: read,
   getById: (id: string) => read().find((p) => p.id === id),
-  add(p: Product) {
-    write([...read(), p]);
+  sync(products: Product[]) {
+    write(products);
   },
-  update(id: string, patch: Partial<Pick<Product, 'name' | 'tagline' | 'price' | 'stock' | 'image'>>) {
-    write(read().map((p) => (p.id === id ? { ...p, ...patch } : p)));
+  add(p: Product) {
+    const updated = [...read(), p];
+    write(updated);
+    saveServerDb({ products: updated }).catch((err) =>
+      console.error('Failed to sync added product to server:', err)
+    );
+  },
+  update(id: string, patch: Partial<Pick<Product, 'name' | 'tagline' | 'price' | 'stock' | 'image' | 'category' | 'breadcrumb'>>) {
+    const updated = read().map((p) => (p.id === id ? { ...p, ...patch } : p));
+    write(updated);
+    saveServerDb({ products: updated }).catch((err) =>
+      console.error('Failed to sync updated product to server:', err)
+    );
   },
   delete(id: string) {
-    write(read().filter((p) => p.id !== id));
+    const updated = read().filter((p) => p.id !== id);
+    write(updated);
+    saveServerDb({ products: updated }).catch((err) =>
+      console.error('Failed to sync deleted product to server:', err)
+    );
   },
   subscribe(l: () => void) {
     listeners.add(l);

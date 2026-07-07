@@ -6,6 +6,7 @@ import {
   INSTAGRAM_URL,
   SHOP_ADDRESS,
 } from './contact';
+import { saveServerDb } from './server-db';
 
 export type SiteSettings = {
   siteName: string;
@@ -65,13 +66,23 @@ function write(settings: SiteSettings): void {
 
 export const siteSettingsStore = {
   get: read,
+  sync(settings: SiteSettings) {
+    write(settings);
+  },
   save(patch: Partial<SiteSettings>) {
-    write({ ...read(), ...patch });
+    const updated = { ...read(), ...patch };
+    write(updated);
+    saveServerDb({ settings: updated }).catch((err) =>
+      console.error('Failed to sync settings changes to server:', err)
+    );
   },
   reset() {
     cache = SETTINGS_DEFAULTS;
     localStorage.removeItem(KEY);
     listeners.forEach((l) => l());
+    saveServerDb({ settings: SETTINGS_DEFAULTS }).catch((err) =>
+      console.error('Failed to sync settings reset to server:', err)
+    );
   },
   subscribe(l: () => void) {
     listeners.add(l);

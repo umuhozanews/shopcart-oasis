@@ -51,9 +51,9 @@ export function Footer() {
         <div>
           <h4 className="text-sm font-semibold">Shop</h4>
           <ul className="mt-4 space-y-2 text-sm opacity-80">
-            <li><Link to="/category/$slug" params={{ slug: 'smartphones' }} className="hover:opacity-100 hover:underline">Smartphones</Link></li>
-            <li><Link to="/category/$slug" params={{ slug: 'iphone' }} className="hover:opacity-100 hover:underline">iPhone</Link></li>
-            <li><Link to="/category/$slug" params={{ slug: 'samsung' }} className="hover:opacity-100 hover:underline">Samsung</Link></li>
+            <li><Link to="/category/$slug" params={{ slug: 'phones' }} className="hover:opacity-100 hover:underline">Phones</Link></li>
+            <li><Link to="/category/$slug" params={{ slug: 'computer' }} className="hover:opacity-100 hover:underline">Computer</Link></li>
+            <li><Link to="/category/$slug" params={{ slug: 'accessories' }} className="hover:opacity-100 hover:underline">Accessories</Link></li>
             <li><Link to="/deals" className="hover:opacity-100 hover:underline">Deals & Offers</Link></li>
             <li><Link to="/category/$slug" params={{ slug: 'all' }} className="hover:opacity-100 hover:underline">All Products</Link></li>
           </ul>

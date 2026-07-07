@@ -4,6 +4,7 @@ import { ChevronDown, Phone, Search, ShoppingCart, User, X } from 'lucide-react'
 import { useCart } from '@/lib/cart-store';
 import { isAdminAuthenticated } from '@/lib/admin-auth';
 import { categories } from '@/lib/products';
+import { useProducts } from '@/lib/product-store';
 import { useSiteSettings } from '@/lib/site-settings-store';
 import hippoLogo from '@/assets/hippo-logo.png';
 
@@ -43,6 +44,14 @@ export function Header() {
   const [showSearch, setShowSearch] = useState(false);
   const catRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
+
+  const products = useProducts();
+  const categoriesWithCounts = categories.map((c) => ({
+    ...c,
+    count: c.slug === 'all'
+      ? products.length
+      : products.filter((p) => p.category === c.slug).length,
+  }));
 
   useEffect(() => {
     function onClickOutside(e: MouseEvent) {
@@ -92,7 +101,7 @@ export function Header() {
             </button>
             {showCategories && (
               <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-52 rounded-2xl bg-background p-2 shadow-xl ring-1 ring-border/60 z-50">
-                {categories.map((c) => (
+                {categoriesWithCounts.map((c) => (
                   <Link
                     key={c.slug}
                     to="/category/$slug"

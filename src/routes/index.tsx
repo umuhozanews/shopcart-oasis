@@ -55,6 +55,13 @@ function Home() {
   const [sort, setSort] = useState('Featured');
   const [showSort, setShowSort] = useState(false);
 
+  const categoriesWithCounts = categories.map((c) => ({
+    ...c,
+    count: c.slug === 'all'
+      ? allProducts.length
+      : allProducts.filter((p) => p.category === c.slug).length,
+  }));
+
   const filtered = activeCategory === 'all'
     ? allProducts
     : allProducts.filter((p) => p.category === activeCategory);
@@ -90,19 +97,18 @@ function Home() {
             >
               All
             </button>
-            {['iphone', 'samsung', 'budget', 'accessories'].map((slug) => {
-              const cat = categories.find((c) => c.slug === slug);
+            {categoriesWithCounts.filter((c) => c.slug !== 'all').map((c) => {
               return (
                 <button
-                  key={slug}
-                  onClick={() => setActiveCategory(slug)}
+                  key={c.slug}
+                  onClick={() => setActiveCategory(c.slug)}
                   className={`rounded-full px-4 py-2 text-xs font-medium transition ${
-                    activeCategory === slug
+                    activeCategory === c.slug
                       ? 'bg-primary text-primary-foreground'
                       : 'border border-border bg-background text-foreground/80 hover:border-primary hover:text-primary'
                   }`}
                 >
-                  {cat?.name ?? slug}
+                  {c.name}
                 </button>
               );
             })}
@@ -143,7 +149,7 @@ function Home() {
         <section className="mt-8">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-bold tracking-tight text-foreground">
-              {activeCategory === 'all' ? 'All Products' : categories.find((c) => c.slug === activeCategory)?.name ?? 'Products'}
+              {activeCategory === 'all' ? 'All Products' : categoriesWithCounts.find((c) => c.slug === activeCategory)?.name ?? 'Products'}
               <span className="ml-2 text-sm font-normal text-muted-foreground">({sorted.length})</span>
             </h2>
           </div>
@@ -158,7 +164,7 @@ function Home() {
         <section className="mt-16 mb-4">
           <h2 className="text-lg font-bold tracking-tight text-foreground">Browse by Category</h2>
           <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-            {categories.map((c) => (
+            {categoriesWithCounts.map((c) => (
               <Link
                 key={c.slug}
                 to="/category/$slug"

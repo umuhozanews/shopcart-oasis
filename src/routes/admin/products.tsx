@@ -3,6 +3,7 @@ import { useState, useRef } from 'react';
 import { Plus, Pencil, Trash2, X, Check, Upload, ImageIcon } from 'lucide-react';
 import { useProducts, productStore } from '@/lib/product-store';
 import type { Product } from '@/lib/products';
+import { formatRWF } from '@/lib/currency';
 
 export const Route = createFileRoute('/admin/products')({
   component: AdminProducts,
@@ -46,9 +47,10 @@ type FormState = {
   price: string;
   stock: string;
   imageData: string; // base64 or URL
+  category: string;
 };
 
-const blank: FormState = { name: '', tagline: '', price: '', stock: '', imageData: '' };
+const blank: FormState = { name: '', tagline: '', price: '', stock: '', imageData: '', category: 'phones' };
 
 function ImageUploader({
   value,
@@ -169,7 +171,14 @@ function AdminProducts() {
 
   function startEdit(p: Product) {
     setEditId(p.id);
-    setForm({ name: p.name, tagline: p.tagline, price: String(p.price), stock: String(p.stock), imageData: p.image });
+    setForm({
+      name: p.name,
+      tagline: p.tagline,
+      price: String(p.price),
+      stock: String(p.stock),
+      imageData: p.image,
+      category: p.category || 'phones'
+    });
     setShowAdd(false);
   }
 
@@ -181,6 +190,8 @@ function AdminProducts() {
       price: parseFloat(form.price) || 0,
       stock: parseInt(form.stock, 10) || 0,
       image: form.imageData || undefined,
+      category: form.category,
+      breadcrumb: ['Electronics', form.category.charAt(0).toUpperCase() + form.category.slice(1)],
     });
     setEditId(null);
     setForm(blank);
@@ -210,8 +221,8 @@ function AdminProducts() {
       rating: 5,
       reviews: 0,
       image: form.imageData || 'https://placehold.co/800x800/f5f5f5/999999?text=Product',
-      breadcrumb: ['Electronics', 'Audio'],
-      category: 'headphones',
+      breadcrumb: ['Electronics', form.category.charAt(0).toUpperCase() + form.category.slice(1)],
+      category: form.category,
     };
     productStore.add(newProduct);
     setShowAdd(false);
@@ -251,8 +262,8 @@ function AdminProducts() {
             </button>
           </div>
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-            <FormField label="Product Name *" placeholder="e.g. Sony WH-1000XM5" value={form.name} onChange={setField('name')} />
-            <FormField label="Price ($) *" placeholder="99.99" type="number" min="0" step="0.01" value={form.price} onChange={setField('price')} />
+            <FormField label="Product Name *" placeholder="e.g. iPhone 16 Pro" value={form.name} onChange={setField('name')} />
+            <FormField label="Price (RWF) *" placeholder="1250000" type="number" min="0" step="1" value={form.price} onChange={setField('price')} />
             <div className="sm:col-span-2">
               <label className="block text-xs font-medium text-muted-foreground mb-1">Description</label>
               <textarea
@@ -264,6 +275,18 @@ function AdminProducts() {
               />
             </div>
             <FormField label="Stock" placeholder="0" type="number" min="0" value={form.stock} onChange={setField('stock')} />
+            <div>
+              <label className="block text-xs font-medium text-muted-foreground mb-1">Category *</label>
+              <select
+                value={form.category}
+                onChange={(e) => setField('category')(e.target.value)}
+                className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm outline-none focus:border-primary transition"
+              >
+                <option value="phones">Phones</option>
+                <option value="computer">Computer</option>
+                <option value="accessories">Accessories</option>
+              </select>
+            </div>
             <ImageUploader value={form.imageData} onChange={setField('imageData')} />
           </div>
           <div className="flex gap-2 pt-1">
@@ -297,7 +320,7 @@ function AdminProducts() {
           </div>
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <FormField label="Product Name" placeholder="Product name" value={form.name} onChange={setField('name')} />
-            <FormField label="Price ($)" placeholder="99.99" type="number" min="0" step="0.01" value={form.price} onChange={setField('price')} />
+            <FormField label="Price (RWF)" placeholder="1250000" type="number" min="0" step="1" value={form.price} onChange={setField('price')} />
             <div className="sm:col-span-2">
               <label className="block text-xs font-medium text-muted-foreground mb-1">Description</label>
               <textarea
@@ -309,6 +332,18 @@ function AdminProducts() {
               />
             </div>
             <FormField label="Stock" placeholder="0" type="number" min="0" value={form.stock} onChange={setField('stock')} />
+            <div>
+              <label className="block text-xs font-medium text-muted-foreground mb-1">Category *</label>
+              <select
+                value={form.category}
+                onChange={(e) => setField('category')(e.target.value)}
+                className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm outline-none focus:border-primary transition"
+              >
+                <option value="phones">Phones</option>
+                <option value="computer">Computer</option>
+                <option value="accessories">Accessories</option>
+              </select>
+            </div>
             <ImageUploader value={form.imageData} onChange={setField('imageData')} label="Product Image (upload to replace)" />
           </div>
           <div className="flex gap-2">
@@ -361,7 +396,7 @@ function AdminProducts() {
                   <td className="px-5 py-3 hidden lg:table-cell max-w-xs">
                     <p className="line-clamp-2 text-sm text-muted-foreground">{p.tagline}</p>
                   </td>
-                  <td className="px-5 py-3 text-right font-semibold">${p.price.toFixed(2)}</td>
+                  <td className="px-5 py-3 text-right font-semibold">{formatRWF(p.price)}</td>
                   <td className="px-5 py-3 text-right hidden sm:table-cell">
                     <span className={`font-medium ${p.stock <= 5 ? 'text-destructive' : ''}`}>
                       {p.stock === 0 ? 'Out of stock' : p.stock}
