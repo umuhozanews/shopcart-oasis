@@ -61,8 +61,9 @@ function read(): SiteSettings {
 }
 
 function write(settings: SiteSettings): void {
-  cache = settings;
-  localStorage.setItem(KEY, JSON.stringify(settings));
+  const merged = { ...SETTINGS_DEFAULTS, ...settings };
+  cache = merged;
+  localStorage.setItem(KEY, JSON.stringify(merged));
   listeners.forEach((l) => l());
 }
 
