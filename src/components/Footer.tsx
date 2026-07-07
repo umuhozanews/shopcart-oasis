@@ -13,7 +13,11 @@ export function Footer() {
         {/* Brand */}
         <div>
           <div className="flex items-center gap-3">
-            <img src={logoSrc} alt={s.siteName} className="h-14 w-auto object-contain brightness-0 invert" />
+            <img 
+              src={logoSrc} 
+              alt={s.siteName} 
+              className={`h-14 w-auto object-contain ${s.logoData ? '' : 'brightness-0 invert'}`} 
+            />
             <div>
               <div className="text-base font-extrabold leading-tight tracking-tight">{s.siteName}</div>
               <div className="text-sm font-bold leading-tight opacity-80">{s.siteSubtitle}</div>
