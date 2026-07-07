@@ -57,7 +57,7 @@ export const orderStore = {
     };
     const updated = [newOrder, ...read()];
     write(updated);
-    saveServerDb({ orders: updated }).catch((err) =>
+    saveServerDb({ data: { orders: updated } }).catch((err) =>
       console.error('Failed to sync added order to server:', err)
     );
     return newOrder;
@@ -65,7 +65,7 @@ export const orderStore = {
   updateStatus(id: string, status: Order['status']): void {
     const updated = read().map((o) => (o.id === id ? { ...o, status } : o));
     write(updated);
-    saveServerDb({ orders: updated }).catch((err) =>
+    saveServerDb({ data: { orders: updated } }).catch((err) =>
       console.error('Failed to sync updated order to server:', err)
     );
   },

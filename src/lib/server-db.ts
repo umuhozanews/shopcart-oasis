@@ -87,13 +87,15 @@ async function saveDbOnServer(state: DbState) {
 }
 
 // Server functions to get and save data
-export const getServerDb = createServerFn('GET', async () => {
-  return await loadDbOnServer();
-});
+export const getServerDb = createServerFn({ method: 'GET' })
+  .handler(async () => {
+    return await loadDbOnServer();
+  });
 
-export const saveServerDb = createServerFn('POST', async (state: Partial<DbState>) => {
-  const current = await loadDbOnServer();
-  const updated = { ...current, ...state };
-  await saveDbOnServer(updated);
-  return { success: true };
-});
+export const saveServerDb = createServerFn({ method: 'POST' })
+  .handler(async ({ data }: { data: Partial<DbState> }) => {
+    const current = await loadDbOnServer();
+    const updated = { ...current, ...data };
+    await saveDbOnServer(updated);
+    return { success: true };
+  });

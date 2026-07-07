@@ -64,21 +64,21 @@ export const productStore = {
   add(p: Product) {
     const updated = [...read(), p];
     write(updated);
-    saveServerDb({ products: updated }).catch((err) =>
+    saveServerDb({ data: { products: updated } }).catch((err) =>
       console.error('Failed to sync added product to server:', err)
     );
   },
   update(id: string, patch: Partial<Pick<Product, 'name' | 'tagline' | 'price' | 'stock' | 'image' | 'category' | 'breadcrumb'>>) {
     const updated = read().map((p) => (p.id === id ? { ...p, ...patch } : p));
     write(updated);
-    saveServerDb({ products: updated }).catch((err) =>
+    saveServerDb({ data: { products: updated } }).catch((err) =>
       console.error('Failed to sync updated product to server:', err)
     );
   },
   delete(id: string) {
     const updated = read().filter((p) => p.id !== id);
     write(updated);
-    saveServerDb({ products: updated }).catch((err) =>
+    saveServerDb({ data: { products: updated } }).catch((err) =>
       console.error('Failed to sync deleted product to server:', err)
     );
   },

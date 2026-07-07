@@ -82,21 +82,21 @@ export const bannerStore = {
   save(patch: Partial<BannerData>) {
     const updated = { ...read(), ...patch };
     write(updated);
-    saveServerDb({ slides: updated.slides, popup: updated.popup }).catch((err) =>
+    saveServerDb({ data: { slides: updated.slides, popup: updated.popup } }).catch((err) =>
       console.error('Failed to sync banners changes to server:', err)
     );
   },
   saveSlides(slides: HeroSlide[]) {
     const updated = { ...read(), slides };
     write(updated);
-    saveServerDb({ slides }).catch((err) =>
+    saveServerDb({ data: { slides } }).catch((err) =>
       console.error('Failed to sync slides changes to server:', err)
     );
   },
   savePopup(popup: StockPopup) {
     const updated = { ...read(), popup };
     write(updated);
-    saveServerDb({ popup }).catch((err) =>
+    saveServerDb({ data: { popup } }).catch((err) =>
       console.error('Failed to sync popup changes to server:', err)
     );
   },
