@@ -224,10 +224,6 @@ function AdminOrders() {
                                   <span className="text-muted-foreground">Shipping</span>
                                   <span className="text-green-600">Free</span>
                                 </div>
-                                <div className="flex justify-between text-sm">
-                                  <span className="text-muted-foreground">Tax (8%)</span>
-                                  <span>{formatRWF(order.tax)}</span>
-                                </div>
                                 <div className="my-1.5 h-px bg-border" />
                                 <div className="flex justify-between text-sm font-bold">
                                   <span>Total</span>

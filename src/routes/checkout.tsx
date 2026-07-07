@@ -42,7 +42,6 @@ function buildOrderMessage(
   customer: CustomerForm,
   items: CartItem[],
   subtotal: number,
-  tax: number,
   total: number
 ): string {
   const lines = items
@@ -61,7 +60,6 @@ function buildOrderMessage(
     lines,
     "",
     `Subtotal: ${formatRWF(subtotal)}`,
-    `Tax (8%): ${formatRWF(tax)}`,
     `*Total: ${formatRWF(total)}*`,
     "",
     "*Customer*",
@@ -84,8 +82,8 @@ function Checkout() {
   const [waLink, setWaLink] = useState("");
 
   const subtotal = items.reduce((n, i) => n + i.price * i.qty, 0);
-  const tax = subtotal * 0.08;
-  const total = subtotal + tax;
+  const tax = 0;
+  const total = subtotal;
 
   function setField(key: keyof CustomerForm) {
     return (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -112,7 +110,6 @@ function Checkout() {
       customer,
       items,
       subtotal,
-      tax,
       total
     );
     const waNumber = siteSettingsStore.get().whatsapp;
@@ -286,7 +283,6 @@ function Checkout() {
             <div className="space-y-2 pt-2 text-sm">
               <Row label="Subtotal" value={formatRWF(subtotal)} />
               <Row label="Shipping" value="Free" />
-              <Row label="Tax (8%)" value={formatRWF(tax)} />
               <div className="my-3 h-px bg-border" />
               <Row label="Total" value={formatRWF(total)} bold />
             </div>
