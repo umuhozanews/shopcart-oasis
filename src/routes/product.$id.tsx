@@ -1,10 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ChevronLeft, ChevronRight, ChevronRight as BreadChev, Minus, Plus, Truck, RotateCcw } from "lucide-react";
-import { useState, useRef, useCallback, useEffect } from "react";
+import { ChevronLeft, ChevronRight, Minus, Plus, Truck, RotateCcw } from "lucide-react";
+import { useState } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { StarRating } from "@/components/StarRating";
-import { products } from "@/lib/products";
+import { products, type GalleryImage } from "@/lib/products";
 import { useProduct } from "@/lib/product-store";
 import { cartStore } from "@/lib/cart-store";
 import { Toaster } from "@/components/ui/sonner";
@@ -21,169 +21,128 @@ function brandFor(name: string): string {
   return "Hippo Technology";
 }
 
-function ProductViewer({ image, name }: { image: string; name: string }) {
-  const rotYRef = useRef(0);
-  const rotXRef = useRef(-6);
-  const draggingRef = useRef(false);
-  const pausedRef = useRef(false);
-  const lastPosRef = useRef<{ x: number; y: number } | null>(null);
-  const rafRef = useRef<number>(0);
-  const lastTsRef = useRef(0);
-
-  const [rotY, setRotY] = useState(0);
-  const [rotX, setRotX] = useState(-6);
-  const [dragging, setDragging] = useState(false);
-  const [interacted, setInteracted] = useState(false);
-
-  // Auto-rotation — runs as long as component is mounted
-  useEffect(() => {
-    function tick(ts: number) {
-      const dt = Math.min(ts - (lastTsRef.current || ts), 50);
-      lastTsRef.current = ts;
-
-      if (!draggingRef.current && !pausedRef.current) {
-        rotYRef.current += dt * 0.022;
-        setRotY(rotYRef.current);
-      }
-
-      rafRef.current = requestAnimationFrame(tick);
-    }
-    rafRef.current = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(rafRef.current);
-  }, []);
-
-  const startDrag = useCallback((x: number, y: number) => {
-    draggingRef.current = true;
-    setDragging(true);
-    setInteracted(true);
-    lastPosRef.current = { x, y };
-  }, []);
-
-  const moveDrag = useCallback((x: number, y: number) => {
-    if (!lastPosRef.current) return;
-    const dx = x - lastPosRef.current.x;
-    const dy = y - lastPosRef.current.y;
-    lastPosRef.current = { x, y };
-    rotYRef.current += dx * 0.55;
-    rotXRef.current = Math.max(-30, Math.min(20, rotXRef.current - dy * 0.3));
-    setRotY(rotYRef.current);
-    setRotX(rotXRef.current);
-  }, []);
-
-  const endDrag = useCallback(() => {
-    draggingRef.current = false;
-    setDragging(false);
-    lastPosRef.current = null;
-  }, []);
-
-  const setHovered = useCallback((v: boolean) => {
-    pausedRef.current = v;
-  }, []);
-
-  const rotateBy = (deg: number) => {
-    rotYRef.current += deg;
-    setRotY(rotYRef.current);
-    setInteracted(true);
-  };
-
-  const reset = () => {
-    rotYRef.current = 0;
-    rotXRef.current = -6;
-    setRotY(0);
-    setRotX(-6);
-  };
+// ---------------------------------------------------------------------------
+// Apple-style image gallery
+// ---------------------------------------------------------------------------
+function ProductGallery({
+  images,
+  activeIdx,
+  onSelect,
+}: {
+  images: GalleryImage[];
+  activeIdx: number;
+  onSelect: (i: number) => void;
+}) {
+  const active = images[activeIdx] ?? images[0];
+  const canPrev = activeIdx > 0;
+  const canNext = activeIdx < images.length - 1;
 
   return (
-    <div className="select-none">
-      {/* Viewer stage */}
-      <div className="relative">
-        {/* 360° badge */}
-        <div className="absolute left-3 top-3 z-10 flex items-center gap-1.5 rounded-full bg-black/50 px-3 py-1 text-xs font-bold text-white backdrop-blur-sm">
-          <RotateCcw size={11} />
-          360°
-        </div>
-
-        <div
-          className="relative overflow-hidden rounded-3xl ring-1 ring-border/60"
-          style={{
-            background: "radial-gradient(ellipse at 50% 35%, hsl(var(--surface-muted)) 0%, hsl(var(--background)) 100%)",
-            perspective: "1400px",
-            cursor: dragging ? "grabbing" : "grab",
-          }}
-          onMouseEnter={() => setHovered(true)}
-          onMouseLeave={() => { endDrag(); setHovered(false); }}
-          onMouseDown={(e) => startDrag(e.clientX, e.clientY)}
-          onMouseMove={(e) => { if (draggingRef.current) moveDrag(e.clientX, e.clientY); }}
-          onMouseUp={endDrag}
-          onTouchStart={(e) => startDrag(e.touches[0].clientX, e.touches[0].clientY)}
-          onTouchMove={(e) => moveDrag(e.touches[0].clientX, e.touches[0].clientY)}
-          onTouchEnd={endDrag}
-        >
-          {/* Product image with 3D transform */}
-          <div
-            style={{
-              transform: `rotateX(${rotX}deg) rotateY(${rotY}deg)`,
-              transformStyle: "preserve-3d",
-              transition: dragging ? "none" : "transform 0.08s linear",
-              willChange: "transform",
-            }}
+    <div>
+      {/* ── Main image ── */}
+      <div className="relative overflow-hidden rounded-3xl bg-surface-muted ring-1 ring-border/60">
+        {/* Prev arrow */}
+        {images.length > 1 && (
+          <button
+            onClick={() => canPrev && onSelect(activeIdx - 1)}
+            disabled={!canPrev}
+            aria-label="Previous view"
+            className="absolute left-3 top-1/2 z-10 -translate-y-1/2 grid h-9 w-9 place-items-center rounded-full bg-background/80 text-foreground/70 shadow backdrop-blur transition hover:bg-background hover:text-primary disabled:opacity-30"
           >
-            <img
-              src={image}
-              alt={name}
-              draggable={false}
-              width={800}
-              height={800}
-              className="aspect-square w-full object-contain p-10"
-            />
+            <ChevronLeft size={18} />
+          </button>
+        )}
+
+        {/* Right arrow */}
+        {images.length > 1 && (
+          <button
+            onClick={() => canNext && onSelect(activeIdx + 1)}
+            disabled={!canNext}
+            aria-label="Next view"
+            className="absolute right-3 top-1/2 z-10 -translate-y-1/2 grid h-9 w-9 place-items-center rounded-full bg-background/80 text-foreground/70 shadow backdrop-blur transition hover:bg-background hover:text-primary disabled:opacity-30"
+          >
+            <ChevronRight size={18} />
+          </button>
+        )}
+
+        <img
+          key={active.src}
+          src={active.src}
+          alt={active.label}
+          width={800}
+          height={800}
+          className="aspect-square w-full object-contain p-10 transition-opacity duration-200"
+        />
+
+        {/* View label badge */}
+        {images.length > 1 && (
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
+            <span className="rounded-full bg-black/40 px-4 py-1.5 text-xs font-medium text-white backdrop-blur-sm">
+              {active.label}
+            </span>
           </div>
+        )}
 
-          {/* Ground shadow */}
-          <div
-            className="pointer-events-none absolute bottom-0 left-1/2 -translate-x-1/2 rounded-full bg-black/15 blur-2xl"
-            style={{ width: "55%", height: "28px" }}
-          />
+        {/* Dot indicators */}
+        {images.length > 1 && (
+          <div className="absolute bottom-4 right-4 flex gap-1.5">
+            {images.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => onSelect(i)}
+                aria-label={`View ${i + 1}`}
+                className={`h-1.5 rounded-full transition-all ${
+                  i === activeIdx ? "w-4 bg-primary" : "w-1.5 bg-foreground/30 hover:bg-foreground/60"
+                }`}
+              />
+            ))}
+          </div>
+        )}
+      </div>
 
-          {/* First-use hint */}
-          {!interacted && (
-            <div className="pointer-events-none absolute inset-x-0 bottom-5 flex justify-center">
-              <span className="animate-pulse rounded-full bg-black/40 px-4 py-1.5 text-xs text-white backdrop-blur-sm">
-                Drag to rotate
+      {/* ── Thumbnail strip ── */}
+      {images.length > 1 && (
+        <div className="mt-4 flex gap-3 overflow-x-auto pb-1">
+          {images.map((img, i) => (
+            <button
+              key={img.label}
+              onClick={() => onSelect(i)}
+              className="group shrink-0 flex flex-col items-center gap-1.5"
+            >
+              <div
+                className={`overflow-hidden rounded-2xl ring-2 transition ${
+                  i === activeIdx
+                    ? "ring-primary"
+                    : "ring-transparent hover:ring-border"
+                }`}
+              >
+                <img
+                  src={img.src}
+                  alt={img.label}
+                  loading="lazy"
+                  width={120}
+                  height={120}
+                  className="h-[72px] w-[72px] object-contain p-1.5"
+                />
+              </div>
+              <span
+                className={`text-[11px] leading-none ${
+                  i === activeIdx ? "font-semibold text-primary" : "text-muted-foreground"
+                }`}
+              >
+                {img.label}
               </span>
-            </div>
-          )}
+            </button>
+          ))}
         </div>
-      </div>
-
-      {/* Controls — left arrow · label · right arrow · reset */}
-      <div className="mt-4 flex items-center justify-center gap-2">
-        <button
-          onClick={() => rotateBy(-90)}
-          aria-label="Rotate left"
-          className="grid h-9 w-9 place-items-center rounded-full border border-border bg-background text-foreground/60 transition hover:border-primary hover:text-primary"
-        >
-          <ChevronLeft size={17} />
-        </button>
-        <span className="px-2 text-xs text-muted-foreground">View all sides</span>
-        <button
-          onClick={() => rotateBy(90)}
-          aria-label="Rotate right"
-          className="grid h-9 w-9 place-items-center rounded-full border border-border bg-background text-foreground/60 transition hover:border-primary hover:text-primary"
-        >
-          <ChevronRight size={17} />
-        </button>
-        <button
-          onClick={reset}
-          aria-label="Reset view"
-          className="ml-1 grid h-9 w-9 place-items-center rounded-full border border-border bg-background text-foreground/60 transition hover:border-primary hover:text-primary"
-        >
-          <RotateCcw size={13} />
-        </button>
-      </div>
+      )}
     </div>
   );
 }
 
+// ---------------------------------------------------------------------------
+// Route
+// ---------------------------------------------------------------------------
 export const Route = createFileRoute("/product/$id")({
   loader: ({ params }) => {
     const product = products.find((p) => p.id === params.id) ?? null;
@@ -213,7 +172,7 @@ function PDP() {
   const storeProduct = useProduct(productId);
   const product = storeProduct ?? loaderProduct;
 
-  const [colorIdx, setColorIdx] = useState(0);
+  const [galleryIdx, setGalleryIdx] = useState(0);
   const [qty, setQty] = useState(1);
 
   if (!product) {
@@ -229,8 +188,20 @@ function PDP() {
     );
   }
 
-  const activeColor = product.colors?.[colorIdx];
-  const mainImage = activeColor?.image ?? product.image;
+  // Build gallery: explicit gallery > derive from colors > single image
+  const galleryImages: GalleryImage[] = product.gallery && product.gallery.length > 0
+    ? product.gallery
+    : product.colors && product.colors.length > 0
+      ? product.colors.map((c) => ({ label: c.name, src: c.image }))
+      : [{ label: product.name, src: product.image }];
+
+  // The active color tracks the gallery index when gallery = colors
+  const activeColor = product.colors?.[galleryIdx];
+  const mainImage = galleryImages[galleryIdx]?.src ?? product.image;
+
+  const handleSelect = (i: number) => {
+    setGalleryIdx(i);
+  };
 
   const productLd = {
     "@context": "https://schema.org",
@@ -277,6 +248,7 @@ function PDP() {
   };
 
   const specs = product.specs ? Object.entries(product.specs) : [];
+  const descParagraphs = product.description?.split("\n\n") ?? [];
 
   return (
     <div className="min-h-screen bg-background">
@@ -285,57 +257,56 @@ function PDP() {
       <Header />
 
       <main className="mx-auto max-w-7xl px-4 py-8 md:px-6">
-        {/* Breadcrumbs */}
+        {/* Breadcrumb */}
         <nav className="flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
           {product.breadcrumb.map((b: string, i: number) => (
             <span key={i} className="flex items-center gap-1">
-              <Link to="/" className="hover:text-primary">
-                {b}
-              </Link>
-              <BreadChev size={12} className="opacity-50" />
+              <Link to="/" className="hover:text-primary">{b}</Link>
+              <ChevronRight size={12} className="opacity-50" />
             </span>
           ))}
           <span className="font-medium text-foreground">{product.name}</span>
         </nav>
 
+        {/* ── Product grid ── */}
         <div className="mt-6 grid grid-cols-1 gap-10 lg:grid-cols-2">
-          {/* 360° Viewer + color thumbnails */}
+          {/* Left — Gallery */}
           <div>
-            {/* Remount viewer when image changes so rotation resets cleanly */}
-            <ProductViewer key={mainImage} image={mainImage} name={product.name} />
+            <ProductGallery
+              images={galleryImages}
+              activeIdx={galleryIdx}
+              onSelect={handleSelect}
+            />
 
-            {/* Color thumbnails */}
-            {product.colors && (
-              <div className="mt-5 grid grid-cols-4 gap-3 sm:grid-cols-5">
-                {product.colors.map((c: { name: string; hex: string; image: string }, i: number) => (
-                  <button
-                    key={c.name}
-                    onClick={() => setColorIdx(i)}
-                    aria-label={c.name}
-                    className={`overflow-hidden rounded-2xl bg-surface-muted ring-2 transition ${
-                      i === colorIdx ? "ring-primary" : "ring-transparent hover:ring-border"
-                    }`}
-                  >
-                    <img
-                      src={c.image}
-                      alt={c.name}
-                      loading="lazy"
-                      width={200}
-                      height={200}
-                      className="aspect-square w-full object-contain p-2"
-                    />
-                  </button>
-                ))}
+            {/* Color swatches — shown separately when product has an explicit gallery */}
+            {product.gallery && product.colors && (
+              <div className="mt-5">
+                <p className="mb-2 text-sm font-semibold">Colour</p>
+                <div className="flex flex-wrap gap-3">
+                  {product.colors.map((c, i) => (
+                    <button
+                      key={c.name}
+                      aria-label={c.name}
+                      title={c.name}
+                      className={`grid h-9 w-9 place-items-center rounded-full ring-2 ring-offset-2 ring-offset-background transition ${
+                        i === galleryIdx ? "ring-primary scale-110" : "ring-transparent hover:ring-border"
+                      }`}
+                      onClick={() => setGalleryIdx(i)}
+                    >
+                      <span className="h-7 w-7 rounded-full border border-black/10" style={{ backgroundColor: c.hex }} />
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
           </div>
 
-          {/* Info panel */}
+          {/* Right — Info */}
           <div>
             <h1 className="font-display text-3xl font-extrabold tracking-tight sm:text-4xl">
               {product.name}
             </h1>
-            <p className="mt-3 max-w-md text-sm text-muted-foreground">
+            <p className="mt-3 max-w-md text-sm text-muted-foreground leading-relaxed">
               {product.tagline}
             </p>
             <div className="mt-3">
@@ -344,67 +315,63 @@ function PDP() {
 
             <div className="my-6 h-px bg-border" />
 
+            {/* Price */}
             <div>
-              <div className="text-2xl font-bold text-foreground">
-                {formatRWF(product.price)}
-              </div>
-              <p className="mt-2 text-xs text-muted-foreground">
-                Free delivery across Rwanda
-              </p>
+              <div className="text-2xl font-bold text-foreground">{formatRWF(product.price)}</div>
+              <p className="mt-1 text-xs text-muted-foreground">Free delivery across Rwanda</p>
             </div>
 
             <div className="my-6 h-px bg-border" />
 
-            {product.colors && (
-              <div>
-                <h3 className="text-sm font-semibold">Choose a Color</h3>
+            {/* Colour selector — only when gallery = colours */}
+            {!product.gallery && product.colors && (
+              <div className="mb-6">
+                <h3 className="text-sm font-semibold">
+                  Colour — <span className="font-normal text-muted-foreground">{galleryImages[galleryIdx]?.label}</span>
+                </h3>
                 <div className="mt-3 flex flex-wrap items-center gap-3">
-                  {product.colors.map((c: { name: string; hex: string; image: string }, i: number) => (
+                  {product.colors.map((c, i) => (
                     <button
                       key={c.name}
-                      onClick={() => setColorIdx(i)}
+                      onClick={() => handleSelect(i)}
                       aria-label={c.name}
                       className={`grid h-9 w-9 place-items-center rounded-full ring-2 ring-offset-2 ring-offset-background transition ${
-                        i === colorIdx ? "ring-primary" : "ring-transparent"
+                        i === galleryIdx ? "ring-primary scale-110" : "ring-transparent hover:ring-border"
                       }`}
                     >
-                      <span
-                        className="h-7 w-7 rounded-full border border-black/10"
-                        style={{ backgroundColor: c.hex }}
-                      />
+                      <span className="h-7 w-7 rounded-full border border-black/10" style={{ backgroundColor: c.hex }} />
                     </button>
                   ))}
                 </div>
               </div>
             )}
 
-            <div className="my-6 h-px bg-border" />
-
+            {/* Qty + stock */}
             <div className="flex flex-wrap items-center gap-6">
               <div className="inline-flex items-center rounded-full border border-border">
                 <button
                   onClick={() => setQty((q) => Math.max(1, q - 1))}
-                  className="grid h-11 w-11 place-items-center text-foreground/70 hover:text-primary"
                   aria-label="Decrease"
+                  className="grid h-11 w-11 place-items-center text-foreground/70 hover:text-primary"
                 >
                   <Minus size={14} />
                 </button>
                 <span className="w-8 text-center text-sm font-semibold">{qty}</span>
                 <button
                   onClick={() => setQty((q) => q + 1)}
-                  className="grid h-11 w-11 place-items-center text-foreground/70 hover:text-primary"
                   aria-label="Increase"
+                  className="grid h-11 w-11 place-items-center text-foreground/70 hover:text-primary"
                 >
                   <Plus size={14} />
                 </button>
               </div>
               <div className="text-sm">
-                Only <span className="font-bold text-warning">{product.stock} items</span>{" "}
-                Left!
+                Only <span className="font-bold text-warning">{product.stock} items</span> left!
                 <div className="text-muted-foreground">Don't miss it</div>
               </div>
             </div>
 
+            {/* CTA buttons */}
             <div className="mt-6 flex flex-wrap gap-3">
               <button
                 onClick={() => addToCart(true)}
@@ -420,15 +387,14 @@ function PDP() {
               </button>
             </div>
 
+            {/* Delivery / returns badges */}
             <div className="mt-8 space-y-3">
               <div className="rounded-2xl border border-border p-4">
                 <div className="flex items-start gap-3">
                   <Truck className="mt-0.5 text-primary" size={20} />
                   <div>
                     <div className="text-sm font-semibold">Free Delivery</div>
-                    <p className="text-xs text-muted-foreground">
-                      Free delivery across Rwanda on all orders
-                    </p>
+                    <p className="text-xs text-muted-foreground">Free delivery across Rwanda on all orders</p>
                   </div>
                 </div>
               </div>
@@ -439,9 +405,7 @@ function PDP() {
                     <div className="text-sm font-semibold">Return Delivery</div>
                     <p className="text-xs text-muted-foreground">
                       Free 30-day returns.{" "}
-                      <Link to="/returns" className="underline">
-                        Details
-                      </Link>
+                      <Link to="/returns" className="underline">Details</Link>
                     </p>
                   </div>
                 </div>
@@ -450,26 +414,29 @@ function PDP() {
           </div>
         </div>
 
-        {/* Specifications */}
+        {/* ── Description ── */}
+        {descParagraphs.length > 0 && (
+          <section className="mt-16">
+            <h2 className="font-display text-2xl font-extrabold tracking-tight">About this product</h2>
+            <div className="mt-6 max-w-3xl space-y-4">
+              {descParagraphs.map((p, i) => (
+                <p key={i} className="text-sm leading-7 text-foreground/80">{p}</p>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* ── Specifications ── */}
         {specs.length > 0 && (
           <section className="mt-14">
-            <h2 className="font-display text-2xl font-extrabold tracking-tight">
-              Specifications
-            </h2>
+            <h2 className="font-display text-2xl font-extrabold tracking-tight">Specifications</h2>
             <div className="mt-5 overflow-hidden rounded-2xl border border-border">
               <table className="w-full text-sm">
                 <tbody>
                   {specs.map(([key, value], i) => (
-                    <tr
-                      key={key}
-                      className={i % 2 === 0 ? "bg-surface-muted/50" : "bg-background"}
-                    >
-                      <td className="w-2/5 px-5 py-3.5 font-medium text-foreground/70 md:w-1/3">
-                        {key}
-                      </td>
-                      <td className="px-5 py-3.5 font-semibold text-foreground">
-                        {value}
-                      </td>
+                    <tr key={key} className={i % 2 === 0 ? "bg-surface-muted/50" : "bg-background"}>
+                      <td className="w-2/5 px-5 py-3.5 font-medium text-foreground/70 md:w-1/3">{key}</td>
+                      <td className="px-5 py-3.5 font-semibold text-foreground">{value}</td>
                     </tr>
                   ))}
                 </tbody>

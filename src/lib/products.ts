@@ -55,16 +55,19 @@ import vrHeadsetImg from "@/assets/gaming/vr-headset.jpg";
 import computerImg from "@/assets/computer.jpg";
 
 export type ColorOption = { name: string; hex: string; image: string };
+export type GalleryImage = { label: string; src: string };
 
 export type Product = {
   id: string;
   name: string;
   tagline: string;
+  description?: string;
   price: number;
   rating: number;
   reviews: number;
   image: string;
   colors?: ColorOption[];
+  gallery?: GalleryImage[];
   stock: number;
   breadcrumb: string[];
   category: string;
@@ -76,6 +79,7 @@ const phones: Product[] = [
     id: "iphone-16-pro-max",
     name: "iPhone 16 Pro Max",
     tagline: "The most powerful iPhone ever. Titanium design, A18 Pro chip, and a pro camera system with 5x optical zoom.",
+    description: "The iPhone 16 Pro Max is Apple's most advanced smartphone ever made. Built from aerospace-grade titanium — stronger and lighter than steel — it pairs with the industry's toughest Ceramic Shield glass for a device that's as beautiful as it is durable.\n\nPowering everything is the Apple A18 Pro chip, the first 3-nanometre chip designed for smartphones. It drives Apple Intelligence, a suite of AI features built into iOS 18 that helps you write, summarise, and create — privately and securely on-device.\n\nThe pro camera system reaches new heights: a 48 MP Main camera with a larger sensor captures incredible detail in any light, a 48 MP Ultra Wide covers wide scenes with razor-sharp precision, and a 12 MP 5× Telephoto with tetraprism optics brings distant subjects close without losing quality. Shoot ProRes video at 4K 120fps or log-encoded footage for professional colour grading.\n\nThe 6.9-inch Super Retina XDR display with ProMotion adapts from 1Hz to 120Hz automatically, making scrolling feel silky-smooth while saving battery. With a 4,685 mAh cell and 27W MagSafe charging, the iPhone 16 Pro Max keeps up with even the busiest day.",
     price: 1900000, rating: 5, reviews: 87, image: iphone16BlackImg, stock: 8,
     category: "phones", breadcrumb: ["Electronics", "Phones"],
     colors: [
@@ -102,6 +106,7 @@ const phones: Product[] = [
     id: "samsung-galaxy-s25-ultra",
     name: "Samsung Galaxy S25 Ultra",
     tagline: "AI-powered flagship with built-in S Pen, 200MP camera and Snapdragon 8 Elite for Galaxy.",
+    description: "The Samsung Galaxy S25 Ultra is the ultimate Android powerhouse, combining bleeding-edge performance with Galaxy AI to reshape what's possible on a smartphone.\n\nAt its core is the Snapdragon 8 Elite for Galaxy — the fastest chip ever placed in an Android device — running at up to 3.53GHz. It handles everything effortlessly: intensive gaming, multi-tasking, real-time AI translation, and 8K video recording without breaking a sweat.\n\nThe integrated S Pen — thinner and more precise than any previous generation — makes the S25 Ultra a true creative tool. Write notes, annotate documents, sketch ideas, or sign contracts with the natural feel of ink on paper. Galaxy AI can then summarise, translate, and act on what you've written.\n\nThe 200MP main camera is the highest resolution ever on a Galaxy, capturing extraordinary detail. A 50MP 5× periscope telephoto and 12MP 3× zoom give you a complete telephoto range, while the 12MP Ultra Wide covers sweeping landscapes with crisp clarity.\n\nThe titanium frame and Armor Aluminium corners give the S25 Ultra a premium rigidity, while the 6.9-inch Dynamic AMOLED 2X display with 2,600 nits peak brightness is visible even in harsh sunlight.",
     price: 1650000, rating: 4.9, reviews: 64, image: samsungS25BlackImg, stock: 6,
     category: "phones", breadcrumb: ["Electronics", "Phones"],
     colors: [
@@ -128,6 +133,7 @@ const phones: Product[] = [
     id: "iphone-15",
     name: "iPhone 15 128GB",
     tagline: "Dynamic Island, 48MP main camera and USB-C in a beautiful colour-infused glass design.",
+    description: "The iPhone 15 marks a new era for iPhone with the arrival of Dynamic Island and USB-C. Dynamic Island is a fluid, interactive space at the top of the display that adapts to show you alerts, Live Activities, and ongoing tasks — from navigation to music — without interrupting what you're doing.\n\nSwitching to USB-C means you can now use the same cable for your iPhone, Mac, and iPad. Transfer photos at up to 480 Mbps, connect to external monitors, and charge from any USB-C power source including your MacBook charger.\n\nThe all-new 48MP Main camera captures four times more information than before. Shoot in full 48MP resolution for stunning detail in photos you can crop and zoom deeply. Portrait mode now works automatically — the camera detects people, pets, and objects and retains depth information so you can adjust focus after the shot.\n\nThe colour-infused glass design is available in five beautiful shades that go all the way through the material — not just a surface coat. Wrapped in Ceramic Shield on the front and backed by the most durable iPhone glass ever on the back, the iPhone 15 looks stunning and stays that way.",
     price: 1250000, rating: 4.8, reviews: 112, image: iphone15PinkImg, stock: 14,
     category: "phones", breadcrumb: ["Electronics", "Phones"],
     colors: [
@@ -155,6 +161,7 @@ const phones: Product[] = [
     id: "iphone-14",
     name: "iPhone 14 128GB",
     tagline: "Emergency SOS via satellite, Crash Detection and the powerful A15 Bionic chip. Great value.",
+    description: "The iPhone 14 brings life-saving technology and powerful performance at outstanding value. Emergency SOS via satellite means that even when you're far from a cell tower — in a remote area, on a mountain, or out at sea — you can contact emergency services. Crash Detection uses sensors and algorithms to automatically call for help if you're in a serious car accident.\n\nPowering the iPhone 14 is the A15 Bionic chip, the same chip found in the iPhone 13 Pro Max — a 6-core CPU, 5-core GPU, and 16-core Neural Engine that handles every task with ease. Games run smoothly, videos export quickly, and computational photography happens in real time.\n\nThe 12MP dual camera system features Photonic Engine — Apple's deep fusion of hardware and software — that delivers up to 2× better performance in low light on the Main camera and up to 2× improvement on the Ultra Wide. Cinematic mode brings Hollywood-style shallow depth of field to your videos, now upgraded to shoot at 4K 30fps.\n\nWith IP68 water resistance, an all-day battery, and the beautiful Super Retina XDR display, the iPhone 14 delivers the full iPhone experience at a price that makes it accessible to more people in Rwanda.",
     price: 950000,
     rating: 4.7,
     reviews: 143,
@@ -182,6 +189,7 @@ const phones: Product[] = [
     id: "samsung-galaxy-a55",
     name: "Samsung Galaxy A55 5G",
     tagline: "Premium mid-range with 50MP triple camera, 5G, IP67 water resistance and smooth 120Hz display.",
+    description: "The Samsung Galaxy A55 5G brings premium features to an accessible price, proving that you don't need a flagship budget to get a flagship-level experience.\n\nThe 6.6-inch Super AMOLED display runs at a smooth 120Hz adaptive refresh rate — scrolling through social media, watching videos, and playing games all feel buttery-smooth. Vision Booster technology ensures the screen is readable even under bright sunlight.\n\nThe 50MP triple camera system is led by a high-resolution main sensor, joined by a 12MP Ultra Wide and a 5MP macro lens for extreme close-up detail. The 32MP front camera takes stunning selfies with natural skin tones and Galaxy AI-powered editing tools.\n\nWith 5G connectivity, you get blazing-fast download speeds for streaming, video calls, and cloud gaming. The 5,000 mAh battery keeps you going all day, and 25W fast charging gets you back up quickly when you need it. IP67 water resistance means you can take it into the rain or pool without worry.\n\nAvailable in Awesome Navy and Awesome Lilac — two colours that stand out from the crowd.",
     price: 650000,
     rating: 4.6,
     reviews: 89,
@@ -212,6 +220,7 @@ const phones: Product[] = [
     id: "tecno-camon-30-pro",
     name: "Tecno Camon 30 Pro",
     tagline: "50MP RGBW portrait camera, vivid AMOLED display and 5000mAh battery built for Africa.",
+    description: "The Tecno Camon 30 Pro is purpose-built for African users — powerful, vivid, and long-lasting. Tecno partnered with RGBW sensor technology for the 50MP main camera, adding a White pixel alongside Red, Green, and Blue to capture 60% more light. The result: portraits that are sharper, brighter, and more true-to-life even in the challenging lighting of Rwandan evenings.\n\nA second 50MP portrait camera with a depth sensor creates professional bokeh effects for stunning subject isolation. The 50MP front camera means your selfies are just as impressive as your rear shots — every face captured in detail.\n\nThe 6.78-inch AMOLED display runs at 144Hz, one of the highest refresh rates in its price class, making every scroll and animation feel premium. Colours pop with deep blacks and vivid saturation that makes photos and videos truly come alive.\n\nThe 5,000 mAh battery combined with 45W fast charging means you can go from 0 to 70% in about 30 minutes — essential when you're on the go. Running HiOS 14 on Android 14, the Camon 30 Pro is optimised for local network conditions, low-storage environments, and the apps Rwandans actually use.",
     price: 300000,
     rating: 4.4,
     reviews: 56,
@@ -237,6 +246,7 @@ const phones: Product[] = [
     id: "infinix-hot-40-pro",
     name: "Infinix Hot 40 Pro",
     tagline: "6.78\" FHD+ display, 108MP camera and massive 5000mAh battery at an unbeatable price.",
+    description: "The Infinix Hot 40 Pro redefines what's possible under 200,000 RWF. Leading the spec sheet is a 108MP main camera — a resolution once reserved for phones costing three times as much — that captures enormous amounts of detail you can crop, zoom, and print large without losing sharpness.\n\nThe 6.78-inch FHD+ display with a 120Hz refresh rate is one of the largest and smoothest screens in this price range. Watching movies, playing mobile games, or scrolling through content feels premium and immersive. The 500-nit peak brightness keeps the screen clear in outdoor conditions.\n\nRunning Android 14 with XOS 14, the Hot 40 Pro is optimised for performance on mid-range hardware. The MediaTek Helio G99 processor handles multitasking, gaming, and everyday apps without stuttering, while 8GB RAM keeps multiple apps open simultaneously.\n\nThe 5,000 mAh battery with 45W fast charging is the headline feature for daily users — charge fully in under an hour and use all day without anxiety. A 32MP front camera completes the package for video calls and social media. For anyone wanting a complete, capable smartphone experience in Rwanda without stretching the budget, the Infinix Hot 40 Pro is the clear choice.",
     price: 195000,
     rating: 4.3,
     reviews: 74,
