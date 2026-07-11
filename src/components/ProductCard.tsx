@@ -3,7 +3,6 @@ import { Heart } from "lucide-react";
 import { useState } from "react";
 import type { Product } from "@/lib/products";
 import { cartStore } from "@/lib/cart-store";
-import { StarRating } from "./StarRating";
 import { toast } from "sonner";
 import { formatRWF } from "@/lib/currency";
 
@@ -67,7 +66,6 @@ export function ProductCard({ product }: { product: Product }) {
             </div>
           </div>
         </div>
-        <StarRating rating={product.rating} reviews={product.reviews} />
         <button
           onClick={() => {
             cartStore.add({

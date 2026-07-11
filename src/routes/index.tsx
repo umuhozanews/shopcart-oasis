@@ -46,7 +46,7 @@ const siteLd = [
   },
 ];
 
-const SORT_OPTIONS = ['Featured', 'Price: Low to High', 'Price: High to Low', 'Top Rated'];
+const SORT_OPTIONS = ['Featured', 'Price: Low to High', 'Price: High to Low'];
 
 function Home() {
   const allProducts = useProducts();
@@ -69,7 +69,6 @@ function Home() {
   const sorted = [...filtered].sort((a, b) => {
     if (sort === 'Price: Low to High') return a.price - b.price;
     if (sort === 'Price: High to Low') return b.price - a.price;
-    if (sort === 'Top Rated') return b.rating - a.rating;
     return 0;
   });
 

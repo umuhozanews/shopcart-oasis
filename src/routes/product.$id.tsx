@@ -3,7 +3,6 @@ import { ChevronLeft, ChevronRight, Minus, Plus, Truck, RotateCcw } from "lucide
 import { useState } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { StarRating } from "@/components/StarRating";
 import type { Product, GalleryImage } from "@/lib/products";
 import { useProduct } from "@/lib/product-store";
 import { cartStore } from "@/lib/cart-store";
@@ -210,15 +209,6 @@ function PDP() {
     image: product.image,
     sku: product.id,
     brand: { "@type": "Brand", name: brandFor(product.name) },
-    ...(product.reviews > 0
-      ? {
-          aggregateRating: {
-            "@type": "AggregateRating",
-            ratingValue: product.rating,
-            reviewCount: product.reviews,
-          },
-        }
-      : {}),
     offers: {
       "@type": "Offer",
       url: `${SITE_URL}/product/${product.id}`,
@@ -320,10 +310,6 @@ function PDP() {
             <p className="mt-3 max-w-md text-sm text-muted-foreground leading-relaxed">
               {product.tagline}
             </p>
-            <div className="mt-3">
-              <StarRating rating={product.rating} reviews={product.reviews} />
-            </div>
-
             <div className="my-6 h-px bg-border" />
 
             {/* Price */}

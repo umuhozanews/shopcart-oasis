@@ -63,7 +63,6 @@ function CategoryPage() {
   const [query, setQuery] = useState('');
   const [priceRange, setPriceRange] = useState<number | null>(null);
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
-  const [minRating, setMinRating] = useState<number | null>(null);
 
   const categoriesWithCounts = categories.map((c) => ({
     ...c,
@@ -83,19 +82,17 @@ function CategoryPage() {
         if (p.price < r.min || p.price > r.max) return false;
       }
       if (selectedBrand && !p.name.toLowerCase().startsWith(selectedBrand.toLowerCase())) return false;
-      if (minRating !== null && p.rating < minRating) return false;
       return true;
     });
-  }, [baseFiltered, query, priceRange, selectedBrand, minRating]);
+  }, [baseFiltered, query, priceRange, selectedBrand]);
 
   const clearAll = () => {
     setQuery('');
     setPriceRange(null);
     setSelectedBrand(null);
-    setMinRating(null);
   };
 
-  const hasFilters = query || priceRange !== null || selectedBrand || minRating !== null;
+  const hasFilters = query || priceRange !== null || selectedBrand;
 
   return (
     <div className="min-h-screen bg-background">
@@ -181,23 +178,6 @@ function CategoryPage() {
               </div>
             </div>
 
-            {/* Rating */}
-            <div className="rounded-2xl bg-surface-muted p-5 ring-1 ring-border/60">
-              <h3 className="mb-3 text-sm font-bold">Minimum Rating</h3>
-              <div className="space-y-2">
-                {[4.5, 4, 3.5].map((r) => (
-                  <label key={r} className="flex cursor-pointer items-center gap-2 text-sm">
-                    <input type="radio" name="rating" checked={minRating === r} onChange={() => setMinRating(r)} className="accent-primary" />
-                    <span>{r}★ & up</span>
-                  </label>
-                ))}
-                {minRating !== null && (
-                  <button onClick={() => setMinRating(null)} className="mt-1 text-xs text-primary underline">
-                    Clear rating
-                  </button>
-                )}
-              </div>
-            </div>
           </aside>
 
           {/* Main */}
