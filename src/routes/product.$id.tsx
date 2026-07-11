@@ -296,15 +296,15 @@ function PDP() {
             <div className="mb-3">
               {product.condition === 'used' ? (
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-700">
-                  🔄 Used Device
+                  🔄 Used · Open Box
                 </span>
               ) : product.condition === 'dubai' ? (
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-100 px-3 py-1 text-xs font-bold text-blue-700">
-                  🇦🇪 Dubai (Open Box)
+                  🇦🇪 Dubai · Open Box
                 </span>
               ) : (
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1 text-xs font-bold text-green-700">
-                  🆕 Brand New
+                  🆕 Brand New · Sealed
                 </span>
               )}
             </div>

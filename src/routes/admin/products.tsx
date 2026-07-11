@@ -336,7 +336,7 @@ function AdminProducts() {
                     onChange={() => setField('condition')('new')}
                     className="accent-primary"
                   />
-                  🆕 Brand New
+                  🆕 Brand New · Sealed
                 </label>
                 <label className="flex flex-1 cursor-pointer items-center gap-2.5 rounded-lg border border-input bg-background px-4 py-2.5 text-sm transition has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 has-[:checked]:text-blue-700">
                   <input
@@ -347,7 +347,7 @@ function AdminProducts() {
                     onChange={() => setField('condition')('dubai')}
                     className="accent-blue-500"
                   />
-                  🇦🇪 Dubai
+                  🇦🇪 Dubai · Open Box
                 </label>
                 <label className="flex flex-1 cursor-pointer items-center gap-2.5 rounded-lg border border-input bg-background px-4 py-2.5 text-sm transition has-[:checked]:border-amber-500 has-[:checked]:bg-amber-50 has-[:checked]:text-amber-700">
                   <input
@@ -358,7 +358,7 @@ function AdminProducts() {
                     onChange={() => setField('condition')('used')}
                     className="accent-amber-500"
                   />
-                  🔄 Used
+                  🔄 Used · Open Box
                 </label>
               </div>
             </div>
@@ -469,7 +469,7 @@ function AdminProducts() {
                     onChange={() => setField('condition')('new')}
                     className="accent-primary"
                   />
-                  🆕 Brand New
+                  🆕 Brand New · Sealed
                 </label>
                 <label className="flex flex-1 cursor-pointer items-center gap-2.5 rounded-lg border border-input bg-background px-4 py-2.5 text-sm transition has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 has-[:checked]:text-blue-700">
                   <input
@@ -480,7 +480,7 @@ function AdminProducts() {
                     onChange={() => setField('condition')('dubai')}
                     className="accent-blue-500"
                   />
-                  🇦🇪 Dubai
+                  🇦🇪 Dubai · Open Box
                 </label>
                 <label className="flex flex-1 cursor-pointer items-center gap-2.5 rounded-lg border border-input bg-background px-4 py-2.5 text-sm transition has-[:checked]:border-amber-500 has-[:checked]:bg-amber-50 has-[:checked]:text-amber-700">
                   <input
@@ -491,7 +491,7 @@ function AdminProducts() {
                     onChange={() => setField('condition')('used')}
                     className="accent-amber-500"
                   />
-                  🔄 Used
+                  🔄 Used · Open Box
                 </label>
               </div>
             </div>
@@ -595,15 +595,15 @@ function AdminProducts() {
                   <td className="px-5 py-3 hidden md:table-cell">
                     {p.condition === 'used' ? (
                       <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-700">
-                        🔄 Used
+                        🔄 Used · Open Box
                       </span>
                     ) : p.condition === 'dubai' ? (
                       <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-700">
-                        🇦🇪 Dubai
+                        🇦🇪 Dubai · Open Box
                       </span>
                     ) : (
                       <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-700">
-                        🆕 Brand New
+                        🆕 Brand New · Sealed
                       </span>
                     )}
                   </td>

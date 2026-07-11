@@ -26,15 +26,15 @@ export function ProductCard({ product }: { product: Product }) {
         <div className="absolute left-3 top-3">
           {product.condition === 'used' ? (
             <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-1 text-[11px] font-bold text-amber-700 shadow-sm">
-              🔄 Used
+              🔄 Used · Open Box
             </span>
           ) : product.condition === 'dubai' ? (
             <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2.5 py-1 text-[11px] font-bold text-blue-700 shadow-sm">
-              🇦🇪 Dubai
+              🇦🇪 Dubai · Open Box
             </span>
           ) : (
             <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-1 text-[11px] font-bold text-green-700 shadow-sm">
-              🆕 Brand New
+              🆕 Brand New · Sealed
             </span>
           )}
         </div>
