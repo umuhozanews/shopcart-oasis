@@ -102,7 +102,7 @@ export function ChatWidget() {
               <div className="text-sm font-bold leading-none">Hippo AI Assistant</div>
               <div className="mt-0.5 flex items-center gap-1.5 text-xs text-primary-foreground/80">
                 <span className="inline-block h-1.5 w-1.5 rounded-full bg-green-300" />
-                Online · Powered by Gemini AI
+                Online · Always here to help
               </div>
             </div>
             <button
