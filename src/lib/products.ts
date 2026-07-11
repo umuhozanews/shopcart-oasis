@@ -312,7 +312,7 @@ const phones: Product[] = [
 ];
 
 // ---------- Helpers for bulk generation ----------
-type Seed = { brand: string; model: string; image: string; base: number; rating: number };
+type Seed = { brand: string; model: string; image: string; base: number; rating: number; gallery?: GalleryImage[] };
 
 function makeCategory(
   categorySlug: string,
@@ -341,6 +341,7 @@ function makeCategory(
         stock: 5 + ((i * 3 + j * 5) % 40),
         category: categorySlug,
         breadcrumb,
+        ...(s.gallery && { gallery: s.gallery }),
       });
     });
   });
@@ -349,19 +350,115 @@ function makeCategory(
 
 // ---------- Tablets ----------
 const tabletSeeds: Seed[] = [
-  { brand: "Apple", model: "iPad Pro M4", image: ipadProImg, base: 1600000, rating: 5 },
-  { brand: "Apple", model: "iPad Air M2", image: ipadAirImg, base: 950000, rating: 4.8 },
-  { brand: "Apple", model: "iPad mini", image: ipadAirImg, base: 720000, rating: 4.7 },
-  { brand: "Samsung", model: "Galaxy Tab S9 Ultra", image: galaxyTabImg, base: 1400000, rating: 4.9 },
-  { brand: "Samsung", model: "Galaxy Tab S9 FE", image: galaxyTabImg, base: 620000, rating: 4.6 },
-  { brand: "Samsung", model: "Galaxy Tab A9+", image: galaxyTabImg, base: 320000, rating: 4.4 },
-  { brand: "Xiaomi", model: "Pad 6 Pro", image: xiaomiPadImg, base: 480000, rating: 4.5 },
-  { brand: "Xiaomi", model: "Redmi Pad SE", image: xiaomiPadImg, base: 220000, rating: 4.3 },
-  { brand: "Huawei", model: "MatePad 11.5", image: huaweiMatePadImg, base: 520000, rating: 4.6 },
-  { brand: "Huawei", model: "MatePad SE", image: huaweiMatePadImg, base: 280000, rating: 4.3 },
-  { brand: "Lenovo", model: "Tab P12", image: xiaomiPadImg, base: 450000, rating: 4.4 },
-  { brand: "Lenovo", model: "Tab M10", image: huaweiMatePadImg, base: 180000, rating: 4.2 },
-  { brand: "OPPO", model: "Pad Air 2", image: xiaomiPadImg, base: 260000, rating: 4.3 },
+  {
+    brand: "Apple", model: "iPad Pro M4", image: ipadProImg, base: 1600000, rating: 5,
+    gallery: [
+      { label: "Front View", src: "https://fdn2.gsmarena.com/vv/bigpic/apple-ipad-pro-11-2024.jpg" },
+      { label: "Back View",  src: "https://fdn2.gsmarena.com/vv/pics/apple/apple-ipad-pro-11-2024-2.jpg" },
+      { label: "Side View",  src: "https://fdn2.gsmarena.com/vv/pics/apple/apple-ipad-pro-2024-3.jpg" },
+      { label: "Angle View", src: "https://fdn2.gsmarena.com/vv/pics/apple/apple-ipad-pro-11-2024-5.jpg" },
+    ],
+  },
+  {
+    brand: "Apple", model: "iPad Air M2", image: ipadAirImg, base: 950000, rating: 4.8,
+    gallery: [
+      { label: "Front View", src: "https://fdn2.gsmarena.com/vv/bigpic/apple-ipad-air-m2-2024.jpg" },
+      { label: "Back View",  src: "https://fdn2.gsmarena.com/vv/pics/apple/apple-ipad-air-m2-2024-1.jpg" },
+      { label: "Side View",  src: "https://fdn2.gsmarena.com/vv/pics/apple/apple-ipad-air-m2-2024-2.jpg" },
+      { label: "Angle View", src: "https://fdn2.gsmarena.com/vv/pics/apple/apple-ipad-air-m2-2024-3.jpg" },
+    ],
+  },
+  {
+    brand: "Apple", model: "iPad mini", image: ipadAirImg, base: 720000, rating: 4.7,
+    gallery: [
+      { label: "Front View", src: "https://fdn2.gsmarena.com/vv/bigpic/apple-ipad-mini-2024.jpg" },
+      { label: "Back View",  src: "https://fdn2.gsmarena.com/vv/pics/apple/apple-ipad-mini-2024-1.jpg" },
+      { label: "Side View",  src: "https://fdn2.gsmarena.com/vv/pics/apple/apple-ipad-mini-2024-2.jpg" },
+      { label: "Angle View", src: "https://fdn2.gsmarena.com/vv/pics/apple/apple-ipad-mini-2024-3.jpg" },
+    ],
+  },
+  {
+    brand: "Samsung", model: "Galaxy Tab S9 Ultra", image: galaxyTabImg, base: 1400000, rating: 4.9,
+    gallery: [
+      { label: "Front View", src: "https://fdn2.gsmarena.com/vv/bigpic/samsung-galaxy-tab-s9-ultra-5g.jpg" },
+      { label: "Back View",  src: "https://fdn2.gsmarena.com/vv/pics/samsung/samsung-galaxy-tab-s9-ultra-5g-1.jpg" },
+      { label: "Side View",  src: "https://fdn2.gsmarena.com/vv/pics/samsung/samsung-galaxy-tab-s9-ultra-5g-2.jpg" },
+      { label: "Angle View", src: "https://fdn2.gsmarena.com/vv/pics/samsung/samsung-galaxy-tab-s9-ultra-5g-3.jpg" },
+    ],
+  },
+  {
+    brand: "Samsung", model: "Galaxy Tab S9 FE", image: galaxyTabImg, base: 620000, rating: 4.6,
+    gallery: [
+      { label: "Front View", src: "https://fdn2.gsmarena.com/vv/bigpic/samsung-galaxy-tab-s9-fe.jpg" },
+      { label: "Back View",  src: "https://fdn2.gsmarena.com/vv/pics/samsung/samsung-galaxy-tab-s9-fe-1.jpg" },
+      { label: "Side View",  src: "https://fdn2.gsmarena.com/vv/pics/samsung/samsung-galaxy-tab-s9-fe-2.jpg" },
+      { label: "Angle View", src: "https://fdn2.gsmarena.com/vv/pics/samsung/samsung-galaxy-tab-s9-fe-3.jpg" },
+    ],
+  },
+  {
+    brand: "Samsung", model: "Galaxy Tab A9+", image: galaxyTabImg, base: 320000, rating: 4.4,
+    gallery: [
+      { label: "Front View", src: "https://fdn2.gsmarena.com/vv/bigpic/samsung-galaxy-tab-a9-plus.jpg" },
+      { label: "Back View",  src: "https://fdn2.gsmarena.com/vv/pics/samsung/samsung-galaxy-tab-a9-plus-1.jpg" },
+      { label: "Side View",  src: "https://fdn2.gsmarena.com/vv/pics/samsung/samsung-galaxy-tab-a9-plus-2.jpg" },
+    ],
+  },
+  {
+    brand: "Xiaomi", model: "Pad 6 Pro", image: xiaomiPadImg, base: 480000, rating: 4.5,
+    gallery: [
+      { label: "Front View", src: "https://fdn2.gsmarena.com/vv/bigpic/xiaomi-pad-6-pro.jpg" },
+      { label: "Back View",  src: "https://fdn2.gsmarena.com/vv/pics/xiaomi/xiaomi-pad-6-pro-1.jpg" },
+      { label: "Side View",  src: "https://fdn2.gsmarena.com/vv/pics/xiaomi/xiaomi-pad-6-pro-2.jpg" },
+    ],
+  },
+  {
+    brand: "Xiaomi", model: "Redmi Pad SE", image: xiaomiPadImg, base: 220000, rating: 4.3,
+    gallery: [
+      { label: "Front View", src: "https://fdn2.gsmarena.com/vv/bigpic/xiaomi-redmi-pad-se.jpg" },
+      { label: "Back View",  src: "https://fdn2.gsmarena.com/vv/pics/xiaomi/xiaomi-redmi-pad-se-1.jpg" },
+      { label: "Side View",  src: "https://fdn2.gsmarena.com/vv/pics/xiaomi/xiaomi-redmi-pad-se-2.jpg" },
+    ],
+  },
+  {
+    brand: "Huawei", model: "MatePad 11.5", image: huaweiMatePadImg, base: 520000, rating: 4.6,
+    gallery: [
+      { label: "Front View", src: "https://fdn2.gsmarena.com/vv/bigpic/huawei-matepad-115.jpg" },
+      { label: "Back View",  src: "https://fdn2.gsmarena.com/vv/pics/huawei/huawei-matepad-115-1.jpg" },
+      { label: "Side View",  src: "https://fdn2.gsmarena.com/vv/pics/huawei/huawei-matepad-115-2.jpg" },
+    ],
+  },
+  {
+    brand: "Huawei", model: "MatePad SE", image: huaweiMatePadImg, base: 280000, rating: 4.3,
+    gallery: [
+      { label: "Front View", src: "https://fdn2.gsmarena.com/vv/bigpic/huawei-matepad-se.jpg" },
+      { label: "Back View",  src: "https://fdn2.gsmarena.com/vv/pics/huawei/huawei-matepad-se-1.jpg" },
+      { label: "Side View",  src: "https://fdn2.gsmarena.com/vv/pics/huawei/huawei-matepad-se-2.jpg" },
+    ],
+  },
+  {
+    brand: "Lenovo", model: "Tab P12", image: xiaomiPadImg, base: 450000, rating: 4.4,
+    gallery: [
+      { label: "Front View", src: "https://fdn2.gsmarena.com/vv/bigpic/lenovo-tab-p12.jpg" },
+      { label: "Back View",  src: "https://fdn2.gsmarena.com/vv/pics/lenovo/lenovo-tab-p12-1.jpg" },
+      { label: "Side View",  src: "https://fdn2.gsmarena.com/vv/pics/lenovo/lenovo-tab-p12-2.jpg" },
+    ],
+  },
+  {
+    brand: "Lenovo", model: "Tab M10", image: huaweiMatePadImg, base: 180000, rating: 4.2,
+    gallery: [
+      { label: "Front View", src: "https://fdn2.gsmarena.com/vv/bigpic/lenovo-tab-m10-plus-gen-3.jpg" },
+      { label: "Back View",  src: "https://fdn2.gsmarena.com/vv/pics/lenovo/lenovo-tab-m10-plus-gen-3-1.jpg" },
+      { label: "Side View",  src: "https://fdn2.gsmarena.com/vv/pics/lenovo/lenovo-tab-m10-plus-gen-3-2.jpg" },
+    ],
+  },
+  {
+    brand: "OPPO", model: "Pad Air 2", image: xiaomiPadImg, base: 260000, rating: 4.3,
+    gallery: [
+      { label: "Front View", src: "https://fdn2.gsmarena.com/vv/bigpic/oppo-pad-air-2.jpg" },
+      { label: "Back View",  src: "https://fdn2.gsmarena.com/vv/pics/oppo/oppo-pad-air-2-1.jpg" },
+      { label: "Side View",  src: "https://fdn2.gsmarena.com/vv/pics/oppo/oppo-pad-air-2-2.jpg" },
+    ],
+  },
 ];
 const tabletVariants = ["Wi-Fi 128GB", "Wi-Fi 256GB", "Cellular 128GB", "Wi-Fi 64GB"];
 const tablets = makeCategory(
@@ -401,19 +498,115 @@ const laptops = makeCategory(
 
 // ---------- Smart Watches ----------
 const watchSeeds: Seed[] = [
-  { brand: "Apple", model: "Watch Series 10", image: appleWatchImg, base: 550000, rating: 4.9 },
-  { brand: "Apple", model: "Watch Ultra 2", image: appleWatchImg, base: 950000, rating: 4.9 },
-  { brand: "Apple", model: "Watch SE", image: appleWatchImg, base: 320000, rating: 4.7 },
-  { brand: "Samsung", model: "Galaxy Watch 7", image: galaxyWatchImg, base: 420000, rating: 4.7 },
-  { brand: "Samsung", model: "Galaxy Watch Ultra", image: galaxyWatchImg, base: 780000, rating: 4.8 },
-  { brand: "Samsung", model: "Galaxy Fit 3", image: xiaomiBandImg, base: 90000, rating: 4.4 },
-  { brand: "Huawei", model: "Watch GT 4", image: huaweiWatchImg, base: 280000, rating: 4.6 },
-  { brand: "Huawei", model: "Watch Fit 3", image: xiaomiBandImg, base: 130000, rating: 4.4 },
-  { brand: "Xiaomi", model: "Smart Band 8", image: xiaomiBandImg, base: 55000, rating: 4.3 },
-  { brand: "Xiaomi", model: "Watch S3", image: huaweiWatchImg, base: 180000, rating: 4.4 },
-  { brand: "Garmin", model: "Fenix 7", image: garminImg, base: 850000, rating: 4.8 },
-  { brand: "Garmin", model: "Forerunner 265", image: garminImg, base: 480000, rating: 4.7 },
-  { brand: "Amazfit", model: "GTR 4", image: huaweiWatchImg, base: 160000, rating: 4.4 },
+  {
+    brand: "Apple", model: "Watch Series 10", image: appleWatchImg, base: 550000, rating: 4.9,
+    gallery: [
+      { label: "Front View", src: "https://fdn2.gsmarena.com/vv/bigpic/apple-watch-series10.jpg" },
+      { label: "Side View",  src: "https://fdn2.gsmarena.com/vv/pics/apple/apple-watch-series10-1.jpg" },
+      { label: "Back View",  src: "https://fdn2.gsmarena.com/vv/pics/apple/apple-watch-series10-2.jpg" },
+      { label: "Angle View", src: "https://fdn2.gsmarena.com/vv/pics/apple/apple-watch-series10-4.jpg" },
+    ],
+  },
+  {
+    brand: "Apple", model: "Watch Ultra 2", image: appleWatchImg, base: 950000, rating: 4.9,
+    gallery: [
+      { label: "Front View", src: "https://fdn2.gsmarena.com/vv/bigpic/apple-watch-ultra2.jpg" },
+      { label: "Side View",  src: "https://fdn2.gsmarena.com/vv/pics/apple/apple-watch-ultra2-1.jpg" },
+      { label: "Back View",  src: "https://fdn2.gsmarena.com/vv/pics/apple/apple-watch-ultra2-2.jpg" },
+      { label: "Angle View", src: "https://fdn2.gsmarena.com/vv/pics/apple/apple-watch-ultra2-3.jpg" },
+    ],
+  },
+  {
+    brand: "Apple", model: "Watch SE", image: appleWatchImg, base: 320000, rating: 4.7,
+    gallery: [
+      { label: "Front View", src: "https://fdn2.gsmarena.com/vv/bigpic/apple-watch-8se-2022.jpg" },
+      { label: "Side View",  src: "https://fdn2.gsmarena.com/vv/pics/apple/apple-watch-8se-2022-1.jpg" },
+      { label: "Back View",  src: "https://fdn2.gsmarena.com/vv/pics/apple/apple-watch-8se-2022-2.jpg" },
+    ],
+  },
+  {
+    brand: "Samsung", model: "Galaxy Watch 7", image: galaxyWatchImg, base: 420000, rating: 4.7,
+    gallery: [
+      { label: "Front View", src: "https://fdn2.gsmarena.com/vv/bigpic/samsung-galaxy-watch7.jpg" },
+      { label: "Side View",  src: "https://fdn2.gsmarena.com/vv/pics/samsung/samsung-galaxy-watch7-1.jpg" },
+      { label: "Back View",  src: "https://fdn2.gsmarena.com/vv/pics/samsung/samsung-galaxy-watch7-2.jpg" },
+      { label: "Angle View", src: "https://fdn2.gsmarena.com/vv/pics/samsung/samsung-galaxy-watch7-4.jpg" },
+    ],
+  },
+  {
+    brand: "Samsung", model: "Galaxy Watch Ultra", image: galaxyWatchImg, base: 780000, rating: 4.8,
+    gallery: [
+      { label: "Front View", src: "https://fdn2.gsmarena.com/vv/bigpic/samsung-galaxy-watch-ultra.jpg" },
+      { label: "Side View",  src: "https://fdn2.gsmarena.com/vv/pics/samsung/samsung-galaxy-watch-ultra-1.jpg" },
+      { label: "Back View",  src: "https://fdn2.gsmarena.com/vv/pics/samsung/samsung-galaxy-watch-ultra-2.jpg" },
+      { label: "Angle View", src: "https://fdn2.gsmarena.com/vv/pics/samsung/samsung-galaxy-watch-ultra-3.jpg" },
+    ],
+  },
+  {
+    brand: "Samsung", model: "Galaxy Fit 3", image: xiaomiBandImg, base: 90000, rating: 4.4,
+    gallery: [
+      { label: "Front View", src: "https://fdn2.gsmarena.com/vv/bigpic/samsung-galaxy-fit3.jpg" },
+      { label: "Side View",  src: "https://fdn2.gsmarena.com/vv/pics/samsung/samsung-galaxy-fit3-1.jpg" },
+      { label: "Back View",  src: "https://fdn2.gsmarena.com/vv/pics/samsung/samsung-galaxy-fit3-2.jpg" },
+    ],
+  },
+  {
+    brand: "Huawei", model: "Watch GT 4", image: huaweiWatchImg, base: 280000, rating: 4.6,
+    gallery: [
+      { label: "Front View", src: "https://fdn2.gsmarena.com/vv/bigpic/huawei-watch-gt-4.jpg" },
+      { label: "Side View",  src: "https://fdn2.gsmarena.com/vv/pics/huawei/huawei-watch-gt-4-1.jpg" },
+      { label: "Back View",  src: "https://fdn2.gsmarena.com/vv/pics/huawei/huawei-watch-gt-4-2.jpg" },
+      { label: "Angle View", src: "https://fdn2.gsmarena.com/vv/pics/huawei/huawei-watch-gt-4-3.jpg" },
+    ],
+  },
+  {
+    brand: "Huawei", model: "Watch Fit 3", image: xiaomiBandImg, base: 130000, rating: 4.4,
+    gallery: [
+      { label: "Front View", src: "https://fdn2.gsmarena.com/vv/bigpic/huawei-watch-fit-3.jpg" },
+      { label: "Side View",  src: "https://fdn2.gsmarena.com/vv/pics/huawei/huawei-watch-fit-3-1.jpg" },
+      { label: "Back View",  src: "https://fdn2.gsmarena.com/vv/pics/huawei/huawei-watch-fit-3-2.jpg" },
+    ],
+  },
+  {
+    brand: "Xiaomi", model: "Smart Band 8", image: xiaomiBandImg, base: 55000, rating: 4.3,
+    gallery: [
+      { label: "Front View", src: "https://fdn2.gsmarena.com/vv/bigpic/xiaomi-smart-band-8.jpg" },
+      { label: "Side View",  src: "https://fdn2.gsmarena.com/vv/pics/xiaomi/xiaomi-smart-band-8-1.jpg" },
+      { label: "Back View",  src: "https://fdn2.gsmarena.com/vv/pics/xiaomi/xiaomi-smart-band-8-2.jpg" },
+    ],
+  },
+  {
+    brand: "Xiaomi", model: "Watch S3", image: huaweiWatchImg, base: 180000, rating: 4.4,
+    gallery: [
+      { label: "Front View", src: "https://fdn2.gsmarena.com/vv/bigpic/xiaomi-watch-s3.jpg" },
+      { label: "Side View",  src: "https://fdn2.gsmarena.com/vv/pics/xiaomi/xiaomi-watch-s3-1.jpg" },
+      { label: "Back View",  src: "https://fdn2.gsmarena.com/vv/pics/xiaomi/xiaomi-watch-s3-2.jpg" },
+    ],
+  },
+  {
+    brand: "Garmin", model: "Fenix 7", image: garminImg, base: 850000, rating: 4.8,
+    gallery: [
+      { label: "Front View", src: "https://fdn2.gsmarena.com/vv/bigpic/garmin-fenix-7.jpg" },
+      { label: "Side View",  src: "https://fdn2.gsmarena.com/vv/pics/garmin/garmin-fenix-7-1.jpg" },
+      { label: "Back View",  src: "https://fdn2.gsmarena.com/vv/pics/garmin/garmin-fenix-7-2.jpg" },
+    ],
+  },
+  {
+    brand: "Garmin", model: "Forerunner 265", image: garminImg, base: 480000, rating: 4.7,
+    gallery: [
+      { label: "Front View", src: "https://fdn2.gsmarena.com/vv/bigpic/garmin-forerunner-265.jpg" },
+      { label: "Side View",  src: "https://fdn2.gsmarena.com/vv/pics/garmin/garmin-forerunner-265-1.jpg" },
+      { label: "Back View",  src: "https://fdn2.gsmarena.com/vv/pics/garmin/garmin-forerunner-265-2.jpg" },
+    ],
+  },
+  {
+    brand: "Amazfit", model: "GTR 4", image: huaweiWatchImg, base: 160000, rating: 4.4,
+    gallery: [
+      { label: "Front View", src: "https://fdn2.gsmarena.com/vv/bigpic/amazfit-gtr-4.jpg" },
+      { label: "Side View",  src: "https://fdn2.gsmarena.com/vv/pics/amazfit/amazfit-gtr-4-1.jpg" },
+      { label: "Back View",  src: "https://fdn2.gsmarena.com/vv/pics/amazfit/amazfit-gtr-4-2.jpg" },
+    ],
+  },
 ];
 const watchVariants = ["40mm", "44mm", "GPS", "GPS + Cellular"];
 const watches = makeCategory(
