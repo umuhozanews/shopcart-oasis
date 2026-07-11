@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ChevronRight, Minus, Plus, Truck, RotateCcw, RefreshCw } from "lucide-react";
-import { useState, useRef, useCallback } from "react";
+import { ChevronLeft, ChevronRight, ChevronRight as BreadChev, Minus, Plus, Truck, RotateCcw } from "lucide-react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { StarRating } from "@/components/StarRating";
@@ -21,105 +21,163 @@ function brandFor(name: string): string {
   return "Hippo Technology";
 }
 
-function Product3DViewer({ image, name }: { image: string; name: string }) {
-  const [rotX, setRotX] = useState(0);
+function ProductViewer({ image, name }: { image: string; name: string }) {
+  const rotYRef = useRef(0);
+  const rotXRef = useRef(-6);
+  const draggingRef = useRef(false);
+  const pausedRef = useRef(false);
+  const lastPosRef = useRef<{ x: number; y: number } | null>(null);
+  const rafRef = useRef<number>(0);
+  const lastTsRef = useRef(0);
+
   const [rotY, setRotY] = useState(0);
+  const [rotX, setRotX] = useState(-6);
   const [dragging, setDragging] = useState(false);
-  const lastPos = useRef<{ x: number; y: number } | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [interacted, setInteracted] = useState(false);
 
-  const onMouseDown = useCallback((e: React.MouseEvent) => {
+  // Auto-rotation — runs as long as component is mounted
+  useEffect(() => {
+    function tick(ts: number) {
+      const dt = Math.min(ts - (lastTsRef.current || ts), 50);
+      lastTsRef.current = ts;
+
+      if (!draggingRef.current && !pausedRef.current) {
+        rotYRef.current += dt * 0.022;
+        setRotY(rotYRef.current);
+      }
+
+      rafRef.current = requestAnimationFrame(tick);
+    }
+    rafRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafRef.current);
+  }, []);
+
+  const startDrag = useCallback((x: number, y: number) => {
+    draggingRef.current = true;
     setDragging(true);
-    lastPos.current = { x: e.clientX, y: e.clientY };
+    setInteracted(true);
+    lastPosRef.current = { x, y };
   }, []);
 
-  const onMouseMove = useCallback(
-    (e: React.MouseEvent) => {
-      if (!dragging || !lastPos.current) return;
-      const dx = e.clientX - lastPos.current.x;
-      const dy = e.clientY - lastPos.current.y;
-      lastPos.current = { x: e.clientX, y: e.clientY };
-      setRotY((r) => r + dx * 0.4);
-      setRotX((r) => Math.max(-35, Math.min(35, r - dy * 0.4)));
-    },
-    [dragging]
-  );
+  const moveDrag = useCallback((x: number, y: number) => {
+    if (!lastPosRef.current) return;
+    const dx = x - lastPosRef.current.x;
+    const dy = y - lastPosRef.current.y;
+    lastPosRef.current = { x, y };
+    rotYRef.current += dx * 0.55;
+    rotXRef.current = Math.max(-30, Math.min(20, rotXRef.current - dy * 0.3));
+    setRotY(rotYRef.current);
+    setRotX(rotXRef.current);
+  }, []);
 
-  const onMouseUp = useCallback(() => {
+  const endDrag = useCallback(() => {
+    draggingRef.current = false;
     setDragging(false);
-    lastPos.current = null;
+    lastPosRef.current = null;
   }, []);
 
-  const onTouchStart = useCallback((e: React.TouchEvent) => {
-    const t = e.touches[0];
-    setDragging(true);
-    lastPos.current = { x: t.clientX, y: t.clientY };
+  const setHovered = useCallback((v: boolean) => {
+    pausedRef.current = v;
   }, []);
 
-  const onTouchMove = useCallback(
-    (e: React.TouchEvent) => {
-      if (!dragging || !lastPos.current) return;
-      const t = e.touches[0];
-      const dx = t.clientX - lastPos.current.x;
-      const dy = t.clientY - lastPos.current.y;
-      lastPos.current = { x: t.clientX, y: t.clientY };
-      setRotY((r) => r + dx * 0.4);
-      setRotX((r) => Math.max(-35, Math.min(35, r - dy * 0.4)));
-    },
-    [dragging]
-  );
-
-  const onTouchEnd = useCallback(() => {
-    setDragging(false);
-    lastPos.current = null;
-  }, []);
+  const rotateBy = (deg: number) => {
+    rotYRef.current += deg;
+    setRotY(rotYRef.current);
+    setInteracted(true);
+  };
 
   const reset = () => {
-    setRotX(0);
+    rotYRef.current = 0;
+    rotXRef.current = -6;
     setRotY(0);
+    setRotX(-6);
   };
 
   return (
-    <div className="relative">
-      <div
-        ref={containerRef}
-        className="overflow-hidden rounded-3xl bg-surface-muted ring-1 ring-border/60"
-        style={{ perspective: "1000px", cursor: dragging ? "grabbing" : "grab", userSelect: "none" }}
-        onMouseDown={onMouseDown}
-        onMouseMove={onMouseMove}
-        onMouseUp={onMouseUp}
-        onMouseLeave={onMouseUp}
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        onTouchEnd={onTouchEnd}
-      >
+    <div className="select-none">
+      {/* Viewer stage */}
+      <div className="relative">
+        {/* 360° badge */}
+        <div className="absolute left-3 top-3 z-10 flex items-center gap-1.5 rounded-full bg-black/50 px-3 py-1 text-xs font-bold text-white backdrop-blur-sm">
+          <RotateCcw size={11} />
+          360°
+        </div>
+
         <div
+          className="relative overflow-hidden rounded-3xl ring-1 ring-border/60"
           style={{
-            transformStyle: "preserve-3d",
-            transform: `rotateX(${rotX}deg) rotateY(${rotY}deg)`,
-            transition: dragging ? "none" : "transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+            background: "radial-gradient(ellipse at 50% 35%, hsl(var(--surface-muted)) 0%, hsl(var(--background)) 100%)",
+            perspective: "1400px",
+            cursor: dragging ? "grabbing" : "grab",
           }}
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => { endDrag(); setHovered(false); }}
+          onMouseDown={(e) => startDrag(e.clientX, e.clientY)}
+          onMouseMove={(e) => { if (draggingRef.current) moveDrag(e.clientX, e.clientY); }}
+          onMouseUp={endDrag}
+          onTouchStart={(e) => startDrag(e.touches[0].clientX, e.touches[0].clientY)}
+          onTouchMove={(e) => moveDrag(e.touches[0].clientX, e.touches[0].clientY)}
+          onTouchEnd={endDrag}
         >
-          <img
-            src={image}
-            alt={name}
-            draggable={false}
-            width={800}
-            height={800}
-            className="aspect-square w-full object-contain p-8"
+          {/* Product image with 3D transform */}
+          <div
+            style={{
+              transform: `rotateX(${rotX}deg) rotateY(${rotY}deg)`,
+              transformStyle: "preserve-3d",
+              transition: dragging ? "none" : "transform 0.08s linear",
+              willChange: "transform",
+            }}
+          >
+            <img
+              src={image}
+              alt={name}
+              draggable={false}
+              width={800}
+              height={800}
+              className="aspect-square w-full object-contain p-10"
+            />
+          </div>
+
+          {/* Ground shadow */}
+          <div
+            className="pointer-events-none absolute bottom-0 left-1/2 -translate-x-1/2 rounded-full bg-black/15 blur-2xl"
+            style={{ width: "55%", height: "28px" }}
           />
+
+          {/* First-use hint */}
+          {!interacted && (
+            <div className="pointer-events-none absolute inset-x-0 bottom-5 flex justify-center">
+              <span className="animate-pulse rounded-full bg-black/40 px-4 py-1.5 text-xs text-white backdrop-blur-sm">
+                Drag to rotate
+              </span>
+            </div>
+          )}
         </div>
       </div>
-      <div className="absolute bottom-3 right-3 flex items-center gap-1.5">
-        <span className="rounded-full bg-background/80 px-3 py-1 text-xs text-muted-foreground backdrop-blur">
-          Drag to rotate
-        </span>
+
+      {/* Controls — left arrow · label · right arrow · reset */}
+      <div className="mt-4 flex items-center justify-center gap-2">
+        <button
+          onClick={() => rotateBy(-90)}
+          aria-label="Rotate left"
+          className="grid h-9 w-9 place-items-center rounded-full border border-border bg-background text-foreground/60 transition hover:border-primary hover:text-primary"
+        >
+          <ChevronLeft size={17} />
+        </button>
+        <span className="px-2 text-xs text-muted-foreground">View all sides</span>
+        <button
+          onClick={() => rotateBy(90)}
+          aria-label="Rotate right"
+          className="grid h-9 w-9 place-items-center rounded-full border border-border bg-background text-foreground/60 transition hover:border-primary hover:text-primary"
+        >
+          <ChevronRight size={17} />
+        </button>
         <button
           onClick={reset}
-          title="Reset view"
-          className="grid h-8 w-8 place-items-center rounded-full bg-background/80 text-muted-foreground backdrop-blur transition hover:text-primary"
+          aria-label="Reset view"
+          className="ml-1 grid h-9 w-9 place-items-center rounded-full border border-border bg-background text-foreground/60 transition hover:border-primary hover:text-primary"
         >
-          <RefreshCw size={14} />
+          <RotateCcw size={13} />
         </button>
       </div>
     </div>
@@ -157,7 +215,6 @@ function PDP() {
 
   const [colorIdx, setColorIdx] = useState(0);
   const [qty, setQty] = useState(1);
-  const [view3D, setView3D] = useState(false);
 
   if (!product) {
     return (
@@ -235,56 +292,21 @@ function PDP() {
               <Link to="/" className="hover:text-primary">
                 {b}
               </Link>
-              <ChevronRight size={12} className="opacity-50" />
+              <BreadChev size={12} className="opacity-50" />
             </span>
           ))}
           <span className="font-medium text-foreground">{product.name}</span>
         </nav>
 
         <div className="mt-6 grid grid-cols-1 gap-10 lg:grid-cols-2">
-          {/* Gallery / 3D Viewer */}
+          {/* 360° Viewer + color thumbnails */}
           <div>
-            {/* View toggle */}
-            <div className="mb-3 flex gap-2">
-              <button
-                onClick={() => setView3D(false)}
-                className={`rounded-full px-4 py-1.5 text-xs font-semibold transition ${
-                  !view3D
-                    ? "bg-primary text-primary-foreground"
-                    : "border border-border text-muted-foreground hover:border-primary hover:text-primary"
-                }`}
-              >
-                Gallery
-              </button>
-              <button
-                onClick={() => setView3D(true)}
-                className={`rounded-full px-4 py-1.5 text-xs font-semibold transition ${
-                  view3D
-                    ? "bg-primary text-primary-foreground"
-                    : "border border-border text-muted-foreground hover:border-primary hover:text-primary"
-                }`}
-              >
-                3D View
-              </button>
-            </div>
+            {/* Remount viewer when image changes so rotation resets cleanly */}
+            <ProductViewer key={mainImage} image={mainImage} name={product.name} />
 
-            {view3D ? (
-              <Product3DViewer image={mainImage} name={product.name} />
-            ) : (
-              <div className="overflow-hidden rounded-3xl bg-surface-muted ring-1 ring-border/60">
-                <img
-                  key={mainImage}
-                  src={mainImage}
-                  alt={product.name}
-                  width={800}
-                  height={800}
-                  className="aspect-square w-full object-contain p-8 transition-opacity duration-300"
-                />
-              </div>
-            )}
-
+            {/* Color thumbnails */}
             {product.colors && (
-              <div className="mt-4 grid grid-cols-4 gap-3 sm:grid-cols-5">
+              <div className="mt-5 grid grid-cols-4 gap-3 sm:grid-cols-5">
                 {product.colors.map((c: { name: string; hex: string; image: string }, i: number) => (
                   <button
                     key={c.name}
@@ -308,7 +330,7 @@ function PDP() {
             )}
           </div>
 
-          {/* Info */}
+          {/* Info panel */}
           <div>
             <h1 className="font-display text-3xl font-extrabold tracking-tight sm:text-4xl">
               {product.name}
