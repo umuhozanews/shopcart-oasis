@@ -1,10 +1,12 @@
 import { createFileRoute, Link, notFound } from '@tanstack/react-router';
+import { useMemo, useState } from 'react';
+import { Search, X } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { ProductCard } from '@/components/ProductCard';
 import { useProducts } from '@/lib/product-store';
 import { Toaster } from '@/components/ui/sonner';
-import { categories } from '@/lib/products';
+import { categories, brands } from '@/lib/products';
 
 export const Route = createFileRoute('/category/$slug')({
   loader: ({ params }) => {
@@ -41,6 +43,14 @@ export const Route = createFileRoute('/category/$slug')({
   component: CategoryPage,
 });
 
+const PRICE_RANGES = [
+  { label: 'Under 100k', min: 0, max: 100000 },
+  { label: '100k – 500k', min: 100000, max: 500000 },
+  { label: '500k – 1M', min: 500000, max: 1000000 },
+  { label: '1M – 2M', min: 1000000, max: 2000000 },
+  { label: 'Over 2M', min: 2000000, max: Infinity },
+];
+
 function CategoryPage() {
   const { slug } = Route.useLoaderData();
   let normalizedSlug = slug;
@@ -50,20 +60,48 @@ function CategoryPage() {
   const cat = categories.find((c) => c.slug === normalizedSlug);
   const allProducts = useProducts();
 
+  const [query, setQuery] = useState('');
+  const [priceRange, setPriceRange] = useState<number | null>(null);
+  const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
+  const [minRating, setMinRating] = useState<number | null>(null);
+
   const categoriesWithCounts = categories.map((c) => ({
     ...c,
-    count: c.slug === 'all'
-      ? allProducts.length
-      : allProducts.filter((p) => p.category === c.slug).length,
+    count: c.slug === 'all' ? allProducts.length : allProducts.filter((p) => p.category === c.slug).length,
   }));
 
-  const filtered = filterBySlugs(allProducts, normalizedSlug);
+  const baseFiltered = useMemo(
+    () => (normalizedSlug === 'all' ? allProducts : allProducts.filter((p) => p.category === normalizedSlug)),
+    [allProducts, normalizedSlug],
+  );
+
+  const filtered = useMemo(() => {
+    return baseFiltered.filter((p) => {
+      if (query && !p.name.toLowerCase().includes(query.toLowerCase()) && !p.tagline.toLowerCase().includes(query.toLowerCase())) return false;
+      if (priceRange !== null) {
+        const r = PRICE_RANGES[priceRange];
+        if (p.price < r.min || p.price > r.max) return false;
+      }
+      if (selectedBrand && !p.name.toLowerCase().startsWith(selectedBrand.toLowerCase())) return false;
+      if (minRating !== null && p.rating < minRating) return false;
+      return true;
+    });
+  }, [baseFiltered, query, priceRange, selectedBrand, minRating]);
+
+  const clearAll = () => {
+    setQuery('');
+    setPriceRange(null);
+    setSelectedBrand(null);
+    setMinRating(null);
+  };
+
+  const hasFilters = query || priceRange !== null || selectedBrand || minRating !== null;
 
   return (
     <div className="min-h-screen bg-background">
       <Toaster position="top-right" />
       <Header />
-      <main className="mx-auto max-w-7xl px-4 py-10 md:px-6">
+      <main className="mx-auto max-w-7xl px-4 py-8 md:px-6">
         {/* Breadcrumb */}
         <nav className="mb-6 flex items-center gap-2 text-xs text-muted-foreground">
           <Link to="/" className="hover:text-primary">Home</Link>
@@ -71,54 +109,143 @@ function CategoryPage() {
           <span className="text-foreground font-medium">{cat?.name ?? 'All Products'}</span>
         </nav>
 
-        <div className="flex items-center gap-4 mb-8">
-          <h1 className="text-2xl font-extrabold tracking-tight">{cat?.name ?? 'All Products'}</h1>
-          <span className="rounded-full bg-surface-muted px-3 py-1 text-xs font-medium text-muted-foreground ring-1 ring-border/60">
-            {filtered.length} products
-          </span>
-        </div>
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[260px_1fr]">
+          {/* Sidebar */}
+          <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
+            {/* Categories */}
+            <div className="rounded-2xl bg-surface-muted p-5 ring-1 ring-border/60">
+              <h3 className="mb-3 text-sm font-bold">Categories</h3>
+              <ul className="space-y-1.5">
+                {categoriesWithCounts.map((c) => (
+                  <li key={c.slug}>
+                    <Link
+                      to="/category/$slug"
+                      params={{ slug: c.slug }}
+                      className={`flex items-center justify-between rounded-lg px-3 py-2 text-sm transition ${
+                        c.slug === normalizedSlug || (normalizedSlug === 'all' && c.slug === 'all')
+                          ? 'bg-primary text-primary-foreground font-semibold'
+                          : 'hover:bg-background text-foreground/80'
+                      }`}
+                    >
+                      <span>{c.name}</span>
+                      <span className={`text-xs ${c.slug === normalizedSlug ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
+                        {c.count}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-        {/* Category links */}
-        <div className="mb-8 flex flex-wrap gap-2">
-          {categoriesWithCounts.map((c) => (
-            <Link
-              key={c.slug}
-              to="/category/$slug"
-              params={{ slug: c.slug }}
-              className={`rounded-full px-4 py-1.5 text-xs font-medium transition ${
-                c.slug === normalizedSlug
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-surface-muted text-foreground hover:bg-primary/10 hover:text-primary ring-1 ring-border/60'
-              }`}
-            >
-              {c.name}
-            </Link>
-          ))}
-        </div>
+            {/* Price */}
+            <div className="rounded-2xl bg-surface-muted p-5 ring-1 ring-border/60">
+              <h3 className="mb-3 text-sm font-bold">Price Range</h3>
+              <div className="space-y-2">
+                {PRICE_RANGES.map((r, i) => (
+                  <label key={r.label} className="flex cursor-pointer items-center gap-2 text-sm">
+                    <input
+                      type="radio"
+                      name="price"
+                      checked={priceRange === i}
+                      onChange={() => setPriceRange(i)}
+                      className="accent-primary"
+                    />
+                    <span>{r.label}</span>
+                  </label>
+                ))}
+                {priceRange !== null && (
+                  <button onClick={() => setPriceRange(null)} className="mt-1 text-xs text-primary underline">
+                    Clear price
+                  </button>
+                )}
+              </div>
+            </div>
 
-        {filtered.length === 0 ? (
-          <div className="py-24 text-center text-muted-foreground">
-            <p className="text-lg font-medium">No products found in this category.</p>
-            <Link to="/" className="mt-4 inline-block text-primary underline">View all products</Link>
+            {/* Brands */}
+            <div className="rounded-2xl bg-surface-muted p-5 ring-1 ring-border/60">
+              <h3 className="mb-3 text-sm font-bold">Brands</h3>
+              <div className="flex flex-wrap gap-1.5">
+                {brands.map((b) => (
+                  <button
+                    key={b.slug}
+                    onClick={() => setSelectedBrand(selectedBrand === b.name ? null : b.name)}
+                    className={`rounded-full px-3 py-1 text-xs font-medium transition ${
+                      selectedBrand === b.name
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-background text-foreground/80 ring-1 ring-border/60 hover:ring-primary/40'
+                    }`}
+                  >
+                    {b.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Rating */}
+            <div className="rounded-2xl bg-surface-muted p-5 ring-1 ring-border/60">
+              <h3 className="mb-3 text-sm font-bold">Minimum Rating</h3>
+              <div className="space-y-2">
+                {[4.5, 4, 3.5].map((r) => (
+                  <label key={r} className="flex cursor-pointer items-center gap-2 text-sm">
+                    <input type="radio" name="rating" checked={minRating === r} onChange={() => setMinRating(r)} className="accent-primary" />
+                    <span>{r}★ & up</span>
+                  </label>
+                ))}
+                {minRating !== null && (
+                  <button onClick={() => setMinRating(null)} className="mt-1 text-xs text-primary underline">
+                    Clear rating
+                  </button>
+                )}
+              </div>
+            </div>
+          </aside>
+
+          {/* Main */}
+          <div>
+            <div className="mb-6 flex flex-wrap items-center gap-4">
+              <h1 className="text-2xl font-extrabold tracking-tight">{cat?.name ?? 'All Products'}</h1>
+              <span className="rounded-full bg-surface-muted px-3 py-1 text-xs font-medium text-muted-foreground ring-1 ring-border/60">
+                {filtered.length} products
+              </span>
+            </div>
+
+            {/* Search */}
+            <div className="mb-4 relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
+              <input
+                type="search"
+                placeholder="Search products..."
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className="w-full rounded-full border border-border bg-surface-muted py-3 pl-11 pr-4 text-sm outline-none ring-1 ring-border/60 focus:ring-primary"
+              />
+            </div>
+
+            {hasFilters && (
+              <div className="mb-4 flex items-center gap-3 text-sm">
+                <span className="text-muted-foreground">Showing {filtered.length} of {baseFiltered.length} products</span>
+                <button onClick={clearAll} className="flex items-center gap-1 text-primary hover:underline">
+                  <X size={14} /> Clear all
+                </button>
+              </div>
+            )}
+
+            {filtered.length === 0 ? (
+              <div className="py-24 text-center text-muted-foreground">
+                <p className="text-lg font-medium">No products match your filters.</p>
+                <button onClick={clearAll} className="mt-4 text-primary underline">Clear filters</button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                {filtered.map((p) => (
+                  <ProductCard key={p.id} product={p} />
+                ))}
+              </div>
+            )}
           </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {filtered.map((p) => (
-              <ProductCard key={p.id} product={p} />
-            ))}
-          </div>
-        )}
+        </div>
       </main>
       <Footer />
     </div>
   );
-}
-
-function filterBySlugs(products: ReturnType<typeof useProducts>, slug: string) {
-  if (slug === 'all') return products;
-  let normalizedSlug = slug;
-  if (slug === 'smartphones' || slug === 'iphone' || slug === 'samsung' || slug === 'budget') {
-    normalizedSlug = 'phones';
-  }
-  return products.filter((p) => p.category === normalizedSlug);
 }
