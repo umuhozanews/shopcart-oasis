@@ -24,40 +24,40 @@ function matchProduct(q: string) {
 function buildReply(userText: string): string {
   const q = userText.toLowerCase();
 
-  // Price / product queries
+  // Product price query — match any message that names a product
   const product = matchProduct(q);
-  if (product && (q.includes('price') || q.includes('cost') || q.includes('much') || q.includes('how') || q.includes('sell') || q.includes('buy') || q.match(/\?/) || true)) {
-    return `The ${product.label} is priced at **${product.price}**. We offer free delivery across Rwanda within 1–3 days. Want to order? WhatsApp us at +250 793 051 054! 😊`;
+  if (product) {
+    return `The ${product.label} is priced at ${product.price}. We offer free delivery across Rwanda within 1–3 days. Want to order? WhatsApp us at +250 793 051 054! 😊`;
   }
 
   // Phone catalog
-  if (q.match(/what (phones?|products?|do you have|you sell|you stock)/i) || q.match(/show.*(phones?|products?)/i) || q.includes('catalog') || q.includes('catalogue')) {
-    return `Here's what we have:\n\n📱 iPhone 16 Pro Max — 1,900,000 RWF\n📱 Samsung S25 Ultra — 1,650,000 RWF\n📱 iPhone 15 — 1,250,000 RWF\n📱 iPhone 14 — 950,000 RWF\n📱 Samsung A55 5G — 650,000 RWF\n📱 Tecno Camon 30 Pro — 300,000 RWF\n📱 Infinix Hot 40 Pro — 195,000 RWF\n🎧 Galaxy Buds3 Pro — 250,000 RWF\n\nAll products are 100% genuine. WhatsApp us to order! 🛒`;
+  if (q.match(/what (phones?|products?|items?|do you (have|sell|stock))/i) || q.match(/show.*(phones?|products?)/i) || q.includes('catalog') || q.includes('catalogue') || q.includes('list')) {
+    return `Here's what we currently have:\n\n📱 iPhone 16 Pro Max — 1,900,000 RWF\n📱 Samsung S25 Ultra — 1,650,000 RWF\n📱 iPhone 15 128GB — 1,250,000 RWF\n📱 iPhone 14 128GB — 950,000 RWF\n📱 Samsung A55 5G — 650,000 RWF\n📱 Tecno Camon 30 Pro — 300,000 RWF\n📱 Infinix Hot 40 Pro — 195,000 RWF\n🎧 Galaxy Buds3 Pro — 250,000 RWF\n\nAll products are 100% genuine. WhatsApp us to order! 🛒`;
   }
 
   // Delivery
-  if (q.match(/deliver|shipping|ship|how long|days?|arrival|receive/i)) {
-    return `We deliver **free** anywhere in Rwanda! Orders typically arrive within **1–3 business days**. Pay on delivery via cash, MTN Mobile Money, or Airtel Money. 🚚`;
+  if (q.match(/deliver|shipping|ship|how long|arrival|receive/i)) {
+    return `We deliver free anywhere in Rwanda! Orders typically arrive within 1–3 business days. You pay on delivery — cash, MTN Mobile Money, or Airtel Money. 🚚`;
   }
 
   // Returns / warranty
   if (q.match(/return|refund|exchange|warranty|broken|faulty|damaged/i)) {
-    return `We offer **free 30-day returns** on all products. If anything is wrong, just contact us on WhatsApp at +250 793 051 054 and we'll sort it out right away! ✅`;
+    return `We offer free 30-day returns on all products. If anything is wrong, contact us on WhatsApp at +250 793 051 054 and we'll sort it out right away! ✅`;
   }
 
   // Payment
   if (q.match(/pay|payment|mtn|airtel|mobile money|cash/i)) {
-    return `We accept **cash**, **MTN Mobile Money**, and **Airtel Money** — all paid on delivery. No upfront payment needed! 💳`;
+    return `We accept cash, MTN Mobile Money, and Airtel Money — all paid on delivery. No upfront payment needed! 💳`;
   }
 
   // Location / address
-  if (q.match(/where|location|address|find you|visit|shop/i)) {
-    return `We're based at **Tajyire Building, near Makuza Plaza, Kigali**. You can also shop online and get free delivery across Rwanda! 📍`;
+  if (q.match(/where|location|address|find you|visit|come to/i)) {
+    return `We're based at Tajyire Building, near Makuza Plaza, Kigali. You can also shop online and get free delivery across Rwanda! 📍`;
   }
 
   // Contact
   if (q.match(/contact|whatsapp|call|phone number|reach/i)) {
-    return `You can reach us on WhatsApp at **+250 793 051 054** — we're available daily and respond quickly! 📲`;
+    return `You can reach us on WhatsApp at +250 793 051 054 — we're available daily and respond quickly! 📲`;
   }
 
   // Greetings
@@ -71,7 +71,7 @@ function buildReply(userText: string): string {
   }
 
   // Fallback
-  return `Great question! For the most accurate answer, please reach us on WhatsApp at **+250 793 051 054** — our team responds quickly and will be happy to help! 🦛`;
+  return `Great question! For the most accurate answer, please reach us on WhatsApp at +250 793 051 054 — our team responds quickly and will be happy to help! 🦛`;
 }
 
 export const sendChatMessage = createServerFn({ method: 'POST' })
