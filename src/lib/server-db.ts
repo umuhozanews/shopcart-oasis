@@ -93,7 +93,8 @@ export const getServerDb = createServerFn({ method: 'GET' })
   });
 
 export const saveServerDb = createServerFn({ method: 'POST' })
-  .handler(async ({ data }: { data: Partial<DbState> }) => {
+  .inputValidator((data: Partial<DbState>) => data)
+  .handler(async ({ data }) => {
     const current = await loadDbOnServer();
     const updated = { ...current, ...data };
     await saveDbOnServer(updated);

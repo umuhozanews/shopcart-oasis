@@ -102,7 +102,7 @@ function read(): BannerData {
   try {
     const raw = localStorage.getItem(KEY);
     cache = raw ? { ...DEFAULTS, ...JSON.parse(raw) } : DEFAULTS;
-    return cache;
+    return cache!;
   } catch {
     cache = DEFAULTS;
     return cache;
