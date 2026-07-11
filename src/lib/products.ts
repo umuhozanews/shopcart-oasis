@@ -87,6 +87,12 @@ const phones: Product[] = [
       { name: "White Titanium", hex: "#e5e5e5", image: iphone16WhiteImg },
       { name: "Desert Titanium", hex: "#c8a882", image: iphone16DesertImg },
     ],
+    gallery: [
+      { label: "Front View",  src: "https://fdn2.gsmarena.com/vv/bigpic/apple-iphone-16-pro-max.jpg" },
+      { label: "Back View",   src: "https://fdn2.gsmarena.com/vv/pics/apple/apple-iphone-16-pro-max-1.jpg" },
+      { label: "Side View",   src: "https://fdn2.gsmarena.com/vv/pics/apple/apple-iphone-16-pro-max-2.jpg" },
+      { label: "Angle View",  src: "https://fdn2.gsmarena.com/vv/pics/apple/apple-iphone-16-pro-max-3.jpg" },
+    ],
     specs: {
       "Display": "6.9\" Super Retina XDR OLED, 2868×1320, 460 ppi, ProMotion 120Hz",
       "Processor": "Apple A18 Pro — 6-core CPU, 6-core GPU",
@@ -112,6 +118,13 @@ const phones: Product[] = [
     colors: [
       { name: "Titanium Black", hex: "#1a1a1a", image: samsungS25BlackImg },
       { name: "Titanium Silver", hex: "#c0c0c0", image: samsungS25SilverImg },
+    ],
+    gallery: [
+      { label: "Front View",  src: "https://fdn2.gsmarena.com/vv/bigpic/samsung-galaxy-s25-ultra-sm-s938.jpg" },
+      { label: "Back View",   src: "https://fdn2.gsmarena.com/vv/pics/samsung/samsung-galaxy-s25-ultra-sm-s938-1.jpg" },
+      { label: "Side View",   src: "https://fdn2.gsmarena.com/vv/pics/samsung/samsung-galaxy-s25-ultra-sm-s938-2.jpg" },
+      { label: "Angle View",  src: "https://fdn2.gsmarena.com/vv/pics/samsung/samsung-galaxy-s25-ultra-sm-s938-3.jpg" },
+      { label: "S Pen View",  src: "https://fdn2.gsmarena.com/vv/pics/samsung/samsung-galaxy-s25-ultra-sm-s938-4.jpg" },
     ],
     specs: {
       "Display": "6.9\" Dynamic AMOLED 2X, 3088×1440, 505 ppi, 120Hz adaptive",
@@ -141,6 +154,13 @@ const phones: Product[] = [
       { name: "Yellow", hex: "#f5d86d", image: iphone15YellowImg },
       { name: "Black", hex: "#1a1a1a", image: iphone15BlackImg },
     ],
+    gallery: [
+      { label: "Front View",  src: "https://fdn2.gsmarena.com/vv/bigpic/apple-iphone-15.jpg" },
+      { label: "Back View",   src: "https://fdn2.gsmarena.com/vv/pics/apple/apple-iphone-15-1.jpg" },
+      { label: "Side View",   src: "https://fdn2.gsmarena.com/vv/pics/apple/apple-iphone-15-2.jpg" },
+      { label: "Angle View",  src: "https://fdn2.gsmarena.com/vv/pics/apple/apple-iphone-15-3.jpg" },
+      { label: "USB-C View",  src: "https://fdn2.gsmarena.com/vv/pics/apple/apple-iphone-15-4.jpg" },
+    ],
     specs: {
       "Display": "6.1\" Super Retina XDR OLED, 2556×1179, 460 ppi, 60Hz",
       "Processor": "Apple A16 Bionic — 6-core CPU, 5-core GPU",
@@ -169,6 +189,11 @@ const phones: Product[] = [
     stock: 18,
     category: "phones",
     breadcrumb: ["Electronics", "Phones"],
+    gallery: [
+      { label: "Front View",  src: "https://fdn2.gsmarena.com/vv/bigpic/apple-iphone-14.jpg" },
+      { label: "Back View",   src: "https://fdn2.gsmarena.com/vv/pics/apple/apple-iphone-14-3.jpg" },
+      { label: "Side View",   src: "https://fdn2.gsmarena.com/vv/pics/apple/apple-iphone-14-2.jpg" },
+    ],
     specs: {
       "Display": "6.1\" Super Retina XDR OLED, 2532×1170, 460 ppi, 60Hz",
       "Processor": "Apple A15 Bionic — 6-core CPU, 5-core GPU",
@@ -201,6 +226,11 @@ const phones: Product[] = [
       { name: "Awesome Navy", hex: "#1a2a4a", image: samsungA55NavyImg },
       { name: "Awesome Lilac", hex: "#b4a0d0", image: samsungA55LilacImg },
     ],
+    gallery: [
+      { label: "Front View",  src: "https://fdn2.gsmarena.com/vv/bigpic/samsung-galaxy-a55.jpg" },
+      { label: "Back View",   src: "https://fdn2.gsmarena.com/vv/pics/samsung/samsung-galaxy-a55-1.jpg" },
+      { label: "Side View",   src: "https://fdn2.gsmarena.com/vv/pics/samsung/samsung-galaxy-a55-2.jpg" },
+    ],
     specs: {
       "Display": "6.6\" Super AMOLED, 2340×1080 FHD+, 120Hz adaptive",
       "Processor": "Samsung Exynos 1480 — 4nm octa-core",
@@ -228,6 +258,11 @@ const phones: Product[] = [
     stock: 30,
     category: "phones",
     breadcrumb: ["Electronics", "Phones"],
+    gallery: [
+      { label: "Front View",  src: "https://fdn2.gsmarena.com/vv/bigpic/tecno-camon-30-pro-new.jpg" },
+      { label: "Back View",   src: "https://fdn2.gsmarena.com/vv/pics/tecno/tecno-camon-30-pro-1.jpg" },
+      { label: "Side View",   src: "https://fdn2.gsmarena.com/vv/pics/tecno/tecno-camon-30-pro-2.jpg" },
+    ],
     specs: {
       "Display": "6.78\" AMOLED, 2400×1080 FHD+, 144Hz",
       "Processor": "MediaTek Helio G99 Ultimate — 6nm octa-core",
@@ -254,6 +289,12 @@ const phones: Product[] = [
     stock: 40,
     category: "phones",
     breadcrumb: ["Electronics", "Phones"],
+    gallery: [
+      { label: "Front View",  src: "https://fdn2.gsmarena.com/vv/bigpic/infinix-hot-40-pro.jpg" },
+      { label: "Back View",   src: "https://fdn2.gsmarena.com/vv/pics/infinix/infinix-hot-40-pro-1.jpg" },
+      { label: "Side View",   src: "https://fdn2.gsmarena.com/vv/pics/infinix/infinix-hot-40-pro-2.jpg" },
+      { label: "Angle View",  src: "https://fdn2.gsmarena.com/vv/pics/infinix/infinix-hot-40-pro-3.jpg" },
+    ],
     specs: {
       "Display": "6.78\" IPS LCD, 2460×1080 FHD+, 120Hz",
       "Processor": "MediaTek Helio G99 — 6nm octa-core",
