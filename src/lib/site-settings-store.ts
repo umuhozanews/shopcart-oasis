@@ -67,7 +67,7 @@ function read(): SiteSettings {
   try {
     const raw = localStorage.getItem(KEY);
     cache = raw ? { ...SETTINGS_DEFAULTS, ...JSON.parse(raw) } : SETTINGS_DEFAULTS;
-    return cache;
+    return cache!;
   } catch {
     cache = SETTINGS_DEFAULTS;
     return cache;
