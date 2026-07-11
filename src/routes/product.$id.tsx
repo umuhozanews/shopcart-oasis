@@ -302,6 +302,18 @@ function PDP() {
 
           {/* Right — Info */}
           <div>
+            {/* Condition badge */}
+            <div className="mb-3">
+              {product.condition === 'used' ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-700">
+                  🔄 Used Device
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1 text-xs font-bold text-green-700">
+                  ✨ Brand New
+                </span>
+              )}
+            </div>
             <h1 className="font-display text-3xl font-extrabold tracking-tight sm:text-4xl">
               {product.name}
             </h1>

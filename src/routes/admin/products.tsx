@@ -46,11 +46,19 @@ type FormState = {
   tagline: string;
   price: string;
   stock: string;
-  imageData: string; // base64 or URL
+  imageData: string; // base64 or URL — main image
   category: string;
+  condition: 'new' | 'used';
+  galleryFront: string;
+  galleryBack: string;
+  gallerySide: string;
 };
 
-const blank: FormState = { name: '', tagline: '', price: '', stock: '', imageData: '', category: 'phones' };
+const blank: FormState = {
+  name: '', tagline: '', price: '', stock: '', imageData: '',
+  category: 'phones', condition: 'new',
+  galleryFront: '', galleryBack: '', gallerySide: '',
+};
 
 function ImageUploader({
   value,
@@ -171,26 +179,47 @@ function AdminProducts() {
 
   function startEdit(p: Product) {
     setEditId(p.id);
+    const g = p.gallery ?? [];
     setForm({
       name: p.name,
       tagline: p.tagline,
       price: String(p.price),
       stock: String(p.stock),
       imageData: p.image,
-      category: p.category || 'phones'
+      category: p.category || 'phones',
+      condition: p.condition || 'new',
+      galleryFront: g.find((x) => x.label === 'Front View')?.src ?? '',
+      galleryBack:  g.find((x) => x.label === 'Back View')?.src  ?? '',
+      gallerySide:  g.find((x) => x.label === 'Side View')?.src  ?? '',
     });
     setShowAdd(false);
   }
 
+  function buildGallery(main: string) {
+    const views: { label: string; key: 'galleryFront' | 'galleryBack' | 'gallerySide' }[] = [
+      { label: 'Front View', key: 'galleryFront' },
+      { label: 'Back View',  key: 'galleryBack'  },
+      { label: 'Side View',  key: 'gallerySide'  },
+    ];
+    const gallery = views
+      .filter((v) => form[v.key])
+      .map((v) => ({ label: v.label, src: form[v.key] }));
+    // If no gallery views uploaded, fall back to main image as single entry
+    return gallery.length > 0 ? gallery : [{ label: 'Main', src: main }];
+  }
+
   function saveEdit() {
     if (!editId) return;
+    const image = form.imageData || undefined;
     productStore.update(editId, {
       name: form.name.trim() || undefined,
       tagline: form.tagline,
       price: parseFloat(form.price) || 0,
       stock: parseInt(form.stock, 10) || 0,
-      image: form.imageData || undefined,
+      image,
       category: form.category,
+      condition: form.condition,
+      gallery: image ? buildGallery(image) : undefined,
       breadcrumb: ['Electronics', form.category.charAt(0).toUpperCase() + form.category.slice(1)],
     });
     setEditId(null);
@@ -212,6 +241,7 @@ function AdminProducts() {
     const name = form.name.trim();
     if (!name) return;
     const slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    const mainImage = form.imageData || 'https://placehold.co/800x800/f5f5f5/999999?text=Product';
     const newProduct: Product = {
       id: `${slug}-${Date.now()}`,
       name,
@@ -220,9 +250,11 @@ function AdminProducts() {
       stock: parseInt(form.stock, 10) || 0,
       rating: 5,
       reviews: 0,
-      image: form.imageData || 'https://placehold.co/800x800/f5f5f5/999999?text=Product',
+      image: mainImage,
+      gallery: buildGallery(mainImage),
       breadcrumb: ['Electronics', form.category.charAt(0).toUpperCase() + form.category.slice(1)],
       category: form.category,
+      condition: form.condition,
     };
     productStore.add(newProduct);
     setShowAdd(false);
@@ -290,7 +322,44 @@ function AdminProducts() {
                 <option value="gaming">Gaming</option>
               </select>
             </div>
+            <div>
+              <label className="block text-xs font-medium text-muted-foreground mb-1">Condition *</label>
+              <div className="mt-1 flex gap-3">
+                <label className="flex flex-1 cursor-pointer items-center gap-2.5 rounded-lg border border-input bg-background px-4 py-2.5 text-sm transition has-[:checked]:border-primary has-[:checked]:bg-primary/5 has-[:checked]:text-primary">
+                  <input
+                    type="radio"
+                    name="condition-add"
+                    value="new"
+                    checked={form.condition === 'new'}
+                    onChange={() => setField('condition')('new')}
+                    className="accent-primary"
+                  />
+                  ✨ New
+                </label>
+                <label className="flex flex-1 cursor-pointer items-center gap-2.5 rounded-lg border border-input bg-background px-4 py-2.5 text-sm transition has-[:checked]:border-amber-500 has-[:checked]:bg-amber-50 has-[:checked]:text-amber-700">
+                  <input
+                    type="radio"
+                    name="condition-add"
+                    value="used"
+                    checked={form.condition === 'used'}
+                    onChange={() => setField('condition')('used')}
+                    className="accent-amber-500"
+                  />
+                  🔄 Used
+                </label>
+              </div>
+            </div>
             <ImageUploader value={form.imageData} onChange={setField('imageData')} />
+            <div className="sm:col-span-2">
+              <p className="text-xs font-medium text-muted-foreground mb-2">
+                Additional Views <span className="font-normal opacity-60">(optional — helps customers see all angles)</span>
+              </p>
+              <div className="grid grid-cols-3 gap-3">
+                <ImageUploader value={form.galleryFront} onChange={setField('galleryFront')} label="Front View" />
+                <ImageUploader value={form.galleryBack}  onChange={setField('galleryBack')}  label="Back View"  />
+                <ImageUploader value={form.gallerySide}  onChange={setField('gallerySide')}  label="Side View"  />
+              </div>
+            </div>
           </div>
           <div className="flex gap-2 pt-1">
             <button
@@ -350,7 +419,44 @@ function AdminProducts() {
                 <option value="gaming">Gaming</option>
               </select>
             </div>
+            <div>
+              <label className="block text-xs font-medium text-muted-foreground mb-1">Condition *</label>
+              <div className="mt-1 flex gap-3">
+                <label className="flex flex-1 cursor-pointer items-center gap-2.5 rounded-lg border border-input bg-background px-4 py-2.5 text-sm transition has-[:checked]:border-primary has-[:checked]:bg-primary/5 has-[:checked]:text-primary">
+                  <input
+                    type="radio"
+                    name="condition-edit"
+                    value="new"
+                    checked={form.condition === 'new'}
+                    onChange={() => setField('condition')('new')}
+                    className="accent-primary"
+                  />
+                  ✨ New
+                </label>
+                <label className="flex flex-1 cursor-pointer items-center gap-2.5 rounded-lg border border-input bg-background px-4 py-2.5 text-sm transition has-[:checked]:border-amber-500 has-[:checked]:bg-amber-50 has-[:checked]:text-amber-700">
+                  <input
+                    type="radio"
+                    name="condition-edit"
+                    value="used"
+                    checked={form.condition === 'used'}
+                    onChange={() => setField('condition')('used')}
+                    className="accent-amber-500"
+                  />
+                  🔄 Used
+                </label>
+              </div>
+            </div>
             <ImageUploader value={form.imageData} onChange={setField('imageData')} label="Product Image (upload to replace)" />
+            <div className="sm:col-span-2">
+              <p className="text-xs font-medium text-muted-foreground mb-2">
+                Additional Views <span className="font-normal opacity-60">(optional)</span>
+              </p>
+              <div className="grid grid-cols-3 gap-3">
+                <ImageUploader value={form.galleryFront} onChange={setField('galleryFront')} label="Front View" />
+                <ImageUploader value={form.galleryBack}  onChange={setField('galleryBack')}  label="Back View"  />
+                <ImageUploader value={form.gallerySide}  onChange={setField('gallerySide')}  label="Side View"  />
+              </div>
+            </div>
           </div>
           <div className="flex gap-2">
             <button
@@ -378,6 +484,7 @@ function AdminProducts() {
               <tr className="border-b border-border bg-surface-muted">
                 <th className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground">Product</th>
                 <th className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground hidden lg:table-cell">Description</th>
+                <th className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground hidden md:table-cell">Condition</th>
                 <th className="px-5 py-3 text-right text-xs font-semibold text-muted-foreground">Price</th>
                 <th className="px-5 py-3 text-right text-xs font-semibold text-muted-foreground hidden sm:table-cell">Stock</th>
                 <th className="px-5 py-3 text-right text-xs font-semibold text-muted-foreground">Actions</th>
@@ -386,7 +493,7 @@ function AdminProducts() {
             <tbody className="divide-y divide-border">
               {products.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-5 py-16 text-center">
+                  <td colSpan={6} className="px-5 py-16 text-center">
                     <span className="text-4xl">📦</span>
                     <p className="mt-3 text-sm font-semibold text-foreground">No products yet</p>
                     <p className="mt-1 text-xs text-muted-foreground">Click "Add Product" above to add your first product.</p>
@@ -410,6 +517,17 @@ function AdminProducts() {
                   </td>
                   <td className="px-5 py-3 hidden lg:table-cell max-w-xs">
                     <p className="line-clamp-2 text-sm text-muted-foreground">{p.tagline}</p>
+                  </td>
+                  <td className="px-5 py-3 hidden md:table-cell">
+                    {p.condition === 'used' ? (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-700">
+                        🔄 Used
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-700">
+                        ✨ New
+                      </span>
+                    )}
                   </td>
                   <td className="px-5 py-3 text-right font-semibold">{formatRWF(p.price)}</td>
                   <td className="px-5 py-3 text-right hidden sm:table-cell">

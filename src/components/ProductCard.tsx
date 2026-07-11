@@ -23,6 +23,18 @@ export function ProductCard({ product }: { product: Product }) {
             className="h-full w-full object-contain p-4 transition-transform duration-500 group-hover:scale-105"
           />
         </Link>
+        {/* Condition badge */}
+        <div className="absolute left-3 top-3">
+          {product.condition === 'used' ? (
+            <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-1 text-[11px] font-bold text-amber-700 shadow-sm">
+              🔄 Used
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-1 text-[11px] font-bold text-green-700 shadow-sm">
+              ✨ New
+            </span>
+          )}
+        </div>
         <button
           onClick={() => setLiked((v) => !v)}
           aria-label="Add to wishlist"

@@ -68,7 +68,7 @@ export const productStore = {
       console.error('Failed to sync added product to server:', err)
     );
   },
-  update(id: string, patch: Partial<Pick<Product, 'name' | 'tagline' | 'price' | 'stock' | 'image' | 'category' | 'breadcrumb'>>) {
+  update(id: string, patch: Partial<Pick<Product, 'name' | 'tagline' | 'price' | 'stock' | 'image' | 'gallery' | 'category' | 'breadcrumb' | 'condition'>>) {
     const updated = read().map((p) => (p.id === id ? { ...p, ...patch } : p));
     write(updated);
     saveServerDb({ data: { products: updated } }).catch((err) =>
