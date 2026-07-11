@@ -12,8 +12,10 @@ export type DbState = {
   orders: Order[];
 };
 
-// In-memory cache for server-side state (acts as fallback if filesystem is read-only)
+// In-memory cache — fast for repeated reads within same function instance
 let globalServerMemoryDb: DbState | null = null;
+
+const BLOB_PATH = 'hippo-tech-db.json';
 
 function getInitialDbState(): DbState {
   return {
@@ -25,49 +27,94 @@ function getInitialDbState(): DbState {
   };
 }
 
-export async function loadDbOnServer(): Promise<DbState> {
-  if (globalServerMemoryDb !== null) {
-    return globalServerMemoryDb;
+function hasBlobToken(): boolean {
+  return !!process.env.BLOB_READ_WRITE_TOKEN;
+}
+
+async function loadFromBlob(): Promise<DbState | null> {
+  try {
+    const { list } = await import('@vercel/blob');
+    const { blobs } = await list({ prefix: BLOB_PATH });
+    if (blobs.length === 0) return null;
+    const res = await fetch(blobs[0].url);
+    if (!res.ok) return null;
+    return (await res.json()) as DbState;
+  } catch (err) {
+    console.warn('Could not load from Vercel Blob:', err);
+    return null;
   }
+}
+
+async function saveToBlob(state: DbState): Promise<void> {
+  const { put, list: blobList, del } = await import('@vercel/blob');
+  // Remove any existing blob at this path before uploading the new one
+  const { blobs } = await blobList({ prefix: BLOB_PATH });
+  if (blobs.length > 0) {
+    await del(blobs.map((b) => b.url));
+  }
+  await put(BLOB_PATH, JSON.stringify(state), {
+    access: 'public',
+    contentType: 'application/json',
+    addRandomSuffix: false,
+  });
+}
+
+export async function loadDbOnServer(): Promise<DbState> {
+  if (globalServerMemoryDb !== null) return globalServerMemoryDb;
 
   let state = getInitialDbState();
-  try {
-    const fs = await import('fs');
-    const path = await import('path');
-    const DB_FILE = path.resolve(process.cwd(), 'db.json');
 
-    if (fs.existsSync(DB_FILE)) {
-      const content = fs.readFileSync(DB_FILE, 'utf8');
-      const parsed = JSON.parse(content);
-      
-      // Migrate old categories to new ones so the site won't break
-      let products = parsed.products || state.products;
-      products = products.map((p: any) => {
-        let category = p.category;
-        let breadcrumb = p.breadcrumb || [];
-        if (category === 'iphone' || category === 'samsung' || category === 'budget' || category === 'smartphones') {
-          category = 'phones';
-          breadcrumb = ['Electronics', 'Phones'];
-        } else if (category === 'headphones') {
-          category = 'accessories';
-          breadcrumb = ['Electronics', 'Accessories'];
-        } else if (!['phones', 'computer', 'accessories', 'tablets', 'smart-watches', 'gaming'].includes(category)) {
-          category = 'phones';
-          breadcrumb = ['Electronics', 'Phones'];
-        }
-        return { ...p, category, breadcrumb };
-      });
-
+  if (hasBlobToken()) {
+    // Production / Vercel: load from Blob storage
+    const blobState = await loadFromBlob();
+    if (blobState) {
       state = {
-        products,
-        settings: parsed.settings ? { ...SETTINGS_DEFAULTS, ...parsed.settings } : state.settings,
-        slides: parsed.slides || state.slides,
-        popup: parsed.popup ? { ...DEFAULT_POPUP, ...parsed.popup } : state.popup,
-        orders: parsed.orders || state.orders,
+        products: blobState.products || state.products,
+        settings: blobState.settings ? { ...SETTINGS_DEFAULTS, ...blobState.settings } : state.settings,
+        slides: blobState.slides || state.slides,
+        popup: blobState.popup ? { ...DEFAULT_POPUP, ...blobState.popup } : state.popup,
+        orders: blobState.orders || state.orders,
       };
     }
-  } catch (err) {
-    console.error('Error loading db.json, using defaults:', err);
+  } else {
+    // Local dev: load from db.json on disk
+    try {
+      const fs = await import('fs');
+      const path = await import('path');
+      const DB_FILE = path.resolve(process.cwd(), 'db.json');
+
+      if (fs.existsSync(DB_FILE)) {
+        const content = fs.readFileSync(DB_FILE, 'utf8');
+        const parsed = JSON.parse(content);
+
+        let products = parsed.products || state.products;
+        products = products.map((p: Product & { category: string; breadcrumb: string[] }) => {
+          let category = p.category;
+          let breadcrumb = p.breadcrumb || [];
+          if (['iphone', 'samsung', 'budget', 'smartphones'].includes(category)) {
+            category = 'phones';
+            breadcrumb = ['Electronics', 'Phones'];
+          } else if (category === 'headphones') {
+            category = 'accessories';
+            breadcrumb = ['Electronics', 'Accessories'];
+          } else if (!['phones', 'computer', 'accessories', 'tablets', 'smart-watches', 'gaming'].includes(category)) {
+            category = 'phones';
+            breadcrumb = ['Electronics', 'Phones'];
+          }
+          return { ...p, category, breadcrumb };
+        });
+
+        state = {
+          products,
+          settings: parsed.settings ? { ...SETTINGS_DEFAULTS, ...parsed.settings } : state.settings,
+          slides: parsed.slides || state.slides,
+          popup: parsed.popup ? { ...DEFAULT_POPUP, ...parsed.popup } : state.popup,
+          orders: parsed.orders || state.orders,
+        };
+      }
+    } catch (err) {
+      console.error('Error loading db.json, using defaults:', err);
+    }
   }
 
   globalServerMemoryDb = state;
@@ -76,21 +123,28 @@ export async function loadDbOnServer(): Promise<DbState> {
 
 async function saveDbOnServer(state: DbState) {
   globalServerMemoryDb = state;
-  try {
-    const fs = await import('fs');
-    const path = await import('path');
-    const DB_FILE = path.resolve(process.cwd(), 'db.json');
-    fs.writeFileSync(DB_FILE, JSON.stringify(state, null, 2), 'utf8');
-  } catch (err) {
-    console.warn('Could not write db.json to disk (filesystem might be read-only), keeping in server memory:', err);
+
+  if (hasBlobToken()) {
+    // Production / Vercel: persist to Blob storage so all instances and cold starts see it
+    try {
+      await saveToBlob(state);
+    } catch (err) {
+      console.warn('Could not write to Vercel Blob, keeping in server memory only:', err);
+    }
+  } else {
+    // Local dev: persist to db.json on disk
+    try {
+      const fs = await import('fs');
+      const path = await import('path');
+      const DB_FILE = path.resolve(process.cwd(), 'db.json');
+      fs.writeFileSync(DB_FILE, JSON.stringify(state, null, 2), 'utf8');
+    } catch (err) {
+      console.warn('Could not write db.json to disk (filesystem might be read-only), keeping in server memory:', err);
+    }
   }
 }
 
-// Server functions to get and save data
-export const getServerDb = createServerFn({ method: 'GET' })
-  .handler(async () => {
-    return await loadDbOnServer();
-  });
+export const getServerDb = createServerFn({ method: 'GET' }).handler(async () => loadDbOnServer());
 
 export const saveServerDb = createServerFn({ method: 'POST' })
   .inputValidator((data: Partial<DbState>) => data)

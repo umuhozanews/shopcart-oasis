@@ -384,6 +384,15 @@ function AdminProducts() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
+              {products.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="px-5 py-16 text-center">
+                    <span className="text-4xl">📦</span>
+                    <p className="mt-3 text-sm font-semibold text-foreground">No products yet</p>
+                    <p className="mt-1 text-xs text-muted-foreground">Click "Add Product" above to add your first product.</p>
+                  </td>
+                </tr>
+              )}
               {products.map((p) => (
                 <tr key={p.id} className="hover:bg-surface-muted/40 transition">
                   <td className="px-5 py-3">

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { StarRating } from "@/components/StarRating";
-import { products, type GalleryImage } from "@/lib/products";
+import type { Product, GalleryImage } from "@/lib/products";
 import { useProduct } from "@/lib/product-store";
 import { cartStore } from "@/lib/cart-store";
 import { Toaster } from "@/components/ui/sonner";
@@ -145,8 +145,7 @@ function ProductGallery({
 // ---------------------------------------------------------------------------
 export const Route = createFileRoute("/product/$id")({
   loader: ({ params }) => {
-    const product = products.find((p) => p.id === params.id) ?? null;
-    return { product, productId: params.id };
+    return { product: null as Product | null, productId: params.id };
   },
   head: ({ loaderData }) => ({
     meta: loaderData?.product

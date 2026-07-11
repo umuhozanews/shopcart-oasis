@@ -6,9 +6,9 @@ type UIMessage = ChatMessage & { id: string };
 
 const QUICK_REPLIES = [
   "What phones do you have?",
-  "How much is the iPhone 16?",
-  "Do you deliver across Rwanda?",
-  "How do returns work?",
+  "Show me your tablets",
+  "Phones under 500,000 RWF",
+  "What's your phone number?",
 ];
 
 export function ChatWidget() {
@@ -28,7 +28,7 @@ export function ChatWidget() {
             id: 'welcome',
             role: 'assistant',
             content:
-              "Hi! I'm Hippo 🦛 your AI assistant at Hippo Technology. Ask me anything about our phones, prices, delivery, or returns!",
+              "Hi! I'm Hippo 🦛 your assistant at Hippo Technology. Ask me about phones, tablets, laptops, watches, gaming gear, prices, delivery, or anything about our store!",
           },
         ]);
       }

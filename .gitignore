@@ -25,6 +25,9 @@ dist-ssr
 .wrangler/
 .dev.vars
 
+# Local dev database (never commit — production uses Vercel Blob)
+db.json
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

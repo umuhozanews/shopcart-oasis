@@ -2,7 +2,7 @@ import { useSyncExternalStore } from 'react';
 import { products as staticProducts, type Product } from './products';
 import { saveServerDb } from './server-db';
 
-const KEY = 'shopcart_products_v3';
+const KEY = 'shopcart_products_v4';
 const listeners = new Set<() => void>();
 let cache: Product[] | null = null;
 

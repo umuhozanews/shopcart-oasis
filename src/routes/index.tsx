@@ -153,11 +153,19 @@ function Home() {
               <span className="ml-2 text-sm font-normal text-muted-foreground">({sorted.length})</span>
             </h2>
           </div>
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {sorted.map((p) => (
-              <ProductCard key={p.id} product={p} />
-            ))}
-          </div>
+          {sorted.length === 0 ? (
+            <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-surface-muted py-24 text-center">
+              <span className="text-5xl">📦</span>
+              <p className="mt-4 text-base font-semibold text-foreground">No products yet</p>
+              <p className="mt-1 text-sm text-muted-foreground">Products will appear here once the admin adds them.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {sorted.map((p) => (
+                <ProductCard key={p.id} product={p} />
+              ))}
+            </div>
+          )}
         </section>
 
         {/* Categories */}
@@ -171,15 +179,8 @@ function Home() {
                 params={{ slug: c.slug }}
                 className="flex items-center gap-3 rounded-2xl bg-surface-muted p-4 ring-1 ring-border/60 transition hover:ring-primary/40 hover:shadow-sm"
               >
-                <div className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-xl bg-background ring-1 ring-border/60">
-                  <img
-                    src={c.image}
-                    alt={c.name}
-                    loading="lazy"
-                    width={112}
-                    height={112}
-                    className="h-full w-full object-contain p-1.5"
-                  />
+                <div className="grid h-14 w-14 shrink-0 place-items-center rounded-xl bg-background text-3xl ring-1 ring-border/60">
+                  {c.emoji}
                 </div>
                 <div className="min-w-0">
                   <div className="truncate text-sm font-semibold">{c.name}</div>
