@@ -282,9 +282,12 @@ function AdminProducts() {
                 onChange={(e) => setField('category')(e.target.value)}
                 className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm outline-none focus:border-primary transition"
               >
-                <option value="phones">Phones</option>
-                <option value="computer">Computer</option>
+                <option value="phones">Smartphones</option>
+                <option value="tablets">Tablets</option>
+                <option value="computer">Laptops</option>
+                <option value="smart-watches">Smart Watches</option>
                 <option value="accessories">Accessories</option>
+                <option value="gaming">Gaming</option>
               </select>
             </div>
             <ImageUploader value={form.imageData} onChange={setField('imageData')} />
@@ -339,9 +342,12 @@ function AdminProducts() {
                 onChange={(e) => setField('category')(e.target.value)}
                 className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm outline-none focus:border-primary transition"
               >
-                <option value="phones">Phones</option>
-                <option value="computer">Computer</option>
+                <option value="phones">Smartphones</option>
+                <option value="tablets">Tablets</option>
+                <option value="computer">Laptops</option>
+                <option value="smart-watches">Smart Watches</option>
                 <option value="accessories">Accessories</option>
+                <option value="gaming">Gaming</option>
               </select>
             </div>
             <ImageUploader value={form.imageData} onChange={setField('imageData')} label="Product Image (upload to replace)" />

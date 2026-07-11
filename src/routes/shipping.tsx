@@ -93,8 +93,8 @@ function Shipping() {
         <div className="mt-12 text-center">
           <p className="text-sm text-muted-foreground">Have questions about your delivery?</p>
           <div className="mt-4 flex flex-wrap justify-center gap-3">
-            <a href="tel:0798989741" className="rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition">
-              Call 0798989741
+            <a href="tel:+250793051054" className="rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition">
+              Call +250 793 051 054
             </a>
             <Link to="/contact" className="rounded-full border border-border px-6 py-2.5 text-sm font-semibold hover:bg-surface-muted transition">
               Contact Support

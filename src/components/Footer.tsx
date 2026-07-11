@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router';
-import { Phone, MapPin, MessageCircle, Instagram } from 'lucide-react';
+import { Phone, MapPin, MessageCircle, Instagram, Facebook } from 'lucide-react';
 import hippoLogo from '@/assets/hippo-logo.png';
 import { useSiteSettings } from '@/lib/site-settings-store';
 
@@ -13,15 +13,11 @@ export function Footer() {
         {/* Brand */}
         <div>
           <div className="flex items-center gap-3">
-            <img 
-              src={logoSrc} 
-              alt={s.siteName} 
-              className={`h-14 w-auto object-contain ${s.logoData ? '' : 'brightness-0 invert'}`} 
+            <img
+              src={logoSrc}
+              alt={s.siteName}
+              className={`h-14 w-auto object-contain ${s.logoData ? '' : 'brightness-0 invert'}`}
             />
-            <div>
-              <div className="text-base font-extrabold leading-tight tracking-tight">{s.siteName}</div>
-              <div className="text-sm font-bold leading-tight opacity-80">{s.siteSubtitle}</div>
-            </div>
           </div>
           <p className="mt-4 max-w-xs text-sm opacity-80">{s.siteTagline}</p>
           <div className="mt-4 flex items-start gap-2 text-sm opacity-90">
@@ -30,6 +26,17 @@ export function Footer() {
           </div>
           {/* Social */}
           <div className="mt-5 flex items-center gap-3">
+            {s.facebookUrl && (
+              <a
+                href={s.facebookUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Facebook"
+                className="grid h-9 w-9 place-items-center rounded-full bg-primary-foreground/10 transition hover:bg-primary-foreground/20"
+              >
+                <Facebook size={18} />
+              </a>
+            )}
             <a
               href={s.instagramUrl}
               target="_blank"
@@ -68,11 +75,13 @@ export function Footer() {
         <div>
           <h4 className="text-sm font-semibold">Shop</h4>
           <ul className="mt-4 space-y-2 text-sm opacity-80">
-            <li><Link to="/category/$slug" params={{ slug: 'phones' }} className="hover:opacity-100 hover:underline">Phones</Link></li>
-            <li><Link to="/category/$slug" params={{ slug: 'computer' }} className="hover:opacity-100 hover:underline">Computer</Link></li>
+            <li><Link to="/category/$slug" params={{ slug: 'phones' }} className="hover:opacity-100 hover:underline">Smartphones</Link></li>
+            <li><Link to="/category/$slug" params={{ slug: 'tablets' }} className="hover:opacity-100 hover:underline">Tablets</Link></li>
+            <li><Link to="/category/$slug" params={{ slug: 'computer' }} className="hover:opacity-100 hover:underline">Laptops</Link></li>
+            <li><Link to="/category/$slug" params={{ slug: 'smart-watches' }} className="hover:opacity-100 hover:underline">Smart Watches</Link></li>
             <li><Link to="/category/$slug" params={{ slug: 'accessories' }} className="hover:opacity-100 hover:underline">Accessories</Link></li>
+            <li><Link to="/category/$slug" params={{ slug: 'gaming' }} className="hover:opacity-100 hover:underline">Gaming</Link></li>
             <li><Link to="/deals" className="hover:opacity-100 hover:underline">Deals & Offers</Link></li>
-            <li><Link to="/category/$slug" params={{ slug: 'all' }} className="hover:opacity-100 hover:underline">All Products</Link></li>
           </ul>
         </div>
 
@@ -85,6 +94,8 @@ export function Footer() {
             <li><Link to="/returns" className="hover:opacity-100 hover:underline">Returns & Warranty</Link></li>
             <li><Link to="/faq" className="hover:opacity-100 hover:underline">FAQ</Link></li>
             <li><Link to="/about" className="hover:opacity-100 hover:underline">About Us</Link></li>
+            <li><Link to="/privacy-policy" className="hover:opacity-100 hover:underline">Privacy Policy</Link></li>
+            <li><Link to="/terms" className="hover:opacity-100 hover:underline">Terms & Conditions</Link></li>
           </ul>
         </div>
 

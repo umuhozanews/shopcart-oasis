@@ -150,8 +150,21 @@ export const products: Product[] = [
 export const getProduct = (id: string) => products.find((p) => p.id === id);
 
 export const categories = [
-  { name: "Phones", slug: "phones", count: 7, image: iphone16BlackImg },
-  { name: "Computer", slug: "computer", count: 0, image: computerImg },
+  { name: "Smartphones", slug: "phones", count: 7, image: iphone16BlackImg },
+  { name: "Tablets", slug: "tablets", count: 0, image: samsungS25BlackImg },
+  { name: "Laptops", slug: "computer", count: 0, image: computerImg },
+  { name: "Smart Watches", slug: "smart-watches", count: 0, image: galaxyBuds3ProImg },
   { name: "Accessories", slug: "accessories", count: 1, image: galaxyBuds3ProImg },
+  { name: "Gaming", slug: "gaming", count: 0, image: computerImg },
   { name: "All Products", slug: "all", count: products.length, image: samsungS25BlackImg },
+];
+
+export const brands = [
+  { name: "Apple", slug: "apple" },
+  { name: "Samsung", slug: "samsung" },
+  { name: "Google Pixel", slug: "google-pixel" },
+  { name: "Xiaomi", slug: "xiaomi" },
+  { name: "Huawei", slug: "huawei" },
+  { name: "Tecno", slug: "tecno" },
+  { name: "Infinix", slug: "infinix" },
 ];

@@ -37,7 +37,7 @@ const faqs = [
   },
   {
     q: 'How do I track my order?',
-    a: 'Once your order is dispatched, you\'ll receive an SMS with tracking details. You can also contact us at 0798989741 for a real-time update.',
+    a: 'Once your order is dispatched, you\'ll receive an SMS with tracking details. You can also contact us at +250 793 051 054 for a real-time update.',
   },
   {
     q: 'Can I cancel or modify my order?',
@@ -87,8 +87,8 @@ function FAQ() {
           <h3 className="font-semibold">Still have questions?</h3>
           <p className="mt-1 text-sm text-muted-foreground">Our team is ready to help.</p>
           <div className="mt-4 flex flex-wrap justify-center gap-3">
-            <a href="tel:0798989741" className="rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition">
-              Call 0798989741
+            <a href="tel:+250793051054" className="rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition">
+              Call +250 793 051 054
             </a>
             <Link to="/contact" className="rounded-full border border-primary px-6 py-2.5 text-sm font-semibold text-primary hover:bg-primary/5 transition">
               Send a message

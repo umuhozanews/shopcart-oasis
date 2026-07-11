@@ -26,7 +26,7 @@ function read(): Product[] {
         category = 'accessories';
         breadcrumb = ['Electronics', 'Accessories'];
         migrated = true;
-      } else if (category !== 'phones' && category !== 'computer' && category !== 'accessories') {
+      } else if (!['phones', 'computer', 'accessories', 'tablets', 'smart-watches', 'gaming'].includes(category)) {
         category = 'phones';
         breadcrumb = ['Electronics', 'Phones'];
         migrated = true;

@@ -68,7 +68,7 @@ function Returns() {
             {[
               { label: 'Manufacturer Warranty', value: '1 year on all products' },
               { label: 'Our Guarantee', value: '30 days satisfaction' },
-              { label: 'Support', value: '0798989741 (Mon–Sat)' },
+              { label: 'Support', value: '+250 793 051 054 (Mon–Sat)' },
             ].map(({ label, value }) => (
               <div key={label} className="rounded-xl bg-background p-4 ring-1 ring-border/60">
                 <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{label}</div>
@@ -91,8 +91,8 @@ function Returns() {
             <li>Once received and inspected, your refund is processed within 3–5 days.</li>
           </ol>
           <div className="mt-5 flex flex-wrap gap-3">
-            <a href="tel:0798989741" className="rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition">
-              Call 0798989741
+            <a href="tel:+250793051054" className="rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition">
+              Call +250 793 051 054
             </a>
             <Link to="/contact" className="rounded-full border border-border px-6 py-2.5 text-sm font-semibold hover:bg-surface-muted transition">
               Contact Form

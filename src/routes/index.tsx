@@ -1,12 +1,12 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
-import { ChevronDown, SlidersHorizontal } from 'lucide-react';
+import { ChevronDown, SlidersHorizontal, ShieldCheck, Award, Truck, Lock, MessageCircle } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { ProductCard } from '@/components/ProductCard';
 import { HeroSlider } from '@/components/HeroSlider';
 import { StockPopup } from '@/components/StockPopup';
-import { categories } from '@/lib/products';
+import { categories, brands } from '@/lib/products';
 import { useProducts } from '@/lib/product-store';
 import { Toaster } from '@/components/ui/sonner';
 import { JsonLd, SITE_URL } from '@/components/JsonLd';
@@ -14,10 +14,10 @@ import { JsonLd, SITE_URL } from '@/components/JsonLd';
 export const Route = createFileRoute('/')({
   head: () => ({
     meta: [
-      { title: 'Hippo Technology — Phones & Gadgets Rwanda' },
-      { name: 'description', content: 'Shop iPhones, Samsung, Tecno, Infinix and top gadgets at Hippo Technology Rwanda. Free delivery, genuine products, 30-day returns.' },
-      { property: 'og:title', content: 'Hippo Technology — Your World, Upgraded.' },
-      { property: 'og:description', content: 'Rwanda\'s premier destination for phones and gadgets. Free delivery on all orders.' },
+      { title: 'Hippo Technology — Original Smartphones & Electronics in Rwanda' },
+      { name: 'description', content: 'Shop original iPhones, Samsung, Google Pixel, Xiaomi, Huawei, Tecno and Infinix smartphones, laptops, tablets, accessories and more at Hippo Technology Rwanda. Genuine products, warranty, fast delivery.' },
+      { property: 'og:title', content: 'Hippo Technology — Original Smartphones & Electronics in Rwanda' },
+      { property: 'og:description', content: 'Rwanda\'s premier destination for original smartphones and electronics. Genuine products, warranty available, fast delivery across Rwanda.' },
       { property: 'og:url', content: SITE_URL },
     ],
     links: [{ rel: 'canonical', href: `${SITE_URL}/` }],
@@ -164,7 +164,7 @@ function Home() {
         <section className="mt-16 mb-4">
           <h2 className="text-lg font-bold tracking-tight text-foreground">Browse by Category</h2>
           <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-            {categoriesWithCounts.map((c) => (
+            {categoriesWithCounts.filter((c) => c.slug !== 'all').map((c) => (
               <Link
                 key={c.slug}
                 to="/category/$slug"
@@ -186,6 +186,42 @@ function Home() {
                   <div className="text-xs text-muted-foreground">{c.count} items</div>
                 </div>
               </Link>
+            ))}
+          </div>
+        </section>
+
+        {/* Shop by Brand */}
+        <section className="mt-12">
+          <h2 className="text-lg font-bold tracking-tight text-foreground">Shop by Brand</h2>
+          <div className="mt-4 flex flex-wrap gap-3">
+            {brands.map((brand) => (
+              <Link
+                key={brand.slug}
+                to="/search"
+                search={{ q: brand.name }}
+                className="rounded-full border border-border bg-background px-5 py-2.5 text-sm font-semibold text-foreground/80 ring-1 ring-border/60 transition hover:ring-primary/40 hover:text-primary hover:shadow-sm"
+              >
+                {brand.name}
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        {/* Trust Section */}
+        <section className="mt-12 mb-4">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+            {[
+              { icon: ShieldCheck, title: "Genuine Products", desc: "100% authentic devices" },
+              { icon: Award, title: "Warranty Available", desc: "Manufacturer warranty" },
+              { icon: Truck, title: "Fast Delivery", desc: "Across Rwanda" },
+              { icon: Lock, title: "Secure Payments", desc: "Safe & trusted checkout" },
+              { icon: MessageCircle, title: "Customer Support", desc: "Mon–Sat, 8am–8pm" },
+            ].map(({ icon: Icon, title, desc }) => (
+              <div key={title} className="flex flex-col items-center gap-2 rounded-2xl bg-surface-muted p-5 ring-1 ring-border/60 text-center">
+                <Icon size={24} className="text-primary" />
+                <div className="text-sm font-semibold">{title}</div>
+                <div className="text-xs text-muted-foreground">{desc}</div>
+              </div>
             ))}
           </div>
         </section>

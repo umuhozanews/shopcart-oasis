@@ -11,41 +11,44 @@ function Slide({ slide, active }: { slide: HeroSlide; active: boolean }) {
       className={`absolute inset-0 transition-opacity duration-700 ${active ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
       aria-hidden={!active}
     >
-      <div className="grid h-full grid-cols-1 items-center gap-6 p-8 md:grid-cols-2 md:p-14">
-        <div>
+      <div className="grid h-full grid-cols-1 items-center gap-4 px-8 py-6 md:grid-cols-2 md:px-14 md:py-8">
+        {/* Text */}
+        <div className="flex flex-col justify-center">
           {slide.badge && (
-            <span className="inline-block rounded-full bg-primary/10 px-4 py-1.5 text-xs font-semibold text-primary mb-4">
+            <span className="mb-3 inline-block self-start rounded-full bg-primary px-4 py-1.5 text-xs font-extrabold tracking-widest text-primary-foreground">
               {slide.badge}
             </span>
           )}
-          <h1 className="max-w-md font-display text-3xl font-extrabold leading-tight tracking-tight text-primary sm:text-4xl md:text-5xl">
+          <h1 className="font-display text-2xl font-extrabold leading-tight tracking-tight text-primary sm:text-3xl md:text-4xl">
             {slide.title}
           </h1>
           {slide.subtitle && (
-            <p className="mt-3 max-w-sm text-sm text-foreground/70">{slide.subtitle}</p>
+            <p className="mt-3 max-w-sm text-sm text-foreground/70 leading-relaxed">{slide.subtitle}</p>
           )}
           {slide.buttonText && slide.buttonLink && (
-            <div className="mt-6 flex flex-wrap gap-3">
+            <div className="mt-5 flex flex-wrap gap-3">
               <Link
                 to={slide.buttonLink as '/'}
-                className="inline-flex items-center rounded-full bg-primary px-7 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90"
+                className="inline-flex items-center rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90"
               >
                 {slide.buttonText}
               </Link>
               <Link
                 to="/deals"
-                className="inline-flex items-center rounded-full border border-primary px-7 py-3 text-sm font-semibold text-primary transition hover:bg-primary/5"
+                className="inline-flex items-center rounded-full border border-primary px-6 py-2.5 text-sm font-semibold text-primary transition hover:bg-primary/5"
               >
                 See All Deals
               </Link>
             </div>
           )}
         </div>
-        <div className="relative flex justify-end">
+
+        {/* Image */}
+        <div className="hidden md:flex items-end justify-center h-full pt-4">
           <img
             src={imgSrc}
             alt={slide.title}
-            className="h-64 w-64 rounded-3xl object-cover shadow-lg sm:h-80 sm:w-80 md:h-96 md:w-96"
+            className="h-full max-h-72 w-auto object-contain drop-shadow-xl lg:max-h-80"
           />
         </div>
       </div>
@@ -64,7 +67,7 @@ export function HeroSlider() {
 
   useEffect(() => {
     if (active.length <= 1 || paused) return;
-    const id = setInterval(next, 5000);
+    const id = setInterval(next, 2000);
     return () => clearInterval(id);
   }, [active.length, paused, next]);
 
@@ -76,12 +79,12 @@ export function HeroSlider() {
   return (
     <section
       className="relative overflow-hidden rounded-3xl bg-accent"
-      style={{ minHeight: '340px' }}
+      style={{ minHeight: '380px' }}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
       {/* Slides */}
-      <div className="relative" style={{ minHeight: '340px' }}>
+      <div className="relative" style={{ minHeight: '380px' }}>
         {active.map((slide, i) => (
           <Slide key={slide.id} slide={slide} active={i === current} />
         ))}

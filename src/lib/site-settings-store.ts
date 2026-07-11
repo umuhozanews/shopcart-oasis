@@ -21,6 +21,7 @@ export type SiteSettings = {
   instagramUrl: string;
   instagramHandle: string;
   tiktokUrl: string;
+  facebookUrl: string;
   footerCopyright: string;
   aboutHeroTitle: string;
   aboutHeroDesc: string;
@@ -37,7 +38,7 @@ export const SETTINGS_DEFAULTS: SiteSettings = {
   siteTagline:
     'Premium Electronic Devices Store. Your World, Upgraded — genuine electronics and audio gear with free delivery across Rwanda.',
   logoData: '',
-  topbarPhone: '0798989741',
+  topbarPhone: '+250 793 051 054',
   topbarPromo: 'Get 50% Off on Selected Items',
   phones: SHOP_PHONES,
   whatsapp: SHOP_WHATSAPP,
@@ -45,6 +46,7 @@ export const SETTINGS_DEFAULTS: SiteSettings = {
   instagramUrl: INSTAGRAM_URL,
   instagramHandle: '@hippotechnologyltd',
   tiktokUrl: 'https://vm.tiktok.com/ZS9MMny4QCwP5-DBcAo/',
+  facebookUrl: 'https://www.facebook.com/hippotechnologyltd',
   footerCopyright: '© {year} Hippo Technology Ltd. All rights reserved.',
   aboutHeroTitle: 'Your World, Upgraded.',
   aboutHeroDesc: "Hippo Technology is Rwanda's leading destination for premium audio gear, electronics, and tech accessories — curated for how you live, work, and play.",

@@ -96,7 +96,7 @@ function Contact() {
           {/* Contact info */}
           <div className="space-y-5">
             {[
-              { icon: Phone, label: 'Phone', value: '0798989741', href: 'tel:0798989741' },
+              { icon: Phone, label: 'Phone', value: '+250 793 051 054', href: 'tel:+250793051054' },
               { icon: Mail, label: 'Email', value: 'info@hippotech.rw', href: 'mailto:info@hippotech.rw' },
               { icon: MapPin, label: 'Address', value: 'KG 501 St, Kigali, Rwanda', href: '#' },
               { icon: Clock, label: 'Hours', value: 'Mon–Sat: 8am – 6pm', href: '#' },

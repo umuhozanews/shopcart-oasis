@@ -8,22 +8,55 @@ import { useProducts } from '@/lib/product-store';
 import { useSiteSettings } from '@/lib/site-settings-store';
 import hippoLogo from '@/assets/hippo-logo.png';
 
+const ANNOUNCEMENTS = [
+  { label: 'HOT DEALS', text: 'iPhone 16 Pro Max — Special Price This Week Only!', link: '/deals' },
+  { label: 'HOT STOCK', text: 'Samsung Galaxy S25 Ultra — Limited Units Available', link: '/category/phones' },
+  { label: 'NEW PRICES', text: 'Samsung Galaxy A Series — Prices Slashed Up to 20%', link: '/category/phones' },
+  { label: 'FREE DELIVERY', text: 'Free Delivery on All Orders Across Rwanda', link: '/' },
+  { label: 'NEW ARRIVALS', text: 'Tecno & Infinix Latest Models — Now In Stock', link: '/category/phones' },
+  { label: 'HOT DEALS', text: 'Accessories Bundle Deals — Save Big on Galaxy Buds', link: '/category/accessories' },
+];
+
 export function TopBar() {
   const s = useSiteSettings();
+  const [idx, setIdx] = useState(0);
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setVisible(false);
+      setTimeout(() => {
+        setIdx((i) => (i + 1) % ANNOUNCEMENTS.length);
+        setVisible(true);
+      }, 350);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const ann = ANNOUNCEMENTS[idx];
+
   return (
-    <div className="hidden bg-primary text-primary-foreground md:block">
+    <div className="hidden bg-primary text-primary-foreground md:block overflow-hidden">
       <div className="mx-auto flex h-9 max-w-7xl items-center justify-between px-6 text-xs">
         <div className="flex items-center gap-2 opacity-90">
           <Phone size={12} />
-          <a href={`tel:${s.topbarPhone}`} className="hover:underline">{s.topbarPhone}</a>
+          <a href={`tel:${s.topbarPhone.replace(/\s/g, '')}`} className="hover:underline">{s.topbarPhone}</a>
         </div>
-        <div className="opacity-90">
-          {s.topbarPromo}{' '}
-          <span className="mx-2 opacity-50">|</span>
-          <Link to="/deals" className="underline underline-offset-2">
+
+        <div
+          className="flex items-center gap-2 transition-all duration-300"
+          style={{ opacity: visible ? 0.95 : 0, transform: visible ? 'translateY(0)' : 'translateY(-6px)' }}
+        >
+          <span className="rounded-full bg-primary-foreground/25 px-2 py-0.5 text-[10px] font-extrabold tracking-widest">
+            {ann.label}
+          </span>
+          <span>{ann.text}</span>
+          <span className="mx-1 opacity-40">|</span>
+          <Link to={ann.link} className="underline underline-offset-2 font-semibold hover:opacity-80 transition">
             Shop Now
           </Link>
         </div>
+
         <div className="flex items-center gap-4 opacity-90">
           <span className="flex items-center gap-1">Eng <ChevronDown size={12} /></span>
           <span className="flex items-center gap-1">Rwanda <ChevronDown size={12} /></span>
@@ -83,10 +116,6 @@ export function Header() {
         {/* Logo */}
         <Link to="/" className="flex shrink-0 items-center gap-2">
           <img src={logoSrc} alt={s.siteName} className="h-12 w-auto object-contain" />
-          <div className="hidden sm:block">
-            <div className="text-base font-extrabold leading-tight tracking-tight text-foreground">{s.siteName}</div>
-            <div className="text-sm font-bold leading-tight text-primary">{s.siteSubtitle}</div>
-          </div>
         </Link>
 
         {/* Nav */}
@@ -120,6 +149,7 @@ export function Header() {
           <Link to="/deals" className="hover:text-primary transition">Deals</Link>
           <Link to="/about" className="hover:text-primary transition">About</Link>
           <Link to="/shipping" className="hover:text-primary transition">Delivery</Link>
+          <Link to="/contact" className="hover:text-primary transition">Contact Us</Link>
 
           {/* Search bar */}
           <form onSubmit={handleSearch} className="relative hidden xl:block">

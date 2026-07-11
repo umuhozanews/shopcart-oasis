@@ -1,24 +1,35 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
+import { useState } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
-import { Shield, Truck, HeadphonesIcon, Star } from 'lucide-react';
+import { Shield, Truck, HeadphonesIcon, Star, ChevronDown } from 'lucide-react';
 import { useSiteSettings } from '@/lib/site-settings-store';
-import heroWomanImg from '@/assets/hero-woman.jpg';
+import hippoTeamImg from '@/assets/hippo-team.jpg';
 
 export const Route = createFileRoute('/about')({
   head: () => ({
     meta: [
       { title: 'About Us — Hippo Technology' },
-      { name: 'description', content: 'Learn about Hippo Technology — Rwanda\'s premier destination for premium audio and electronics.' },
+      { name: 'description', content: 'Learn about Hippo Technology — Rwanda\'s premier destination for original smartphones and electronics.' },
     ],
   }),
   component: About,
 });
 
+const faqs = [
+  { q: 'How long does delivery take?', a: 'Standard delivery within Kigali takes 1–2 business days. Nationwide delivery takes 2–4 business days. We offer free delivery on all orders.' },
+  { q: 'Are all products genuine?', a: 'Yes. Every product sold by Hippo Technology is 100% authentic and sourced directly from authorized distributors. We never sell counterfeits.' },
+  { q: 'What payment methods do you accept?', a: 'We accept cash on delivery, MTN MoMo, Airtel Money, bank transfer, and card payments.' },
+  { q: 'Do products come with warranty?', a: 'All products come with the manufacturer\'s warranty (typically 1 year). We also offer our own 30-day satisfaction guarantee.' },
+  { q: 'What is your return policy?', a: 'We offer a 30-day return policy on all unused items in original packaging. Contact us and we\'ll arrange collection and a full refund or exchange.' },
+  { q: 'Do you ship outside Rwanda?', a: 'Currently we ship within Rwanda only. Contact us for special arrangements.' },
+];
+
 function About() {
   const s = useSiteSettings();
-  const storyImage = s.aboutStoryImageData || heroWomanImg;
+  const storyImage = s.aboutStoryImageData || hippoTeamImg;
   const storyParagraphs = s.aboutStoryText.split('\n\n').filter(Boolean);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   return (
     <div className="min-h-screen bg-background">
@@ -83,10 +94,36 @@ function About() {
           </div>
         </section>
 
+        {/* FAQ */}
+        <section className="mx-auto max-w-3xl px-4 py-20">
+          <h2 className="text-center text-2xl font-bold tracking-tight mb-10">Frequently Asked Questions</h2>
+          <div className="space-y-3">
+            {faqs.map((faq, i) => (
+              <div key={i} className="rounded-2xl bg-surface-muted ring-1 ring-border/60 overflow-hidden">
+                <button
+                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  className="flex w-full items-center justify-between px-6 py-4 text-left text-sm font-semibold hover:text-primary transition"
+                >
+                  {faq.q}
+                  <ChevronDown size={16} className={`shrink-0 text-muted-foreground transition-transform ${openFaq === i ? 'rotate-180' : ''}`} />
+                </button>
+                {openFaq === i && (
+                  <div className="border-t border-border px-6 py-4 text-sm text-muted-foreground leading-relaxed">
+                    {faq.a}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+          <p className="mt-8 text-center text-sm text-muted-foreground">
+            More questions? <Link to="/faq" className="text-primary underline">See full FAQ</Link> or <Link to="/contact" className="text-primary underline">contact us</Link>.
+          </p>
+        </section>
+
         {/* CTA */}
-        <section className="mx-auto max-w-3xl px-4 py-20 text-center">
+        <section className="mx-auto max-w-3xl px-4 pb-20 text-center">
           <h2 className="text-2xl font-bold tracking-tight">Ready to upgrade your world?</h2>
-          <p className="mt-3 text-muted-foreground">Explore our full range of premium audio and electronics.</p>
+          <p className="mt-3 text-muted-foreground">Explore our full range of original smartphones and electronics.</p>
           <div className="mt-8 flex flex-wrap justify-center gap-4">
             <Link
               to="/"

@@ -349,6 +349,12 @@ function AdminSettings() {
             onChange={(v) => set('tiktokUrl', v)}
             placeholder="https://vm.tiktok.com/..."
           />
+          <Field
+            label="Facebook URL"
+            value={form.facebookUrl}
+            onChange={(v) => set('facebookUrl', v)}
+            placeholder="https://www.facebook.com/..."
+          />
         </div>
       </Section>
 
