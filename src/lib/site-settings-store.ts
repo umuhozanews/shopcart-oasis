@@ -30,6 +30,7 @@ export type SiteSettings = {
   aboutStoryImageData: string;
   email: string;
   address: string;
+  geminiApiKey: string;
 };
 
 export const SETTINGS_DEFAULTS: SiteSettings = {
@@ -55,6 +56,7 @@ export const SETTINGS_DEFAULTS: SiteSettings = {
   aboutStoryImageData: '',
   email: 'info@hippotech.rw',
   address: SHOP_ADDRESS,
+  geminiApiKey: '',
 };
 
 const KEY = 'hippo_site_settings_v1';

@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ChevronRight, Minus, Plus, Truck, RotateCcw } from "lucide-react";
-import { useState } from "react";
+import { ChevronRight, Minus, Plus, Truck, RotateCcw, RefreshCw } from "lucide-react";
+import { useState, useRef, useCallback } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { StarRating } from "@/components/StarRating";
@@ -19,6 +19,111 @@ function brandFor(name: string): string {
   if (n.includes("tecno")) return "Tecno";
   if (n.includes("infinix")) return "Infinix";
   return "Hippo Technology";
+}
+
+function Product3DViewer({ image, name }: { image: string; name: string }) {
+  const [rotX, setRotX] = useState(0);
+  const [rotY, setRotY] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const lastPos = useRef<{ x: number; y: number } | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const onMouseDown = useCallback((e: React.MouseEvent) => {
+    setDragging(true);
+    lastPos.current = { x: e.clientX, y: e.clientY };
+  }, []);
+
+  const onMouseMove = useCallback(
+    (e: React.MouseEvent) => {
+      if (!dragging || !lastPos.current) return;
+      const dx = e.clientX - lastPos.current.x;
+      const dy = e.clientY - lastPos.current.y;
+      lastPos.current = { x: e.clientX, y: e.clientY };
+      setRotY((r) => r + dx * 0.4);
+      setRotX((r) => Math.max(-35, Math.min(35, r - dy * 0.4)));
+    },
+    [dragging]
+  );
+
+  const onMouseUp = useCallback(() => {
+    setDragging(false);
+    lastPos.current = null;
+  }, []);
+
+  const onTouchStart = useCallback((e: React.TouchEvent) => {
+    const t = e.touches[0];
+    setDragging(true);
+    lastPos.current = { x: t.clientX, y: t.clientY };
+  }, []);
+
+  const onTouchMove = useCallback(
+    (e: React.TouchEvent) => {
+      if (!dragging || !lastPos.current) return;
+      const t = e.touches[0];
+      const dx = t.clientX - lastPos.current.x;
+      const dy = t.clientY - lastPos.current.y;
+      lastPos.current = { x: t.clientX, y: t.clientY };
+      setRotY((r) => r + dx * 0.4);
+      setRotX((r) => Math.max(-35, Math.min(35, r - dy * 0.4)));
+    },
+    [dragging]
+  );
+
+  const onTouchEnd = useCallback(() => {
+    setDragging(false);
+    lastPos.current = null;
+  }, []);
+
+  const reset = () => {
+    setRotX(0);
+    setRotY(0);
+  };
+
+  return (
+    <div className="relative">
+      <div
+        ref={containerRef}
+        className="overflow-hidden rounded-3xl bg-surface-muted ring-1 ring-border/60"
+        style={{ perspective: "1000px", cursor: dragging ? "grabbing" : "grab", userSelect: "none" }}
+        onMouseDown={onMouseDown}
+        onMouseMove={onMouseMove}
+        onMouseUp={onMouseUp}
+        onMouseLeave={onMouseUp}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+      >
+        <div
+          style={{
+            transformStyle: "preserve-3d",
+            transform: `rotateX(${rotX}deg) rotateY(${rotY}deg)`,
+            transition: dragging ? "none" : "transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+          }}
+        >
+          <img
+            src={image}
+            alt={name}
+            draggable={false}
+            width={800}
+            height={800}
+            className="aspect-square w-full object-contain p-8"
+          />
+        </div>
+      </div>
+      <div className="absolute bottom-3 right-3 flex items-center gap-1.5">
+        <span className="rounded-full bg-background/80 px-3 py-1 text-xs text-muted-foreground backdrop-blur">
+          Drag to rotate
+        </span>
+        <button
+          onClick={reset}
+          title="Reset view"
+          className="grid h-8 w-8 place-items-center rounded-full bg-background/80 text-muted-foreground backdrop-blur transition hover:text-primary"
+        >
+          <RefreshCw size={14} />
+        </button>
+      </div>
+    </div>
+  );
 }
 
 export const Route = createFileRoute("/product/$id")({
@@ -52,6 +157,7 @@ function PDP() {
 
   const [colorIdx, setColorIdx] = useState(0);
   const [qty, setQty] = useState(1);
+  const [view3D, setView3D] = useState(false);
 
   if (!product) {
     return (
@@ -113,6 +219,8 @@ function PDP() {
     if (buyNow) window.location.href = "/checkout";
   };
 
+  const specs = product.specs ? Object.entries(product.specs) : [];
+
   return (
     <div className="min-h-screen bg-background">
       <JsonLd data={productLd} />
@@ -134,18 +242,47 @@ function PDP() {
         </nav>
 
         <div className="mt-6 grid grid-cols-1 gap-10 lg:grid-cols-2">
-          {/* Gallery */}
+          {/* Gallery / 3D Viewer */}
           <div>
-            <div className="overflow-hidden rounded-3xl bg-surface-muted ring-1 ring-border/60">
-              <img
-                key={mainImage}
-                src={mainImage}
-                alt={product.name}
-                width={800}
-                height={800}
-                className="aspect-square w-full object-contain p-8 transition-opacity duration-300"
-              />
+            {/* View toggle */}
+            <div className="mb-3 flex gap-2">
+              <button
+                onClick={() => setView3D(false)}
+                className={`rounded-full px-4 py-1.5 text-xs font-semibold transition ${
+                  !view3D
+                    ? "bg-primary text-primary-foreground"
+                    : "border border-border text-muted-foreground hover:border-primary hover:text-primary"
+                }`}
+              >
+                Gallery
+              </button>
+              <button
+                onClick={() => setView3D(true)}
+                className={`rounded-full px-4 py-1.5 text-xs font-semibold transition ${
+                  view3D
+                    ? "bg-primary text-primary-foreground"
+                    : "border border-border text-muted-foreground hover:border-primary hover:text-primary"
+                }`}
+              >
+                3D View
+              </button>
             </div>
+
+            {view3D ? (
+              <Product3DViewer image={mainImage} name={product.name} />
+            ) : (
+              <div className="overflow-hidden rounded-3xl bg-surface-muted ring-1 ring-border/60">
+                <img
+                  key={mainImage}
+                  src={mainImage}
+                  alt={product.name}
+                  width={800}
+                  height={800}
+                  className="aspect-square w-full object-contain p-8 transition-opacity duration-300"
+                />
+              </div>
+            )}
+
             {product.colors && (
               <div className="mt-4 grid grid-cols-4 gap-3 sm:grid-cols-5">
                 {product.colors.map((c: { name: string; hex: string; image: string }, i: number) => (
@@ -290,6 +427,34 @@ function PDP() {
             </div>
           </div>
         </div>
+
+        {/* Specifications */}
+        {specs.length > 0 && (
+          <section className="mt-14">
+            <h2 className="font-display text-2xl font-extrabold tracking-tight">
+              Specifications
+            </h2>
+            <div className="mt-5 overflow-hidden rounded-2xl border border-border">
+              <table className="w-full text-sm">
+                <tbody>
+                  {specs.map(([key, value], i) => (
+                    <tr
+                      key={key}
+                      className={i % 2 === 0 ? "bg-surface-muted/50" : "bg-background"}
+                    >
+                      <td className="w-2/5 px-5 py-3.5 font-medium text-foreground/70 md:w-1/3">
+                        {key}
+                      </td>
+                      <td className="px-5 py-3.5 font-semibold text-foreground">
+                        {value}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        )}
       </main>
 
       <Footer />

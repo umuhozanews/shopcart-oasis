@@ -25,7 +25,7 @@ function getInitialDbState(): DbState {
   };
 }
 
-async function loadDbOnServer(): Promise<DbState> {
+export async function loadDbOnServer(): Promise<DbState> {
   if (globalServerMemoryDb !== null) {
     return globalServerMemoryDb;
   }

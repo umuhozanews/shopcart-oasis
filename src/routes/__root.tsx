@@ -11,6 +11,7 @@ import { useEffect, type ReactNode } from "react";
 import { Analytics } from "@vercel/analytics/react";
 import { visitorStore } from "@/lib/visitor-store";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
+import { ChatWidget } from "@/components/ChatWidget";
 import { getServerDb } from "@/lib/server-db";
 import { productStore } from "@/lib/product-store";
 import { siteSettingsStore } from "@/lib/site-settings-store";
@@ -77,6 +78,12 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  // Runs server-side on every full page load — fetches the real database state
+  // so admin changes are immediately visible to every visitor without any delay
+  loader: async () => {
+    const db = await getServerDb();
+    return { db };
+  },
   head: () => ({
     meta: [
       { charSet: "utf-8" },
@@ -128,25 +135,26 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+// Module-level flag resets automatically on every full browser refresh
+// (JS modules are re-evaluated on hard reload, clearing this value)
+let _didSyncFromServer = false;
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const { db } = Route.useLoaderData();
+
+  // Populate stores from server DB synchronously before any child renders.
+  // This means even a first-time visitor (empty localStorage) immediately sees
+  // the admin's latest products, prices, settings, and banners — no flash, no delay.
+  if (typeof window !== 'undefined' && !_didSyncFromServer && db) {
+    _didSyncFromServer = true;
+    productStore.sync(db.products);
+    siteSettingsStore.sync(db.settings);
+    bannerStore.sync(db.slides, db.popup);
+    orderStore.sync(db.orders);
+  }
 
   useEffect(() => {
-    // Sync stores with server database on startup
-    async function syncDatabase() {
-      try {
-        const db = await getServerDb();
-        productStore.sync(db.products);
-        siteSettingsStore.sync(db.settings);
-        bannerStore.sync(db.slides, db.popup);
-        orderStore.sync(db.orders);
-      } catch (err) {
-        console.error('Failed to sync database with server:', err);
-      }
-    }
-    syncDatabase();
-
-    // Track page views for admin dashboard
     visitorStore.record(window.location.pathname);
   }, []);
 
@@ -154,6 +162,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <Outlet />
       <WhatsAppButton />
+      <ChatWidget />
       <Analytics />
     </QueryClientProvider>
   );

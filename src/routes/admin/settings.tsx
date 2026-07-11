@@ -457,6 +457,22 @@ function AdminSettings() {
         </div>
       </Section>
 
+      {/* AI Chatbot */}
+      <Section title="AI Chatbot (Gemini)">
+        <div className="space-y-3">
+          <Field
+            label="Google Gemini API Key"
+            value={form.geminiApiKey ?? ''}
+            onChange={(v) => set('geminiApiKey', v)}
+            placeholder="AQ.Ab8RN6..."
+            type="password"
+          />
+          <p className="text-xs text-muted-foreground">
+            Get your free key at <span className="font-medium text-foreground">aistudio.google.com/apikey</span>. Save it here and the chatbot will start using real Gemini AI automatically — no restart needed.
+          </p>
+        </div>
+      </Section>
+
       {/* Footer Customization */}
       <Section title="Footer Customization">
         <div className="space-y-4">
