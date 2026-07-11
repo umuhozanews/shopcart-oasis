@@ -49,6 +49,7 @@ type FormState = {
   imageData: string; // base64 or URL — main image
   category: string;
   condition: 'new' | 'used';
+  inStock: boolean;
   galleryFront: string;
   galleryBack: string;
   gallerySide: string;
@@ -56,7 +57,7 @@ type FormState = {
 
 const blank: FormState = {
   name: '', tagline: '', price: '', stock: '', imageData: '',
-  category: 'phones', condition: 'new',
+  category: 'phones', condition: 'new', inStock: true,
   galleryFront: '', galleryBack: '', gallerySide: '',
 };
 
@@ -188,6 +189,7 @@ function AdminProducts() {
       imageData: p.image,
       category: p.category || 'phones',
       condition: p.condition || 'new',
+      inStock: p.stock > 0,
       galleryFront: g.find((x) => x.label === 'Front View')?.src ?? '',
       galleryBack:  g.find((x) => x.label === 'Back View')?.src  ?? '',
       gallerySide:  g.find((x) => x.label === 'Side View')?.src  ?? '',
@@ -215,7 +217,7 @@ function AdminProducts() {
       name: form.name.trim() || undefined,
       tagline: form.tagline,
       price: parseFloat(form.price) || 0,
-      stock: parseInt(form.stock, 10) || 0,
+      stock: form.inStock ? (parseInt(form.stock, 10) || 1) : 0,
       image,
       category: form.category,
       condition: form.condition,
@@ -247,7 +249,7 @@ function AdminProducts() {
       name,
       tagline: form.tagline,
       price: parseFloat(form.price) || 0,
-      stock: parseInt(form.stock, 10) || 0,
+      stock: form.inStock ? (parseInt(form.stock, 10) || 1) : 0,
       rating: 5,
       reviews: 0,
       image: mainImage,
@@ -349,6 +351,31 @@ function AdminProducts() {
                 </label>
               </div>
             </div>
+            <div>
+              <label className="block text-xs font-medium text-muted-foreground mb-1">Availability *</label>
+              <div className="mt-1 flex gap-3">
+                <label className="flex flex-1 cursor-pointer items-center gap-2.5 rounded-lg border border-input bg-background px-4 py-2.5 text-sm transition has-[:checked]:border-green-500 has-[:checked]:bg-green-50 has-[:checked]:text-green-700">
+                  <input
+                    type="radio"
+                    name="stock-add"
+                    checked={form.inStock}
+                    onChange={() => setForm((f) => ({ ...f, inStock: true }))}
+                    className="accent-green-600"
+                  />
+                  ✅ In Stock
+                </label>
+                <label className="flex flex-1 cursor-pointer items-center gap-2.5 rounded-lg border border-input bg-background px-4 py-2.5 text-sm transition has-[:checked]:border-red-400 has-[:checked]:bg-red-50 has-[:checked]:text-red-600">
+                  <input
+                    type="radio"
+                    name="stock-add"
+                    checked={!form.inStock}
+                    onChange={() => setForm((f) => ({ ...f, inStock: false }))}
+                    className="accent-red-500"
+                  />
+                  ❌ Out of Stock
+                </label>
+              </div>
+            </div>
             <ImageUploader value={form.imageData} onChange={setField('imageData')} />
             <div className="sm:col-span-2">
               <p className="text-xs font-medium text-muted-foreground mb-2">
@@ -446,6 +473,31 @@ function AdminProducts() {
                 </label>
               </div>
             </div>
+            <div>
+              <label className="block text-xs font-medium text-muted-foreground mb-1">Availability *</label>
+              <div className="mt-1 flex gap-3">
+                <label className="flex flex-1 cursor-pointer items-center gap-2.5 rounded-lg border border-input bg-background px-4 py-2.5 text-sm transition has-[:checked]:border-green-500 has-[:checked]:bg-green-50 has-[:checked]:text-green-700">
+                  <input
+                    type="radio"
+                    name="stock-edit"
+                    checked={form.inStock}
+                    onChange={() => setForm((f) => ({ ...f, inStock: true }))}
+                    className="accent-green-600"
+                  />
+                  ✅ In Stock
+                </label>
+                <label className="flex flex-1 cursor-pointer items-center gap-2.5 rounded-lg border border-input bg-background px-4 py-2.5 text-sm transition has-[:checked]:border-red-400 has-[:checked]:bg-red-50 has-[:checked]:text-red-600">
+                  <input
+                    type="radio"
+                    name="stock-edit"
+                    checked={!form.inStock}
+                    onChange={() => setForm((f) => ({ ...f, inStock: false }))}
+                    className="accent-red-500"
+                  />
+                  ❌ Out of Stock
+                </label>
+              </div>
+            </div>
             <ImageUploader value={form.imageData} onChange={setField('imageData')} label="Product Image (upload to replace)" />
             <div className="sm:col-span-2">
               <p className="text-xs font-medium text-muted-foreground mb-2">
@@ -531,9 +583,15 @@ function AdminProducts() {
                   </td>
                   <td className="px-5 py-3 text-right font-semibold">{formatRWF(p.price)}</td>
                   <td className="px-5 py-3 text-right hidden sm:table-cell">
-                    <span className={`font-medium ${p.stock <= 5 ? 'text-destructive' : ''}`}>
-                      {p.stock === 0 ? 'Out of stock' : p.stock}
-                    </span>
+                    {p.stock > 0 ? (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-700">
+                        ✅ In Stock
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-red-600">
+                        ❌ Out of Stock
+                      </span>
+                    )}
                   </td>
                   <td className="px-5 py-3">
                     <div className="flex items-center justify-end gap-1.5">

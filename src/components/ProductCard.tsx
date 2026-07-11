@@ -64,9 +64,17 @@ export function ProductCard({ product }: { product: Product }) {
             <div className="text-sm font-bold text-foreground">
               {formatRWF(product.price)}
             </div>
+            <div className="mt-1">
+              {product.stock > 0 ? (
+                <span className="text-[10px] font-semibold text-green-600">✅ In Stock</span>
+              ) : (
+                <span className="text-[10px] font-semibold text-red-500">❌ Out of Stock</span>
+              )}
+            </div>
           </div>
         </div>
         <button
+          disabled={product.stock === 0}
           onClick={() => {
             cartStore.add({
               id: product.id,
@@ -76,9 +84,9 @@ export function ProductCard({ product }: { product: Product }) {
             });
             toast.success(`${product.name} added to cart`);
           }}
-          className="mt-auto self-start rounded-full border border-primary/60 px-5 py-1.5 text-xs font-semibold text-primary transition hover:bg-primary hover:text-primary-foreground"
+          className="mt-auto self-start rounded-full border border-primary/60 px-5 py-1.5 text-xs font-semibold text-primary transition hover:bg-primary hover:text-primary-foreground disabled:cursor-not-allowed disabled:opacity-40"
         >
-          Add to Cart
+          {product.stock > 0 ? 'Add to Cart' : 'Out of Stock'}
         </button>
       </div>
     </div>

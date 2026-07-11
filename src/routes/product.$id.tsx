@@ -343,42 +343,55 @@ function PDP() {
               </div>
             )}
 
-            {/* Qty + stock */}
-            <div className="flex flex-wrap items-center gap-6">
-              <div className="inline-flex items-center rounded-full border border-border">
-                <button
-                  onClick={() => setQty((q) => Math.max(1, q - 1))}
-                  aria-label="Decrease"
-                  className="grid h-11 w-11 place-items-center text-foreground/70 hover:text-primary"
-                >
-                  <Minus size={14} />
-                </button>
-                <span className="w-8 text-center text-sm font-semibold">{qty}</span>
-                <button
-                  onClick={() => setQty((q) => q + 1)}
-                  aria-label="Increase"
-                  className="grid h-11 w-11 place-items-center text-foreground/70 hover:text-primary"
-                >
-                  <Plus size={14} />
-                </button>
-              </div>
-              <div className="text-sm">
-                Only <span className="font-bold text-warning">{product.stock} items</span> left!
-                <div className="text-muted-foreground">Don't miss it</div>
-              </div>
+            {/* Stock status */}
+            <div className="mb-4">
+              {product.stock > 0 ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1 text-xs font-bold text-green-700">
+                  ✅ In Stock
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-red-100 px-3 py-1 text-xs font-bold text-red-600">
+                  ❌ Out of Stock
+                </span>
+              )}
             </div>
+
+            {/* Qty selector — only when in stock */}
+            {product.stock > 0 && (
+              <div className="flex flex-wrap items-center gap-6">
+                <div className="inline-flex items-center rounded-full border border-border">
+                  <button
+                    onClick={() => setQty((q) => Math.max(1, q - 1))}
+                    aria-label="Decrease"
+                    className="grid h-11 w-11 place-items-center text-foreground/70 hover:text-primary"
+                  >
+                    <Minus size={14} />
+                  </button>
+                  <span className="w-8 text-center text-sm font-semibold">{qty}</span>
+                  <button
+                    onClick={() => setQty((q) => q + 1)}
+                    aria-label="Increase"
+                    className="grid h-11 w-11 place-items-center text-foreground/70 hover:text-primary"
+                  >
+                    <Plus size={14} />
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* CTA buttons */}
             <div className="mt-6 flex flex-wrap gap-3">
               <button
                 onClick={() => addToCart(true)}
-                className="min-w-40 rounded-full bg-primary px-8 py-3.5 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90"
+                disabled={product.stock === 0}
+                className="min-w-40 rounded-full bg-primary px-8 py-3.5 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Buy Now
               </button>
               <button
                 onClick={() => addToCart(false)}
-                className="min-w-40 rounded-full border border-primary bg-transparent px-8 py-3.5 text-sm font-semibold text-primary transition hover:bg-primary hover:text-primary-foreground"
+                disabled={product.stock === 0}
+                className="min-w-40 rounded-full border border-primary bg-transparent px-8 py-3.5 text-sm font-semibold text-primary transition hover:bg-primary hover:text-primary-foreground disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Add to Cart
               </button>
