@@ -48,7 +48,7 @@ type FormState = {
   stock: string;
   imageData: string; // base64 or URL — main image
   category: string;
-  condition: 'new' | 'used';
+  condition: 'new' | 'dubai' | 'used';
   inStock: boolean;
   galleryFront: string;
   galleryBack: string;
@@ -336,7 +336,18 @@ function AdminProducts() {
                     onChange={() => setField('condition')('new')}
                     className="accent-primary"
                   />
-                  ✨ New
+                  🆕 Brand New
+                </label>
+                <label className="flex flex-1 cursor-pointer items-center gap-2.5 rounded-lg border border-input bg-background px-4 py-2.5 text-sm transition has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 has-[:checked]:text-blue-700">
+                  <input
+                    type="radio"
+                    name="condition-add"
+                    value="dubai"
+                    checked={form.condition === 'dubai'}
+                    onChange={() => setField('condition')('dubai')}
+                    className="accent-blue-500"
+                  />
+                  🇦🇪 Dubai
                 </label>
                 <label className="flex flex-1 cursor-pointer items-center gap-2.5 rounded-lg border border-input bg-background px-4 py-2.5 text-sm transition has-[:checked]:border-amber-500 has-[:checked]:bg-amber-50 has-[:checked]:text-amber-700">
                   <input
@@ -458,7 +469,18 @@ function AdminProducts() {
                     onChange={() => setField('condition')('new')}
                     className="accent-primary"
                   />
-                  ✨ New
+                  🆕 Brand New
+                </label>
+                <label className="flex flex-1 cursor-pointer items-center gap-2.5 rounded-lg border border-input bg-background px-4 py-2.5 text-sm transition has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 has-[:checked]:text-blue-700">
+                  <input
+                    type="radio"
+                    name="condition-edit"
+                    value="dubai"
+                    checked={form.condition === 'dubai'}
+                    onChange={() => setField('condition')('dubai')}
+                    className="accent-blue-500"
+                  />
+                  🇦🇪 Dubai
                 </label>
                 <label className="flex flex-1 cursor-pointer items-center gap-2.5 rounded-lg border border-input bg-background px-4 py-2.5 text-sm transition has-[:checked]:border-amber-500 has-[:checked]:bg-amber-50 has-[:checked]:text-amber-700">
                   <input
@@ -575,9 +597,13 @@ function AdminProducts() {
                       <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-700">
                         🔄 Used
                       </span>
+                    ) : p.condition === 'dubai' ? (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-700">
+                        🇦🇪 Dubai
+                      </span>
                     ) : (
                       <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-700">
-                        ✨ New
+                        🆕 Brand New
                       </span>
                     )}
                   </td>

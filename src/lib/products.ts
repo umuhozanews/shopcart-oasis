@@ -15,7 +15,7 @@ export type Product = {
   stock: number;
   breadcrumb: string[];
   category: string;
-  condition?: 'new' | 'used';
+  condition?: 'new' | 'dubai' | 'used';
   specs?: Record<string, string>;
 };
 

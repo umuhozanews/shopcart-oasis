@@ -298,9 +298,13 @@ function PDP() {
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-700">
                   🔄 Used Device
                 </span>
+              ) : product.condition === 'dubai' ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-100 px-3 py-1 text-xs font-bold text-blue-700">
+                  🇦🇪 Dubai (Open Box)
+                </span>
               ) : (
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1 text-xs font-bold text-green-700">
-                  ✨ Brand New
+                  🆕 Brand New
                 </span>
               )}
             </div>

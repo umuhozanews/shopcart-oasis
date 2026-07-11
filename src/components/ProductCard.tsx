@@ -28,9 +28,13 @@ export function ProductCard({ product }: { product: Product }) {
             <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-1 text-[11px] font-bold text-amber-700 shadow-sm">
               🔄 Used
             </span>
+          ) : product.condition === 'dubai' ? (
+            <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2.5 py-1 text-[11px] font-bold text-blue-700 shadow-sm">
+              🇦🇪 Dubai
+            </span>
           ) : (
             <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-1 text-[11px] font-bold text-green-700 shadow-sm">
-              ✨ New
+              🆕 Brand New
             </span>
           )}
         </div>
