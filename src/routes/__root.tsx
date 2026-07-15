@@ -101,7 +101,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "Rwanda's premier destination for premium audio and electronics.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:image", content: "https://www.hippotech.rw/hippo-logo.png" },
+      { property: "og:image:width", content: "800" },
+      { property: "og:image:height", content: "400" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: "https://www.hippotech.rw/hippo-logo.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
