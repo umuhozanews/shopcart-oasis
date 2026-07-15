@@ -1,25 +1,16 @@
 import { Link } from '@tanstack/react-router';
 import { Phone, MapPin, MessageCircle, Instagram, Facebook } from 'lucide-react';
-import hippoLogo from '@/assets/hippo-logo.png';
 import { useSiteSettings } from '@/lib/site-settings-store';
 
 export function Footer() {
   const s = useSiteSettings();
-  const logoSrc = s.logoData || hippoLogo;
 
   return (
     <footer className="mt-24 bg-primary text-primary-foreground">
       <div className="mx-auto grid max-w-7xl gap-10 px-6 py-14 sm:grid-cols-2 lg:grid-cols-4">
         {/* Brand */}
         <div>
-          <div className="flex items-center gap-3">
-            <img
-              src={logoSrc}
-              alt={s.siteName}
-              className={`h-14 w-auto object-contain ${s.logoData ? '' : 'brightness-0 invert'}`}
-            />
-          </div>
-          <p className="mt-4 max-w-xs text-sm opacity-80">{s.siteTagline}</p>
+          <p className="max-w-xs text-sm opacity-80">{s.siteTagline}</p>
           <div className="mt-4 flex items-start gap-2 text-sm opacity-90">
             <MapPin size={16} className="mt-0.5 shrink-0" />
             <span>{s.address}</span>
