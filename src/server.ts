@@ -44,8 +44,49 @@ function isH3SwallowedErrorBody(body: string): boolean {
   }
 }
 
+// Proxy route for private Vercel Blob images.
+// The blob store is private-only, so images are uploaded as private blobs
+// and served here using SDK auth. URLs are cached for a year by the browser.
+async function handleImageProxy(reqUrl: URL): Promise<Response> {
+  const blobUrl = reqUrl.searchParams.get("url") ?? "";
+  if (!blobUrl.match(/^https:\/\/[^/]+\.blob\.vercel-storage\.com\//)) {
+    return new Response("Forbidden", { status: 403 });
+  }
+  try {
+    const { get } = await import("@vercel/blob");
+    const result = await get(blobUrl, { access: "private" });
+    if (!result || result.statusCode !== 200 || !result.stream) {
+      return new Response("Not Found", { status: 404 });
+    }
+    const iter = result.stream as AsyncIterable<Uint8Array>;
+    const body = new ReadableStream({
+      async start(controller) {
+        try {
+          for await (const chunk of iter) controller.enqueue(chunk);
+          controller.close();
+        } catch (e) {
+          controller.error(e);
+        }
+      },
+    });
+    return new Response(body, {
+      headers: {
+        "content-type": result.contentType || "image/jpeg",
+        "cache-control": "public, max-age=31536000, immutable",
+      },
+    });
+  } catch (err) {
+    console.error("[img-proxy]", err);
+    return new Response("Error", { status: 500 });
+  }
+}
+
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
+    const url = new URL(request.url);
+    if (url.pathname === "/api/img") {
+      return handleImageProxy(url);
+    }
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);

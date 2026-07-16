@@ -209,15 +209,15 @@ export const saveImageToBlob = createServerFn({ method: 'POST' })
       const binary = atob(base64Data ?? data.base64);
       const bytes = new Uint8Array(binary.length);
       for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-      // Wrap in Blob so the SDK receives a well-typed Web API object
-      // rather than a raw Uint8Array (avoids internal Buffer usage in SDK).
       const blob = new Blob([bytes], { type: mime });
+      // The blob store is private-only — use access:'private' and serve
+      // images through /api/img proxy which handles SDK auth transparently.
       const result = await put(`product-images/${data.filename}`, blob, {
-        access: 'public',
+        access: 'private',
         contentType: mime,
         addRandomSuffix: true,
       });
-      return { url: result.url };
+      return { url: `/api/img?url=${encodeURIComponent(result.url)}` };
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       console.error('[server-db] Image blob upload failed:', msg);
