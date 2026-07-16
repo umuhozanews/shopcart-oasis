@@ -64,23 +64,23 @@ export const productStore = {
   add(p: Product) {
     const updated = [...read(), p];
     write(updated);
-    saveServerDb({ data: { products: updated } })
-      .then((r) => console.log('[db] add status:', r.status))
-      .catch((err) => console.error('[db] add failed:', err));
+    saveServerDb({ data: { products: updated } }).catch((err) =>
+      console.error('Failed to sync added product to server:', err)
+    );
   },
   update(id: string, patch: Partial<Pick<Product, 'name' | 'tagline' | 'price' | 'stock' | 'image' | 'gallery' | 'category' | 'breadcrumb' | 'condition'>>) {
     const updated = read().map((p) => (p.id === id ? { ...p, ...patch } : p));
     write(updated);
-    saveServerDb({ data: { products: updated } })
-      .then((r) => console.log('[db] update status:', r.status))
-      .catch((err) => console.error('[db] update failed:', err));
+    saveServerDb({ data: { products: updated } }).catch((err) =>
+      console.error('Failed to sync updated product to server:', err)
+    );
   },
   delete(id: string) {
     const updated = read().filter((p) => p.id !== id);
     write(updated);
-    saveServerDb({ data: { products: updated } })
-      .then((r) => console.log('[db] delete status:', r.status))
-      .catch((err) => console.error('[db] delete failed:', err));
+    saveServerDb({ data: { products: updated } }).catch((err) =>
+      console.error('Failed to sync deleted product to server:', err)
+    );
   },
   subscribe(l: () => void) {
     listeners.add(l);

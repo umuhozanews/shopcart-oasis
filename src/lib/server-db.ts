@@ -126,7 +126,7 @@ export async function loadDbOnServer(): Promise<DbState> {
   return state;
 }
 
-async function saveDbOnServer(state: DbState): Promise<string> {
+async function saveDbOnServer(state: DbState) {
   globalServerMemoryDb = state;
 
   if (hasBlobToken()) {
@@ -134,11 +134,8 @@ async function saveDbOnServer(state: DbState): Promise<string> {
     try {
       await saveToBlob(state);
       globalFromPersistence = true;
-      return 'blob:ok';
     } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      console.error('[blob] WRITE FAILED:', msg);
-      return `blob:error:${msg}`;
+      console.error('Could not write to Vercel Blob:', err instanceof Error ? err.message : String(err));
     }
   } else {
     // Local dev: persist to db.json on disk
@@ -148,12 +145,10 @@ async function saveDbOnServer(state: DbState): Promise<string> {
       const DB_FILE = path.resolve(process.cwd(), 'db.json');
       fs.writeFileSync(DB_FILE, JSON.stringify(state, null, 2), 'utf8');
       globalFromPersistence = true;
-      return 'disk:ok';
     } catch (err) {
-      return 'disk:readonly';
+      console.warn('Could not write db.json to disk (filesystem might be read-only), keeping in server memory:', err);
     }
   }
-  return 'no-token';
 }
 
 export const getServerDb = createServerFn({ method: 'GET' }).handler(async () => {
@@ -166,6 +161,6 @@ export const saveServerDb = createServerFn({ method: 'POST' })
   .handler(async ({ data }) => {
     const current = await loadDbOnServer();
     const updated = { ...current, ...data };
-    const status = await saveDbOnServer(updated);
-    return { success: true, status };
+    await saveDbOnServer(updated);
+    return { success: true };
   });
