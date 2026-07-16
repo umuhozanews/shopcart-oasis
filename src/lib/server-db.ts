@@ -201,11 +201,13 @@ export const saveImageToBlob = createServerFn({ method: 'POST' })
       return { url: data.base64 };
     }
     const { put } = await import('@vercel/blob');
-    const [, base64Data] = data.base64.split(',');
-    const buffer = Buffer.from(base64Data ?? data.base64, 'base64');
-    const result = await put(`product-images/${data.filename}`, buffer, {
+    // Use fetch() to convert the data URL to a Blob — works in both
+    // Edge Runtime (no Buffer) and Node.js.
+    const res = await fetch(data.base64);
+    const blob = await res.blob();
+    const result = await put(`product-images/${data.filename}`, blob, {
       access: 'public',
-      contentType: 'image/jpeg',
+      contentType: blob.type || 'image/jpeg',
       addRandomSuffix: true,
     });
     return { url: result.url };
