@@ -17,7 +17,7 @@ async function processImage(file: File): Promise<string> {
     const objectUrl = URL.createObjectURL(file);
     img.onload = () => {
       URL.revokeObjectURL(objectUrl);
-      const MAX = 1600; // max dimension in px — sharp HD quality
+      const MAX = 900;
       let { width, height } = img;
       if (width > MAX || height > MAX) {
         if (width >= height) {
@@ -35,7 +35,15 @@ async function processImage(file: File): Promise<string> {
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = 'high';
       ctx.drawImage(img, 0, 0, width, height);
-      resolve(canvas.toDataURL('image/jpeg', 0.92));
+      // Vercel Edge Functions cap request bodies at ~1 MB. base64 adds ~37%
+      // overhead, so keep the data URL under 700 KB to stay safely under limit.
+      let q = 0.85;
+      let url = canvas.toDataURL('image/jpeg', q);
+      while (url.length > 700_000 && q > 0.4) {
+        q -= 0.1;
+        url = canvas.toDataURL('image/jpeg', q);
+      }
+      resolve(url);
     };
     img.onerror = () => { URL.revokeObjectURL(objectUrl); reject(new Error('Failed to load image')); };
     img.src = objectUrl;
