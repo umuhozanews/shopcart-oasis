@@ -35,11 +35,11 @@ function hasBlobToken(): boolean {
 
 async function loadFromBlob(): Promise<DbState | null> {
   try {
-    const { list } = await import('@vercel/blob');
+    const { list, get } = await import('@vercel/blob');
     const { blobs } = await list({ prefix: BLOB_PATH });
     if (blobs.length === 0) return null;
-    const res = await fetch(blobs[0].url);
-    if (!res.ok) return null;
+    const res = await get(blobs[0].url);
+    if (!res) return null;
     return (await res.json()) as DbState;
   } catch (err) {
     console.warn('Could not load from Vercel Blob:', err);
@@ -49,18 +49,15 @@ async function loadFromBlob(): Promise<DbState | null> {
 
 async function saveToBlob(state: DbState): Promise<void> {
   const { put, list: blobList, del } = await import('@vercel/blob');
-  console.log('[blob] saveToBlob: BLOB_STORE_ID=', process.env.BLOB_STORE_ID ? 'set' : 'missing', 'BLOB_READ_WRITE_TOKEN=', process.env.BLOB_READ_WRITE_TOKEN ? 'set' : 'missing', 'VERCEL_OIDC_TOKEN=', process.env.VERCEL_OIDC_TOKEN ? 'set' : 'missing');
   const { blobs } = await blobList({ prefix: BLOB_PATH });
-  console.log('[blob] list returned', blobs.length, 'blobs');
   if (blobs.length > 0) {
     await del(blobs.map((b) => b.url));
   }
-  const result = await put(BLOB_PATH, JSON.stringify(state), {
-    access: 'public',
+  await put(BLOB_PATH, JSON.stringify(state), {
+    access: 'private',
     contentType: 'application/json',
     addRandomSuffix: false,
   });
-  console.log('[blob] put succeeded, url=', result.url);
 }
 
 export async function loadDbOnServer(): Promise<DbState> {
