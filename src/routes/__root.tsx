@@ -8,6 +8,7 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
+import { Analytics } from "@vercel/analytics/react";
 import { visitorStore } from "@/lib/visitor-store";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { ChatWidget } from "@/components/ChatWidget";
@@ -171,6 +172,7 @@ function RootComponent() {
       <Outlet />
       <WhatsAppButton />
       <ChatWidget />
+      <Analytics />
     </QueryClientProvider>
   );
 }

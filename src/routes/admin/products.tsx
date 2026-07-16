@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { useState, useRef } from 'react';
 import { Plus, Pencil, Trash2, X, Check, Upload, ImageIcon } from 'lucide-react';
 import { useProducts, productStore } from '@/lib/product-store';
-import { saveImage } from '@/lib/server-db';
+import { saveImageToBlob } from '@/lib/server-db';
 import type { Product } from '@/lib/products';
 import { formatRWF } from '@/lib/currency';
 
@@ -92,7 +92,7 @@ function ImageUploader({
     }
     try {
       const safeName = file.name.replace(/[^a-z0-9.-]/gi, '-').toLowerCase();
-      const { url } = await saveImage({ data: { base64, filename: safeName } });
+      const { url } = await saveImageToBlob({ data: { base64, filename: safeName } });
       onChange(url);
     } catch (err) {
       console.error('Image upload failed:', err);

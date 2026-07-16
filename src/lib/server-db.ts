@@ -12,21 +12,12 @@ export type DbState = {
   orders: Order[];
 };
 
-// In-memory cache — used only in local dev when filesystem is read-only.
-// In production (Railway) we always load fresh from disk so all instances stay in sync.
+// In-memory cache for local dev (no blob token). Production always reads fresh
+// from blob so multiple Vercel instances never serve stale data to each other.
 let globalServerMemoryDb: DbState | null = null;
 let globalFromPersistence = false;
 
-async function getDbPath() {
-  const path = await import('path');
-  const dir = process.env.DB_DIR ?? process.cwd();
-  return path.join(dir, 'db.json');
-}
-
-async function getUploadsDir() {
-  const path = await import('path');
-  return process.env.UPLOADS_DIR ?? path.join(process.cwd(), 'data', 'uploads');
-}
+const BLOB_PATH = 'hippo-tech-db.json';
 
 function getInitialDbState(): DbState {
   return {
@@ -38,72 +29,152 @@ function getInitialDbState(): DbState {
   };
 }
 
-async function loadFromDisk(): Promise<DbState | null> {
+function hasBlobToken(): boolean {
+  return !!(process.env.BLOB_READ_WRITE_TOKEN || process.env.BLOB_STORE_ID);
+}
+
+async function loadFromBlob(): Promise<DbState | null> {
   try {
-    const fs = await import('fs');
-    const DB_FILE = await getDbPath();
-    if (!fs.existsSync(DB_FILE)) return null;
-    const content = fs.readFileSync(DB_FILE, 'utf8');
-    return JSON.parse(content) as DbState;
-  } catch {
+    const { list, get } = await import('@vercel/blob');
+    const { blobs } = await list({ prefix: BLOB_PATH });
+    if (blobs.length === 0) return null;
+
+    // Use the SDK's get() so OIDC / token auth is handled automatically,
+    // rather than a raw fetch() which fails when BLOB_READ_WRITE_TOKEN is absent.
+    const result = await get(blobs[0].url, { access: 'private' });
+    if (!result || result.statusCode !== 200 || !result.stream) {
+      console.warn('[server-db] blob get failed, status:', result?.statusCode);
+      return null;
+    }
+
+    const chunks: Buffer[] = [];
+    for await (const chunk of result.stream as AsyncIterable<Uint8Array>) {
+      chunks.push(Buffer.from(chunk));
+    }
+    return JSON.parse(Buffer.concat(chunks).toString('utf8')) as DbState;
+  } catch (err) {
+    console.error('[server-db] Could not load from Vercel Blob:', err);
     return null;
   }
 }
 
-async function saveToDisk(state: DbState): Promise<void> {
-  const fs = await import('fs');
-  fs.writeFileSync(await getDbPath(), JSON.stringify(state, null, 2), 'utf8');
+async function saveToBlob(state: DbState): Promise<void> {
+  const { put, list: blobList, del } = await import('@vercel/blob');
+  const { blobs } = await blobList({ prefix: BLOB_PATH });
+  if (blobs.length > 0) {
+    await del(blobs.map((b) => b.url));
+  }
+  await put(BLOB_PATH, JSON.stringify(state), {
+    access: 'private',
+    contentType: 'application/json',
+    addRandomSuffix: false,
+  });
 }
 
 export async function loadDbOnServer(): Promise<DbState> {
-  // Always try disk first — ensures every request sees the latest saved data
-  // regardless of which server instance handled the last write.
-  // In-memory cache is only used as fallback when db.json doesn't exist yet.
-  const diskState = await loadFromDisk();
+  if (hasBlobToken()) {
+    // Production: always load fresh from blob so every Vercel function instance
+    // sees the latest data regardless of which instance last wrote.
+    const blobState = await loadFromBlob();
+    if (blobState) {
+      const state: DbState = {
+        products: blobState.products || staticProducts,
+        settings: blobState.settings ? { ...SETTINGS_DEFAULTS, ...blobState.settings } : SETTINGS_DEFAULTS,
+        slides: blobState.slides || DEFAULT_SLIDES,
+        popup: blobState.popup ? { ...DEFAULT_POPUP, ...blobState.popup } : DEFAULT_POPUP,
+        orders: blobState.orders || [],
+      };
 
-  if (diskState) {
-    const defaults = getInitialDbState();
-    const state: DbState = {
-      products: diskState.products || defaults.products,
-      settings: diskState.settings ? { ...SETTINGS_DEFAULTS, ...diskState.settings } : defaults.settings,
-      slides: diskState.slides || defaults.slides,
-      popup: diskState.popup ? { ...DEFAULT_POPUP, ...diskState.popup } : defaults.popup,
-      orders: diskState.orders || defaults.orders,
-    };
+      // Migrate legacy categories
+      state.products = state.products.map((p: Product & { category: string; breadcrumb: string[] }) => {
+        let { category, breadcrumb = [] } = p;
+        if (['iphone', 'samsung', 'budget', 'smartphones'].includes(category)) {
+          category = 'phones'; breadcrumb = ['Electronics', 'Phones'];
+        } else if (category === 'headphones') {
+          category = 'accessories'; breadcrumb = ['Electronics', 'Accessories'];
+        } else if (!['phones', 'computer', 'accessories', 'tablets', 'smart-watches', 'gaming'].includes(category)) {
+          category = 'phones'; breadcrumb = ['Electronics', 'Phones'];
+        }
+        return { ...p, category, breadcrumb };
+      });
 
-    // Migrate legacy categories
-    state.products = state.products.map((p: Product & { category: string; breadcrumb: string[] }) => {
-      let { category, breadcrumb = [] } = p;
-      if (['iphone', 'samsung', 'budget', 'smartphones'].includes(category)) {
-        category = 'phones'; breadcrumb = ['Electronics', 'Phones'];
-      } else if (category === 'headphones') {
-        category = 'accessories'; breadcrumb = ['Electronics', 'Accessories'];
-      } else if (!['phones', 'computer', 'accessories', 'tablets', 'smart-watches', 'gaming'].includes(category)) {
-        category = 'phones'; breadcrumb = ['Electronics', 'Phones'];
-      }
-      return { ...p, category, breadcrumb };
-    });
+      globalServerMemoryDb = state;
+      globalFromPersistence = true;
+      return state;
+    }
 
-    globalServerMemoryDb = state;
-    globalFromPersistence = true;
-    return state;
+    // Blob exists but empty — use defaults
+    globalServerMemoryDb = getInitialDbState();
+    globalFromPersistence = false;
+    return globalServerMemoryDb;
   }
 
-  // No disk file yet — use in-memory cache (populated by first save) or defaults
+  // Local dev: use in-memory cache (filesystem may be read-only)
   if (globalServerMemoryDb !== null) return globalServerMemoryDb;
-  const state = getInitialDbState();
+
+  let state = getInitialDbState();
+  let fromPersistence = false;
+
+  try {
+    const fs = await import('fs');
+    const path = await import('path');
+    const DB_FILE = path.resolve(process.cwd(), 'db.json');
+
+    if (fs.existsSync(DB_FILE)) {
+      const content = fs.readFileSync(DB_FILE, 'utf8');
+      const parsed = JSON.parse(content);
+
+      let products = parsed.products || state.products;
+      products = products.map((p: Product & { category: string; breadcrumb: string[] }) => {
+        let { category, breadcrumb = [] } = p;
+        if (['iphone', 'samsung', 'budget', 'smartphones'].includes(category)) {
+          category = 'phones'; breadcrumb = ['Electronics', 'Phones'];
+        } else if (category === 'headphones') {
+          category = 'accessories'; breadcrumb = ['Electronics', 'Accessories'];
+        } else if (!['phones', 'computer', 'accessories', 'tablets', 'smart-watches', 'gaming'].includes(category)) {
+          category = 'phones'; breadcrumb = ['Electronics', 'Phones'];
+        }
+        return { ...p, category, breadcrumb };
+      });
+
+      state = {
+        products,
+        settings: parsed.settings ? { ...SETTINGS_DEFAULTS, ...parsed.settings } : state.settings,
+        slides: parsed.slides || state.slides,
+        popup: parsed.popup ? { ...DEFAULT_POPUP, ...parsed.popup } : state.popup,
+        orders: parsed.orders || state.orders,
+      };
+      fromPersistence = true;
+    }
+  } catch (err) {
+    console.error('Error loading db.json, using defaults:', err);
+  }
+
   globalServerMemoryDb = state;
-  globalFromPersistence = false;
+  globalFromPersistence = fromPersistence;
   return state;
 }
 
 async function saveDbOnServer(state: DbState) {
   globalServerMemoryDb = state;
-  try {
-    await saveToDisk(state);
-    globalFromPersistence = true;
-  } catch (err) {
-    console.warn('[server-db] Could not write db.json (read-only?), keeping in memory:', err);
+
+  if (hasBlobToken()) {
+    try {
+      await saveToBlob(state);
+      globalFromPersistence = true;
+    } catch (err) {
+      console.error('Could not write to Vercel Blob:', err instanceof Error ? err.message : String(err));
+    }
+  } else {
+    try {
+      const fs = await import('fs');
+      const path = await import('path');
+      const DB_FILE = path.resolve(process.cwd(), 'db.json');
+      fs.writeFileSync(DB_FILE, JSON.stringify(state, null, 2), 'utf8');
+      globalFromPersistence = true;
+    } catch (err) {
+      console.warn('Could not write db.json (filesystem read-only?), keeping in memory:', err);
+    }
   }
 }
 
@@ -121,31 +192,21 @@ export const saveServerDb = createServerFn({ method: 'POST' })
     return { success: true };
   });
 
-// Upload a product image: saves to disk and returns a URL path.
-export const saveImage = createServerFn({ method: 'POST' })
+// Upload a product image to Vercel Blob (public) and return its URL.
+// Falls back to returning the base64 data URL in local dev (no blob token).
+export const saveImageToBlob = createServerFn({ method: 'POST' })
   .inputValidator((data: { base64: string; filename: string }) => data)
   .handler(async ({ data }) => {
-    const fs = await import('fs');
-    const path = await import('path');
-
-    const uploadsDir = await getUploadsDir();
-    if (!fs.existsSync(uploadsDir)) {
-      fs.mkdirSync(uploadsDir, { recursive: true });
+    if (!hasBlobToken()) {
+      return { url: data.base64 };
     }
-
-    const isPng = data.base64.startsWith('data:image/png');
-    const ext = isPng ? 'png' : 'jpg';
-    const safeName = data.filename
-      .replace(/\.[^.]+$/, '')
-      .replace(/[^a-z0-9-]/gi, '-')
-      .toLowerCase()
-      .slice(0, 60);
-    const filename = `${Date.now()}-${safeName}.${ext}`;
-    const filePath = path.join(uploadsDir, filename);
-
+    const { put } = await import('@vercel/blob');
     const [, base64Data] = data.base64.split(',');
     const buffer = Buffer.from(base64Data ?? data.base64, 'base64');
-    fs.writeFileSync(filePath, buffer);
-
-    return { url: `/uploads/${filename}` };
+    const result = await put(`product-images/${data.filename}`, buffer, {
+      access: 'public',
+      contentType: 'image/jpeg',
+      addRandomSuffix: true,
+    });
+    return { url: result.url };
   });
