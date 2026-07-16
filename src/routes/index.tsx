@@ -1,6 +1,21 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import { ChevronDown, SlidersHorizontal, ShieldCheck, Award, Truck, Lock, MessageCircle } from 'lucide-react';
+import phoneImg from '@/assets/phones/iphone-15-pink.jpg';
+import tabletImg from '@/assets/tablets/ipad-air.jpg';
+import laptopImg from '@/assets/laptops/macbook-air.jpg';
+import watchImg from '@/assets/watches/apple-watch.jpg';
+import accessoryImg from '@/assets/accessories/airpods.jpg';
+import gamingImg from '@/assets/gaming/ps5.jpg';
+
+const CATEGORY_IMAGES: Record<string, string> = {
+  phones: phoneImg,
+  tablets: tabletImg,
+  computer: laptopImg,
+  'smart-watches': watchImg,
+  accessories: accessoryImg,
+  gaming: gamingImg,
+};
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { ProductCard } from '@/components/ProductCard';
@@ -178,8 +193,12 @@ function Home() {
                 params={{ slug: c.slug }}
                 className="flex items-center gap-3 rounded-2xl bg-surface-muted p-4 ring-1 ring-border/60 transition hover:ring-primary/40 hover:shadow-sm"
               >
-                <div className="grid h-14 w-14 shrink-0 place-items-center rounded-xl bg-background text-3xl ring-1 ring-border/60">
-                  {c.emoji}
+                <div className="h-14 w-14 shrink-0 overflow-hidden rounded-xl ring-1 ring-border/60">
+                  {CATEGORY_IMAGES[c.slug] ? (
+                    <img src={CATEGORY_IMAGES[c.slug]} alt={c.name} className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="grid h-full w-full place-items-center bg-background text-3xl">{c.emoji}</div>
+                  )}
                 </div>
                 <div className="min-w-0">
                   <div className="truncate text-sm font-semibold">{c.name}</div>
