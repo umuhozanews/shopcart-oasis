@@ -148,14 +148,18 @@ function RootComponent() {
   const { db } = Route.useLoaderData();
 
   // Populate stores from server DB synchronously before any child renders.
-  // This means even a first-time visitor (empty localStorage) immediately sees
-  // the admin's latest products, prices, settings, and banners — no flash, no delay.
+  // Only sync products if the server loaded from real storage (blob/disk).
+  // When _fromPersistence is false the server has no blob token and returned
+  // only defaults — syncing would wipe any products the admin already saved
+  // to localStorage on this browser.
   if (typeof window !== 'undefined' && !_didSyncFromServer && db) {
     _didSyncFromServer = true;
-    productStore.sync(db.products);
+    if (db._fromPersistence) {
+      productStore.sync(db.products);
+      orderStore.sync(db.orders);
+    }
     siteSettingsStore.sync(db.settings);
     bannerStore.sync(db.slides, db.popup);
-    orderStore.sync(db.orders);
   }
 
   useEffect(() => {

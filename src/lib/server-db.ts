@@ -14,6 +14,8 @@ export type DbState = {
 
 // In-memory cache — fast for repeated reads within same function instance
 let globalServerMemoryDb: DbState | null = null;
+// True only when the cache was populated from blob/disk (not just defaults)
+let globalFromPersistence = false;
 
 const BLOB_PATH = 'hippo-tech-db.json';
 
@@ -63,6 +65,7 @@ export async function loadDbOnServer(): Promise<DbState> {
   if (globalServerMemoryDb !== null) return globalServerMemoryDb;
 
   let state = getInitialDbState();
+  let fromPersistence = false;
 
   if (hasBlobToken()) {
     // Production / Vercel: load from Blob storage
@@ -75,6 +78,7 @@ export async function loadDbOnServer(): Promise<DbState> {
         popup: blobState.popup ? { ...DEFAULT_POPUP, ...blobState.popup } : state.popup,
         orders: blobState.orders || state.orders,
       };
+      fromPersistence = true;
     }
   } else {
     // Local dev: load from db.json on disk
@@ -111,6 +115,7 @@ export async function loadDbOnServer(): Promise<DbState> {
           popup: parsed.popup ? { ...DEFAULT_POPUP, ...parsed.popup } : state.popup,
           orders: parsed.orders || state.orders,
         };
+        fromPersistence = true;
       }
     } catch (err) {
       console.error('Error loading db.json, using defaults:', err);
@@ -118,6 +123,7 @@ export async function loadDbOnServer(): Promise<DbState> {
   }
 
   globalServerMemoryDb = state;
+  globalFromPersistence = fromPersistence;
   return state;
 }
 
@@ -128,6 +134,7 @@ async function saveDbOnServer(state: DbState) {
     // Production / Vercel: persist to Blob storage so all instances and cold starts see it
     try {
       await saveToBlob(state);
+      globalFromPersistence = true;
     } catch (err) {
       console.warn('Could not write to Vercel Blob, keeping in server memory only:', err);
     }
@@ -138,13 +145,17 @@ async function saveDbOnServer(state: DbState) {
       const path = await import('path');
       const DB_FILE = path.resolve(process.cwd(), 'db.json');
       fs.writeFileSync(DB_FILE, JSON.stringify(state, null, 2), 'utf8');
+      globalFromPersistence = true;
     } catch (err) {
       console.warn('Could not write db.json to disk (filesystem might be read-only), keeping in server memory:', err);
     }
   }
 }
 
-export const getServerDb = createServerFn({ method: 'GET' }).handler(async () => loadDbOnServer());
+export const getServerDb = createServerFn({ method: 'GET' }).handler(async () => {
+  const state = await loadDbOnServer();
+  return { ...state, _fromPersistence: globalFromPersistence };
+});
 
 export const saveServerDb = createServerFn({ method: 'POST' })
   .inputValidator((data: Partial<DbState>) => data)
