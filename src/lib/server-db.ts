@@ -129,7 +129,7 @@ export async function loadDbOnServer(): Promise<DbState> {
   return state;
 }
 
-async function saveDbOnServer(state: DbState) {
+async function saveDbOnServer(state: DbState): Promise<string> {
   globalServerMemoryDb = state;
 
   if (hasBlobToken()) {
@@ -137,8 +137,11 @@ async function saveDbOnServer(state: DbState) {
     try {
       await saveToBlob(state);
       globalFromPersistence = true;
+      return 'blob:ok';
     } catch (err) {
-      console.error('[blob] WRITE FAILED:', err instanceof Error ? err.message : String(err));
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[blob] WRITE FAILED:', msg);
+      return `blob:error:${msg}`;
     }
   } else {
     // Local dev: persist to db.json on disk
@@ -148,10 +151,12 @@ async function saveDbOnServer(state: DbState) {
       const DB_FILE = path.resolve(process.cwd(), 'db.json');
       fs.writeFileSync(DB_FILE, JSON.stringify(state, null, 2), 'utf8');
       globalFromPersistence = true;
+      return 'disk:ok';
     } catch (err) {
-      console.warn('Could not write db.json to disk (filesystem might be read-only), keeping in server memory:', err);
+      return 'disk:readonly';
     }
   }
+  return 'no-token';
 }
 
 export const getServerDb = createServerFn({ method: 'GET' }).handler(async () => {
@@ -164,6 +169,6 @@ export const saveServerDb = createServerFn({ method: 'POST' })
   .handler(async ({ data }) => {
     const current = await loadDbOnServer();
     const updated = { ...current, ...data };
-    await saveDbOnServer(updated);
-    return { success: true };
+    const status = await saveDbOnServer(updated);
+    return { success: true, status };
   });
