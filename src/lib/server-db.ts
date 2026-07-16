@@ -200,18 +200,27 @@ export const saveImageToBlob = createServerFn({ method: 'POST' })
     if (!hasBlobToken()) {
       return { url: data.base64 };
     }
-    const { put } = await import('@vercel/blob');
-    // atob() + Uint8Array works in Edge Runtime, Node.js 16+, and browsers.
-    // fetch(dataUrl) and Buffer are NOT available in Vercel's Edge Runtime.
-    const [header, base64Data] = data.base64.split(',');
-    const binary = atob(base64Data ?? data.base64);
-    const bytes = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-    const mime = header?.match(/:(.*?);/)?.[1] ?? 'image/jpeg';
-    const result = await put(`product-images/${data.filename}`, bytes, {
-      access: 'public',
-      contentType: mime,
-      addRandomSuffix: true,
-    });
-    return { url: result.url };
+    try {
+      const { put } = await import('@vercel/blob');
+      // Decode base64 data URL → Blob (Web API, available in Edge/Node/Cloudflare).
+      // Never use Buffer (Node-only) or fetch(dataUrl) (not supported in Edge).
+      const [header, base64Data] = data.base64.split(',');
+      const mime = header?.match(/:(.*?);/)?.[1] ?? 'image/jpeg';
+      const binary = atob(base64Data ?? data.base64);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      // Wrap in Blob so the SDK receives a well-typed Web API object
+      // rather than a raw Uint8Array (avoids internal Buffer usage in SDK).
+      const blob = new Blob([bytes], { type: mime });
+      const result = await put(`product-images/${data.filename}`, blob, {
+        access: 'public',
+        contentType: mime,
+        addRandomSuffix: true,
+      });
+      return { url: result.url };
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[server-db] Image blob upload failed:', msg);
+      throw new Error(`Image upload failed: ${msg}`);
+    }
   });

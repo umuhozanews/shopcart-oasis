@@ -104,7 +104,8 @@ function ImageUploader({
       onChange(url);
     } catch (err) {
       console.error('Image upload failed:', err);
-      setError('Upload failed — check your connection and try again.');
+      const msg = err instanceof Error ? err.message : String(err);
+      setError(`Upload failed: ${msg}`);
     } finally {
       setUploading(false);
     }
