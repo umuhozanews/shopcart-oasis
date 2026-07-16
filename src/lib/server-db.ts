@@ -201,13 +201,16 @@ export const saveImageToBlob = createServerFn({ method: 'POST' })
       return { url: data.base64 };
     }
     const { put } = await import('@vercel/blob');
-    // Use fetch() to convert the data URL to a Blob — works in both
-    // Edge Runtime (no Buffer) and Node.js.
-    const res = await fetch(data.base64);
-    const blob = await res.blob();
-    const result = await put(`product-images/${data.filename}`, blob, {
+    // atob() + Uint8Array works in Edge Runtime, Node.js 16+, and browsers.
+    // fetch(dataUrl) and Buffer are NOT available in Vercel's Edge Runtime.
+    const [header, base64Data] = data.base64.split(',');
+    const binary = atob(base64Data ?? data.base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    const mime = header?.match(/:(.*?);/)?.[1] ?? 'image/jpeg';
+    const result = await put(`product-images/${data.filename}`, bytes, {
       access: 'public',
-      contentType: blob.type || 'image/jpeg',
+      contentType: mime,
       addRandomSuffix: true,
     });
     return { url: result.url };
