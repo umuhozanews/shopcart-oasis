@@ -12,12 +12,21 @@ export type DbState = {
   orders: Order[];
 };
 
-// In-memory cache — fast for repeated reads within same function instance
+// In-memory cache — used only in local dev when filesystem is read-only.
+// In production (Railway) we always load fresh from disk so all instances stay in sync.
 let globalServerMemoryDb: DbState | null = null;
-// True only when the cache was populated from blob/disk (not just defaults)
 let globalFromPersistence = false;
 
-const BLOB_PATH = 'hippo-tech-db.json';
+async function getDbPath() {
+  const path = await import('path');
+  const dir = process.env.DB_DIR ?? process.cwd();
+  return path.join(dir, 'db.json');
+}
+
+async function getUploadsDir() {
+  const path = await import('path');
+  return process.env.UPLOADS_DIR ?? path.join(process.cwd(), 'data', 'uploads');
+}
 
 function getInitialDbState(): DbState {
   return {
@@ -29,125 +38,72 @@ function getInitialDbState(): DbState {
   };
 }
 
-function hasBlobToken(): boolean {
-  return !!(process.env.BLOB_READ_WRITE_TOKEN || process.env.BLOB_STORE_ID);
-}
-
-async function loadFromBlob(): Promise<DbState | null> {
+async function loadFromDisk(): Promise<DbState | null> {
   try {
-    const { list, get } = await import('@vercel/blob');
-    const { blobs } = await list({ prefix: BLOB_PATH });
-    if (blobs.length === 0) return null;
-    const res = await get(blobs[0].url);
-    if (!res) return null;
-    return (await res.json()) as DbState;
-  } catch (err) {
-    console.warn('Could not load from Vercel Blob:', err);
+    const fs = await import('fs');
+    const DB_FILE = await getDbPath();
+    if (!fs.existsSync(DB_FILE)) return null;
+    const content = fs.readFileSync(DB_FILE, 'utf8');
+    return JSON.parse(content) as DbState;
+  } catch {
     return null;
   }
 }
 
-async function saveToBlob(state: DbState): Promise<void> {
-  const { put, list: blobList, del } = await import('@vercel/blob');
-  const { blobs } = await blobList({ prefix: BLOB_PATH });
-  if (blobs.length > 0) {
-    await del(blobs.map((b) => b.url));
-  }
-  await put(BLOB_PATH, JSON.stringify(state), {
-    access: 'private',
-    contentType: 'application/json',
-    addRandomSuffix: false,
-  });
+async function saveToDisk(state: DbState): Promise<void> {
+  const fs = await import('fs');
+  fs.writeFileSync(await getDbPath(), JSON.stringify(state, null, 2), 'utf8');
 }
 
 export async function loadDbOnServer(): Promise<DbState> {
-  if (globalServerMemoryDb !== null) return globalServerMemoryDb;
+  // Always try disk first — ensures every request sees the latest saved data
+  // regardless of which server instance handled the last write.
+  // In-memory cache is only used as fallback when db.json doesn't exist yet.
+  const diskState = await loadFromDisk();
 
-  let state = getInitialDbState();
-  let fromPersistence = false;
+  if (diskState) {
+    const defaults = getInitialDbState();
+    const state: DbState = {
+      products: diskState.products || defaults.products,
+      settings: diskState.settings ? { ...SETTINGS_DEFAULTS, ...diskState.settings } : defaults.settings,
+      slides: diskState.slides || defaults.slides,
+      popup: diskState.popup ? { ...DEFAULT_POPUP, ...diskState.popup } : defaults.popup,
+      orders: diskState.orders || defaults.orders,
+    };
 
-  if (hasBlobToken()) {
-    // Production / Vercel: load from Blob storage
-    const blobState = await loadFromBlob();
-    if (blobState) {
-      state = {
-        products: blobState.products || state.products,
-        settings: blobState.settings ? { ...SETTINGS_DEFAULTS, ...blobState.settings } : state.settings,
-        slides: blobState.slides || state.slides,
-        popup: blobState.popup ? { ...DEFAULT_POPUP, ...blobState.popup } : state.popup,
-        orders: blobState.orders || state.orders,
-      };
-      fromPersistence = true;
-    }
-  } else {
-    // Local dev: load from db.json on disk
-    try {
-      const fs = await import('fs');
-      const path = await import('path');
-      const DB_FILE = path.resolve(process.cwd(), 'db.json');
-
-      if (fs.existsSync(DB_FILE)) {
-        const content = fs.readFileSync(DB_FILE, 'utf8');
-        const parsed = JSON.parse(content);
-
-        let products = parsed.products || state.products;
-        products = products.map((p: Product & { category: string; breadcrumb: string[] }) => {
-          let category = p.category;
-          let breadcrumb = p.breadcrumb || [];
-          if (['iphone', 'samsung', 'budget', 'smartphones'].includes(category)) {
-            category = 'phones';
-            breadcrumb = ['Electronics', 'Phones'];
-          } else if (category === 'headphones') {
-            category = 'accessories';
-            breadcrumb = ['Electronics', 'Accessories'];
-          } else if (!['phones', 'computer', 'accessories', 'tablets', 'smart-watches', 'gaming'].includes(category)) {
-            category = 'phones';
-            breadcrumb = ['Electronics', 'Phones'];
-          }
-          return { ...p, category, breadcrumb };
-        });
-
-        state = {
-          products,
-          settings: parsed.settings ? { ...SETTINGS_DEFAULTS, ...parsed.settings } : state.settings,
-          slides: parsed.slides || state.slides,
-          popup: parsed.popup ? { ...DEFAULT_POPUP, ...parsed.popup } : state.popup,
-          orders: parsed.orders || state.orders,
-        };
-        fromPersistence = true;
+    // Migrate legacy categories
+    state.products = state.products.map((p: Product & { category: string; breadcrumb: string[] }) => {
+      let { category, breadcrumb = [] } = p;
+      if (['iphone', 'samsung', 'budget', 'smartphones'].includes(category)) {
+        category = 'phones'; breadcrumb = ['Electronics', 'Phones'];
+      } else if (category === 'headphones') {
+        category = 'accessories'; breadcrumb = ['Electronics', 'Accessories'];
+      } else if (!['phones', 'computer', 'accessories', 'tablets', 'smart-watches', 'gaming'].includes(category)) {
+        category = 'phones'; breadcrumb = ['Electronics', 'Phones'];
       }
-    } catch (err) {
-      console.error('Error loading db.json, using defaults:', err);
-    }
+      return { ...p, category, breadcrumb };
+    });
+
+    globalServerMemoryDb = state;
+    globalFromPersistence = true;
+    return state;
   }
 
+  // No disk file yet — use in-memory cache (populated by first save) or defaults
+  if (globalServerMemoryDb !== null) return globalServerMemoryDb;
+  const state = getInitialDbState();
   globalServerMemoryDb = state;
-  globalFromPersistence = fromPersistence;
+  globalFromPersistence = false;
   return state;
 }
 
 async function saveDbOnServer(state: DbState) {
   globalServerMemoryDb = state;
-
-  if (hasBlobToken()) {
-    // Production / Vercel: persist to Blob storage so all instances and cold starts see it
-    try {
-      await saveToBlob(state);
-      globalFromPersistence = true;
-    } catch (err) {
-      console.error('Could not write to Vercel Blob:', err instanceof Error ? err.message : String(err));
-    }
-  } else {
-    // Local dev: persist to db.json on disk
-    try {
-      const fs = await import('fs');
-      const path = await import('path');
-      const DB_FILE = path.resolve(process.cwd(), 'db.json');
-      fs.writeFileSync(DB_FILE, JSON.stringify(state, null, 2), 'utf8');
-      globalFromPersistence = true;
-    } catch (err) {
-      console.warn('Could not write db.json to disk (filesystem might be read-only), keeping in server memory:', err);
-    }
+  try {
+    await saveToDisk(state);
+    globalFromPersistence = true;
+  } catch (err) {
+    console.warn('[server-db] Could not write db.json (read-only?), keeping in memory:', err);
   }
 }
 
@@ -163,4 +119,33 @@ export const saveServerDb = createServerFn({ method: 'POST' })
     const updated = { ...current, ...data };
     await saveDbOnServer(updated);
     return { success: true };
+  });
+
+// Upload a product image: saves to disk and returns a URL path.
+export const saveImage = createServerFn({ method: 'POST' })
+  .inputValidator((data: { base64: string; filename: string }) => data)
+  .handler(async ({ data }) => {
+    const fs = await import('fs');
+    const path = await import('path');
+
+    const uploadsDir = await getUploadsDir();
+    if (!fs.existsSync(uploadsDir)) {
+      fs.mkdirSync(uploadsDir, { recursive: true });
+    }
+
+    const isPng = data.base64.startsWith('data:image/png');
+    const ext = isPng ? 'png' : 'jpg';
+    const safeName = data.filename
+      .replace(/\.[^.]+$/, '')
+      .replace(/[^a-z0-9-]/gi, '-')
+      .toLowerCase()
+      .slice(0, 60);
+    const filename = `${Date.now()}-${safeName}.${ext}`;
+    const filePath = path.join(uploadsDir, filename);
+
+    const [, base64Data] = data.base64.split(',');
+    const buffer = Buffer.from(base64Data ?? data.base64, 'base64');
+    fs.writeFileSync(filePath, buffer);
+
+    return { url: `/uploads/${filename}` };
   });

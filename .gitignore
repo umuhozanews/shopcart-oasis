@@ -25,8 +25,9 @@ dist-ssr
 .wrangler/
 .dev.vars
 
-# Local dev database (never commit — production uses Vercel Blob)
+# Local database and uploads (production data lives on Railway volume)
 db.json
+data/uploads/
 
 # Editor directories and files
 .vscode/*
@@ -39,3 +40,4 @@ db.json
 *.sln
 *.sw?
 .vercel
+.env*

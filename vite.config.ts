@@ -15,7 +15,11 @@ export default defineConfig(async ({ command }) => {
   if (command === 'build') {
     try {
       const { nitro } = await import('nitro/vite')
-      plugins.push(nitro({ defaultPreset: 'cloudflare-module' }))
+      plugins.push(nitro({
+        defaultPreset: 'node-server',
+        // Scan server/ directory for route handlers (e.g. uploads handler)
+        scanDirs: ['server'],
+      }))
     } catch {
       // nitro optional — skip if not installed
     }

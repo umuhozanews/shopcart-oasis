@@ -2,6 +2,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { useState, useRef } from 'react';
 import { Plus, Pencil, Trash2, X, Check, Upload, ImageIcon } from 'lucide-react';
 import { useProducts, productStore } from '@/lib/product-store';
+import { saveImage } from '@/lib/server-db';
 import type { Product } from '@/lib/products';
 import { formatRWF } from '@/lib/currency';
 
@@ -81,11 +82,21 @@ function ImageUploader({
     }
     setError('');
     setUploading(true);
+    let base64: string;
     try {
-      const result = await processImage(file);
-      onChange(result);
+      base64 = await processImage(file);
     } catch {
-      setError('Failed to process image. Try a different file.');
+      setUploading(false);
+      setError('Could not read this image. Try converting it to JPEG or PNG first.');
+      return;
+    }
+    try {
+      const safeName = file.name.replace(/[^a-z0-9.-]/gi, '-').toLowerCase();
+      const { url } = await saveImage({ data: { base64, filename: safeName } });
+      onChange(url);
+    } catch (err) {
+      console.error('Image upload failed:', err);
+      setError('Upload failed — check your connection and try again.');
     } finally {
       setUploading(false);
     }
