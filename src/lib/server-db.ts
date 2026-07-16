@@ -49,16 +49,18 @@ async function loadFromBlob(): Promise<DbState | null> {
 
 async function saveToBlob(state: DbState): Promise<void> {
   const { put, list: blobList, del } = await import('@vercel/blob');
-  // Remove any existing blob at this path before uploading the new one
+  console.log('[blob] saveToBlob: BLOB_STORE_ID=', process.env.BLOB_STORE_ID ? 'set' : 'missing', 'BLOB_READ_WRITE_TOKEN=', process.env.BLOB_READ_WRITE_TOKEN ? 'set' : 'missing', 'VERCEL_OIDC_TOKEN=', process.env.VERCEL_OIDC_TOKEN ? 'set' : 'missing');
   const { blobs } = await blobList({ prefix: BLOB_PATH });
+  console.log('[blob] list returned', blobs.length, 'blobs');
   if (blobs.length > 0) {
     await del(blobs.map((b) => b.url));
   }
-  await put(BLOB_PATH, JSON.stringify(state), {
+  const result = await put(BLOB_PATH, JSON.stringify(state), {
     access: 'public',
     contentType: 'application/json',
     addRandomSuffix: false,
   });
+  console.log('[blob] put succeeded, url=', result.url);
 }
 
 export async function loadDbOnServer(): Promise<DbState> {
@@ -136,7 +138,7 @@ async function saveDbOnServer(state: DbState) {
       await saveToBlob(state);
       globalFromPersistence = true;
     } catch (err) {
-      console.warn('Could not write to Vercel Blob, keeping in server memory only:', err);
+      console.error('[blob] WRITE FAILED:', err instanceof Error ? err.message : String(err));
     }
   } else {
     // Local dev: persist to db.json on disk
