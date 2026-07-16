@@ -115,6 +115,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap",
       },
+      { rel: "shortcut icon", href: "/favicon.ico" },
       { rel: "icon", href: "/hippo-logo.png", type: "image/png" },
       { rel: "apple-touch-icon", href: "/hippo-logo.png" },
     ],
