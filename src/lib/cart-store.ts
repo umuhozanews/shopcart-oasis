@@ -9,7 +9,25 @@ export type CartItem = {
   qty: number;
 };
 
-let items: CartItem[] = [];
+const STORAGE_KEY = "hippo_cart";
+
+function load(): CartItem[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as CartItem[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+function save(items: CartItem[]) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+  } catch {}
+}
+
+let items: CartItem[] = load();
 const listeners = new Set<() => void>();
 
 function emit() {
@@ -22,11 +40,13 @@ export const cartStore = {
     const existing = items.find((i) => i.id + (i.color ?? "") === key);
     if (existing) existing.qty += qty;
     else items = [...items, { ...item, qty }];
+    save(items);
     emit();
   },
   remove(id: string, color?: string) {
     const key = id + (color ?? "");
     items = items.filter((i) => i.id + (i.color ?? "") !== key);
+    save(items);
     emit();
   },
   setQty(id: string, color: string | undefined, qty: number) {
@@ -34,10 +54,12 @@ export const cartStore = {
     items = items.map((i) =>
       i.id + (i.color ?? "") === key ? { ...i, qty: Math.max(1, qty) } : i
     );
+    save(items);
     emit();
   },
   clear() {
     items = [];
+    save(items);
     emit();
   },
   get() {

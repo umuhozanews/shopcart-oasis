@@ -1,13 +1,14 @@
 import { Link } from "@tanstack/react-router";
 import { Heart } from "lucide-react";
-import { useState } from "react";
 import type { Product } from "@/lib/products";
 import { cartStore } from "@/lib/cart-store";
+import { wishlistStore, useWishlist } from "@/lib/wishlist-store";
 import { toast } from "sonner";
 import { formatRWF } from "@/lib/currency";
 
 export function ProductCard({ product }: { product: Product }) {
-  const [liked, setLiked] = useState(false);
+  const wishlist = useWishlist();
+  const liked = wishlist.has(product.id);
 
   return (
     <div className="group flex flex-col overflow-hidden rounded-2xl bg-card ring-1 ring-border/60 transition-shadow hover:shadow-lg hover:shadow-primary/5">
@@ -39,7 +40,7 @@ export function ProductCard({ product }: { product: Product }) {
           )}
         </div>
         <button
-          onClick={() => setLiked((v) => !v)}
+          onClick={() => wishlistStore.toggle(product.id)}
           aria-label="Add to wishlist"
           className="absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-full bg-background/90 text-foreground shadow-sm ring-1 ring-border transition hover:bg-background"
         >

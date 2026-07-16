@@ -250,7 +250,11 @@ function PDP() {
         <nav className="flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
           {product.breadcrumb.map((b: string, i: number) => (
             <span key={i} className="flex items-center gap-1">
-              <Link to="/" className="hover:text-primary">{b}</Link>
+              {i === 0 ? (
+                <Link to="/" className="hover:text-primary">{b}</Link>
+              ) : (
+                <Link to="/category/$slug" params={{ slug: product.category }} className="hover:text-primary">{b}</Link>
+              )}
               <ChevronRight size={12} className="opacity-50" />
             </span>
           ))}
