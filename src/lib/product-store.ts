@@ -2,7 +2,7 @@ import { useSyncExternalStore } from 'react';
 import { products as staticProducts, type Product } from './products';
 import { saveServerDb } from './server-db';
 
-const KEY = 'shopcart_products_v4';
+const KEY = 'shopcart_products_v5';
 const listeners = new Set<() => void>();
 let cache: Product[] | null = null;
 
@@ -12,13 +12,23 @@ function read(): Product[] {
   try {
     const raw = localStorage.getItem(KEY);
     let products = raw ? (JSON.parse(raw) as Product[]) : staticProducts;
+    if (!products || products.length === 0) {
+      products = staticProducts;
+    }
     
-    // Migrate old legacy categories to new ones so the site won't break
+    // Migrate old legacy categories and heal broken image URLs
     let migrated = false;
     products = products.map((p) => {
-      let category = p.category;
-      let breadcrumb = p.breadcrumb || [];
-      if (category === 'iphone' || category === 'samsung' || category === 'budget' || category === 'smartphones') {
+      let { category, breadcrumb = [], image } = p;
+      const staticMatch = staticProducts.find((s) => s.id === p.id);
+
+      // If image is missing or was pointing to suspended /api/img proxy, heal with static asset
+      if ((!image || image.startsWith('/api/img')) && staticMatch?.image) {
+        image = staticMatch.image;
+        migrated = true;
+      }
+
+      if (['iphone', 'samsung', 'budget', 'smartphones'].includes(category)) {
         category = 'phones';
         breadcrumb = ['Electronics', 'Phones'];
         migrated = true;
@@ -31,13 +41,10 @@ function read(): Product[] {
         breadcrumb = ['Electronics', 'Phones'];
         migrated = true;
       }
-      if (migrated) {
-        return { ...p, category, breadcrumb };
-      }
-      return p;
+      return { ...p, category, breadcrumb, image };
     });
 
-    if (migrated) {
+    if (migrated || !raw) {
       localStorage.setItem(KEY, JSON.stringify(products));
     }
 

@@ -155,8 +155,10 @@ function RootComponent() {
   // to localStorage on this browser.
   if (typeof window !== 'undefined' && !_didSyncFromServer && db) {
     _didSyncFromServer = true;
-    if (db._fromPersistence) {
+    if (db.products && db.products.length > 0) {
       productStore.sync(db.products);
+    }
+    if (db.orders) {
       orderStore.sync(db.orders);
     }
     siteSettingsStore.sync(db.settings);

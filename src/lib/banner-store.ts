@@ -92,7 +92,7 @@ const DEFAULTS: BannerData = {
   popup: DEFAULT_POPUP,
 };
 
-const KEY = 'hippo_banners_v2';
+const KEY = 'hippo_banners_v3';
 const listeners = new Set<() => void>();
 let cache: BannerData | null = null;
 
@@ -101,8 +101,19 @@ function read(): BannerData {
   if (typeof window === 'undefined') return DEFAULTS;
   try {
     const raw = localStorage.getItem(KEY);
-    cache = raw ? { ...DEFAULTS, ...JSON.parse(raw) } : DEFAULTS;
-    return cache!;
+    let data: BannerData = raw ? { ...DEFAULTS, ...JSON.parse(raw) } : DEFAULTS;
+    
+    // Heal broken slide images if pointing to /api/img
+    data.slides = (data.slides || DEFAULT_SLIDES).map((s, idx) => {
+      if (!s.imageData || s.imageData.startsWith('/api/img')) {
+        const def = DEFAULT_SLIDES[idx] || DEFAULT_SLIDES[0];
+        return { ...s, imageData: def.imageData };
+      }
+      return s;
+    });
+
+    cache = data;
+    return cache;
   } catch {
     cache = DEFAULTS;
     return cache;
