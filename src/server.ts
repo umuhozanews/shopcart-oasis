@@ -76,8 +76,15 @@ async function handleImageProxy(reqUrl: URL): Promise<Response> {
       },
     });
   } catch (err) {
-    console.error("[img-proxy]", err);
-    return new Response("Error", { status: 500 });
+    console.warn("[img-proxy] Blob fetch failed:", err);
+    const placeholder = `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400" fill="#f8fafc"><rect width="400" height="400" fill="#f1f5f9"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#94a3b8">Hippo Technology</text></svg>`;
+    return new Response(placeholder, {
+      status: 200,
+      headers: {
+        "content-type": "image/svg+xml",
+        "cache-control": "public, max-age=3600",
+      },
+    });
   }
 }
 

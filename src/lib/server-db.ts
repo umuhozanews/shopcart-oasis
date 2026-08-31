@@ -59,14 +59,11 @@ async function loadFromBlob(): Promise<DbState | null> {
 }
 
 async function saveToBlob(state: DbState): Promise<void> {
-  const { put, list: blobList, del } = await import('@vercel/blob');
-  const { blobs } = await blobList({ prefix: BLOB_PATH });
-  if (blobs.length > 0) {
-    await del(blobs.map((b) => b.url));
-  }
+  const { put } = await import('@vercel/blob');
   await put(BLOB_PATH, JSON.stringify(state), {
     access: 'private',
     contentType: 'application/json',
+    allowOverwrite: true,
     addRandomSuffix: false,
   });
 }
