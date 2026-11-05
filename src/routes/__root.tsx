@@ -162,8 +162,6 @@ function RootComponent() {
     if (db.orders) {
       orderStore.sync(db.orders);
     }
-      orderStore.sync(db.orders);
-    }
     siteSettingsStore.sync(db.settings);
     bannerStore.sync(db.slides, db.popup);
   }
