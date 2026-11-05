@@ -4,7 +4,8 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { cartStore, useCart } from "@/lib/cart-store";
 import { orderStore } from "@/lib/order-store";
-import { Minus, Plus, Trash2, CheckCircle2 } from "lucide-react";
+import { Minus, Plus, Trash2, CheckCircle2, ShieldCheck } from "lucide-react";
+import { productStore } from "@/lib/product-store";
 import { formatRWF } from "@/lib/currency";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
@@ -45,30 +46,49 @@ function buildOrderMessage(
   total: number
 ): string {
   const lines = items
-    .map(
-      (i) =>
-        `• ${i.name}${i.color ? ` (${i.color})` : ""} x${i.qty} — ${formatRWF(
-          i.price * i.qty
-        )}`
-    )
-    .join("\n");
+    .map((i) => {
+      const prod = productStore.getById(i.id);
+      const condition = i.condition ?? prod?.condition;
+      const specs = i.specs ?? prod?.specs;
+
+      let condText = "";
+      if (condition === "dubai") condText = "🇦🇪 Dubai Open Box (Import)";
+      else if (condition === "used") condText = "🔄 Second Hand (Certified Pre-Owned)";
+      else if (condition === "new") condText = "🆕 Brand New (Factory Sealed Box)";
+
+      const specList = specs
+        ? Object.entries(specs)
+            .map(([k, v]) => `   • ${k}: ${v}`)
+            .join("\n")
+        : "";
+
+      return [
+        `• *${i.name}*${i.color ? ` (${i.color})` : ""} x${i.qty} — ${formatRWF(i.price * i.qty)}`,
+        condText ? `  Condition: ${condText}` : "",
+        specList ? `  Full Specifications:\n${specList}` : "",
+      ]
+        .filter(Boolean)
+        .join("\n");
+    })
+    .join("\n\n");
 
   return [
     `*New Order ${orderId}*`,
     "",
-    "*Items*",
+    "*Ordered Items & Detailed Specifications*",
     lines,
     "",
     `Subtotal: ${formatRWF(subtotal)}`,
     `*Total: ${formatRWF(total)}*`,
     "",
-    "*Customer*",
+    "*Customer Details*",
     `Name: ${customer.name}`,
     `Mobile: ${customer.mobile}`,
     customer.address ? `Address: ${customer.address}` : "",
     customer.city ? `City: ${customer.city}` : "",
     customer.email ? `Email: ${customer.email}` : "",
     "Payment: Cash on Delivery",
+    "Delivery: Free across Rwanda",
   ]
     .filter(Boolean)
     .join("\n");
@@ -186,51 +206,104 @@ function Checkout() {
                     </Link>
                   </div>
                 ) : (
-                  items.map((item) => (
-                    <div
-                      key={item.id + (item.color ?? "")}
-                      className="grid grid-cols-[64px_1fr_auto] items-center gap-4 py-4"
-                    >
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        className="h-16 w-16 rounded-xl bg-surface-muted object-contain p-1"
-                      />
-                      <div className="min-w-0">
-                        <div className="truncate text-sm font-semibold">{item.name}</div>
-                        <div className="text-xs text-muted-foreground">
-                          {item.color ? `Color: ${item.color} · ` : ""}Qty {item.qty}
+                  items.map((item) => {
+                    const prod = productStore.getById(item.id);
+                    const condition = item.condition ?? prod?.condition;
+                    const specs = item.specs ?? prod?.specs;
+                    const specEntries = specs ? Object.entries(specs) : [];
+
+                    return (
+                      <div
+                        key={item.id + (item.color ?? "")}
+                        className="py-4 space-y-3 border-b border-border last:border-b-0"
+                      >
+                        <div className="grid grid-cols-[64px_1fr_auto] items-start gap-4">
+                          <img
+                            src={item.image}
+                            onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = "/product-image-fallback.svg"; }}
+                            alt={item.name}
+                            className="h-16 w-16 rounded-xl bg-surface-muted object-contain p-1"
+                          />
+                          <div className="min-w-0">
+                            <div className="font-semibold text-sm text-foreground">{item.name}</div>
+                            <div className="mt-1 flex flex-wrap items-center gap-2">
+                              {condition === "dubai" ? (
+                                <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2.5 py-0.5 text-[11px] font-bold text-blue-700">
+                                  🇦🇪 Dubai Open Box
+                                </span>
+                              ) : condition === "used" ? (
+                                <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-[11px] font-bold text-amber-700">
+                                  🔄 Second Hand · Tested
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-0.5 text-[11px] font-bold text-green-700">
+                                  🆕 Brand New · Sealed
+                                </span>
+                              )}
+                              {item.color && (
+                                <span className="text-xs text-muted-foreground">
+                                  Color: {item.color}
+                                </span>
+                              )}
+                            </div>
+                            <div className="mt-2.5 inline-flex items-center rounded-full border border-border">
+                              <button
+                                onClick={() => cartStore.setQty(item.id, item.color, item.qty - 1)}
+                                className="grid h-7 w-7 place-items-center hover:text-primary transition"
+                                aria-label="Decrease"
+                              >
+                                <Minus size={12} />
+                              </button>
+                              <span className="w-6 text-center text-xs font-semibold">{item.qty}</span>
+                              <button
+                                onClick={() => cartStore.setQty(item.id, item.color, item.qty + 1)}
+                                className="grid h-7 w-7 place-items-center hover:text-primary transition"
+                                aria-label="Increase"
+                              >
+                                <Plus size={12} />
+                              </button>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-sm font-bold text-foreground">{formatRWF(item.price * item.qty)}</div>
+                            <div className="text-[11px] text-muted-foreground mt-0.5">
+                              {formatRWF(item.price)} each
+                            </div>
+                            <button
+                              onClick={() => cartStore.remove(item.id, item.color)}
+                              className="mt-2 text-muted-foreground hover:text-destructive transition"
+                              aria-label="Remove"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
                         </div>
-                        <div className="mt-2 inline-flex items-center rounded-full border border-border">
-                          <button
-                            onClick={() => cartStore.setQty(item.id, item.color, item.qty - 1)}
-                            className="grid h-7 w-7 place-items-center hover:text-primary transition"
-                            aria-label="Decrease"
-                          >
-                            <Minus size={12} />
-                          </button>
-                          <span className="w-6 text-center text-xs font-semibold">{item.qty}</span>
-                          <button
-                            onClick={() => cartStore.setQty(item.id, item.color, item.qty + 1)}
-                            className="grid h-7 w-7 place-items-center hover:text-primary transition"
-                            aria-label="Increase"
-                          >
-                            <Plus size={12} />
-                          </button>
-                        </div>
+
+                        {/* Whole technical specifications for this phone / device */}
+                        {specEntries.length > 0 && (
+                          <div className="rounded-xl border border-border/70 bg-surface-muted/60 p-3.5">
+                            <div className="mb-2.5 flex items-center justify-between text-xs font-bold text-foreground">
+                              <span className="flex items-center gap-1.5 text-primary">
+                                <ShieldCheck size={14} />
+                                Full Technical Specifications
+                              </span>
+                              <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">
+                                Complete Specs Breakdown
+                              </span>
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5 text-xs">
+                              {specEntries.map(([k, v]) => (
+                                <div key={k} className="flex items-baseline justify-between border-b border-border/30 pb-1">
+                                  <span className="text-muted-foreground font-medium pr-2">{k}:</span>
+                                  <span className="text-foreground font-semibold text-right">{v}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
-                      <div className="text-right">
-                        <div className="text-sm font-bold">{formatRWF(item.price * item.qty)}</div>
-                        <button
-                          onClick={() => cartStore.remove(item.id, item.color)}
-                          className="mt-2 text-muted-foreground hover:text-destructive transition"
-                          aria-label="Remove"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
             </section>

@@ -159,6 +159,7 @@ function AdminOrders() {
                                   >
                                     <img
                                       src={item.image}
+                                      onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = '/product-image-fallback.svg'; }}
                                       alt=""
                                       className="h-9 w-9 flex-shrink-0 rounded-lg bg-background object-contain p-1"
                                     />

@@ -1,10 +1,10 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight, Minus, Plus, Truck, RotateCcw } from "lucide-react";
 import { useState } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import type { Product, GalleryImage } from "@/lib/products";
-import { useProduct } from "@/lib/product-store";
+import { productStore, useProduct } from "@/lib/product-store";
 import { cartStore } from "@/lib/cart-store";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
@@ -13,10 +13,23 @@ import { JsonLd, SITE_URL } from "@/components/JsonLd";
 
 function brandFor(name: string): string {
   const n = name.toLowerCase();
-  if (n.includes("iphone")) return "Apple";
+  if (n.includes("apple") || n.includes("iphone") || n.includes("macbook") || n.includes("ipad") || n.includes("airpods")) return "Apple";
   if (n.includes("samsung") || n.includes("galaxy")) return "Samsung";
+  if (n.includes("jbl")) return "JBL";
+  if (n.includes("anker")) return "Anker";
+  if (n.includes("bose")) return "Bose";
+  if (n.includes("marshall")) return "Marshall";
+  if (n.includes("sony") || n.includes("playstation") || n.includes("ps5")) return "Sony";
+  if (n.includes("nintendo")) return "Nintendo";
+  if (n.includes("microsoft") || n.includes("xbox") || n.includes("surface")) return "Microsoft";
+  if (n.includes("dell")) return "Dell";
+  if (n.includes("hp")) return "HP";
+  if (n.includes("lenovo") || n.includes("thinkpad")) return "Lenovo";
+  if (n.includes("asus") || n.includes("rog")) return "ASUS";
+  if (n.includes("google") || n.includes("pixel")) return "Google";
   if (n.includes("tecno")) return "Tecno";
   if (n.includes("infinix")) return "Infinix";
+  if (n.includes("dji")) return "DJI";
   return "Hippo Technology";
 }
 
@@ -67,6 +80,7 @@ function ProductGallery({
         <img
           key={active.src}
           src={active.src}
+          onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = "/product-image-fallback.svg"; }}
           alt={active.label}
           width={800}
           height={800}
@@ -117,6 +131,7 @@ function ProductGallery({
               >
                 <img
                   src={img.src}
+                  onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = "/product-image-fallback.svg"; }}
                   alt={img.label}
                   loading="lazy"
                   width={120}
@@ -144,15 +159,16 @@ function ProductGallery({
 // ---------------------------------------------------------------------------
 export const Route = createFileRoute("/product/$id")({
   loader: ({ params }) => {
-    return { product: null as Product | null, productId: params.id };
+    return { product: productStore.getById(params.id) ?? null, productId: params.id };
   },
   head: ({ loaderData }) => ({
     meta: loaderData?.product
       ? [
-          { title: `${loaderData.product.name} — Hippo Technology` },
-          { name: "description", content: loaderData.product.tagline },
-          { property: "og:title", content: `${loaderData.product.name} — Hippo Technology` },
-          { property: "og:description", content: loaderData.product.tagline },
+          { title: `${loaderData.product.name} | Buy in Kigali, Rwanda | Hippo Technology` },
+          { name: "description", content: `${loaderData.product.tagline} Available from Hippo Technology in Kigali, with free delivery across Rwanda.` },
+          { name: "keywords", content: `${loaderData.product.name}, buy ${loaderData.product.name} Rwanda, ${brandFor(loaderData.product.name)} Kigali, phones in Kigali` },
+          { property: "og:title", content: `${loaderData.product.name} | Hippo Technology` },
+          { property: "og:description", content: `${loaderData.product.tagline} Free delivery across Rwanda.` },
           { property: "og:type", content: "product" },
           { property: "og:image", content: loaderData.product.image },
           { property: "og:url", content: `${SITE_URL}/product/${loaderData.product.id}` },
@@ -166,6 +182,7 @@ export const Route = createFileRoute("/product/$id")({
 });
 
 function PDP() {
+  const navigate = useNavigate();
   const { product: loaderProduct, productId } = Route.useLoaderData();
   const storeProduct = useProduct(productId);
   const product = storeProduct ?? loaderProduct;
@@ -221,7 +238,19 @@ function PDP() {
     },
   };
 
-  const addToCart = (buyNow?: boolean) => {
+  const conditionOrder: Record<string, number> = { dubai: 1, new: 2, used: 3 };
+  const siblingVariants = product.modelKey
+    ? productStore
+        .getAll()
+        .filter((p) => p.modelKey === product.modelKey)
+        .sort(
+          (a, b) =>
+            (conditionOrder[a.condition ?? ""] ?? 99) -
+            (conditionOrder[b.condition ?? ""] ?? 99)
+        )
+    : [];
+
+  const addToCart = () => {
     cartStore.add(
       {
         id: product.id,
@@ -229,11 +258,13 @@ function PDP() {
         price: product.price,
         image: mainImage,
         color: activeColor?.name,
+        condition: product.condition,
+        specs: product.specs,
       },
       qty
     );
     toast.success(`${product.name} added to cart`);
-    if (buyNow) window.location.href = "/checkout";
+    navigate({ to: "/checkout" });
   };
 
   const specs = product.specs ? Object.entries(product.specs) : [];
@@ -297,7 +328,7 @@ function PDP() {
           {/* Right — Info */}
           <div>
             {/* Condition badge */}
-            <div className="mb-3">
+            {product.condition && <div className="mb-3">
               {product.condition === 'used' ? (
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-700">
                   🔄 Used · Open Box
@@ -311,7 +342,7 @@ function PDP() {
                   🆕 Brand New · Sealed
                 </span>
               )}
-            </div>
+            </div>}
             <h1 className="font-display text-3xl font-extrabold tracking-tight sm:text-4xl">
               {product.name}
             </h1>
@@ -325,6 +356,56 @@ function PDP() {
               <div className="text-2xl font-bold text-foreground">{formatRWF(product.price)}</div>
               <p className="mt-1 text-xs text-muted-foreground">Free delivery across Rwanda</p>
             </div>
+
+            {/* Condition selector if this model has multiple tiers */}
+            {siblingVariants.length > 1 && (
+              <div className="mt-5 rounded-2xl border border-border/80 bg-surface-muted/60 p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                    Available Conditions
+                  </span>
+                  <span className="text-xs font-semibold text-primary">3 Options Available</span>
+                </div>
+                <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+                  {siblingVariants.map((v) => {
+                    const isCurrent = v.id === product.id;
+                    const conditionLabel =
+                      v.condition === "dubai"
+                        ? "🇦🇪 Dubai Open Box"
+                        : v.condition === "used"
+                        ? "🔄 Second Hand"
+                        : "🆕 Brand New Sealed";
+                    const subLabel =
+                      v.condition === "dubai"
+                        ? "Dubai import · Tested"
+                        : v.condition === "used"
+                        ? "Pre-owned · Certified"
+                        : "Factory sealed box";
+
+                    return (
+                      <Link
+                        key={v.id}
+                        to="/product/$id"
+                        params={{ id: v.id }}
+                        className={`flex flex-col justify-between rounded-xl p-3 border text-left transition ${
+                          isCurrent
+                            ? "border-primary bg-primary/10 ring-2 ring-primary shadow-sm"
+                            : "border-border/70 bg-background hover:border-primary/40"
+                        }`}
+                      >
+                        <div>
+                          <div className="text-xs font-bold text-foreground">{conditionLabel}</div>
+                          <div className="text-[11px] text-muted-foreground mt-0.5">{subLabel}</div>
+                        </div>
+                        <div className="mt-2 text-sm font-extrabold text-foreground">
+                          {formatRWF(v.price)}
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             <div className="my-6 h-px bg-border" />
 
@@ -390,14 +471,14 @@ function PDP() {
             {/* CTA buttons */}
             <div className="mt-6 flex flex-wrap gap-3">
               <button
-                onClick={() => addToCart(true)}
+                onClick={addToCart}
                 disabled={product.stock === 0}
                 className="min-w-40 rounded-full bg-primary px-8 py-3.5 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Buy Now
               </button>
               <button
-                onClick={() => addToCart(false)}
+                onClick={addToCart}
                 disabled={product.stock === 0}
                 className="min-w-40 rounded-full border border-primary bg-transparent px-8 py-3.5 text-sm font-semibold text-primary transition hover:bg-primary hover:text-primary-foreground disabled:cursor-not-allowed disabled:opacity-40"
               >

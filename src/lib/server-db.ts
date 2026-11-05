@@ -3,6 +3,7 @@ import { products as staticProducts, type Product } from './products';
 import { SETTINGS_DEFAULTS, type SiteSettings } from './site-settings-store';
 import { DEFAULT_SLIDES, DEFAULT_POPUP, type HeroSlide, type StockPopup } from './banner-store';
 import type { Order } from './order-store';
+import { verifyAdminSession } from './admin-session';
 
 export type DbState = {
   products: Product[];
@@ -10,6 +11,7 @@ export type DbState = {
   slides: HeroSlide[];
   popup: StockPopup;
   orders: Order[];
+  removedProductIds?: string[];
 };
 
 // In-memory cache for local dev (no blob token). Production always reads fresh
@@ -22,11 +24,28 @@ const BLOB_PATH = 'hippo-tech-db.json';
 function getInitialDbState(): DbState {
   return {
     products: staticProducts,
+    removedProductIds: [],
     settings: SETTINGS_DEFAULTS,
     slides: DEFAULT_SLIDES,
     popup: DEFAULT_POPUP,
     orders: [],
   };
+}
+
+function mergeCatalogProducts(savedProducts: Product[], removedProductIds: string[] = []): Product[] {
+  const removed = new Set(removedProductIds);
+  const ids = new Set<string>();
+  const names = new Set<string>();
+  const merged: Product[] = [];
+  for (const product of [...staticProducts, ...savedProducts]) {
+    if (removed.has(product.id)) continue;
+    const name = product.name.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+    if (ids.has(product.id) || names.has(name)) continue;
+    ids.add(product.id);
+    names.add(name);
+    merged.push(product);
+  }
+  return merged;
 }
 
 function hasBlobToken(): boolean {
@@ -75,7 +94,8 @@ export async function loadDbOnServer(): Promise<DbState> {
     const blobState = await loadFromBlob();
     if (blobState) {
       const state: DbState = {
-        products: blobState.products || staticProducts,
+        products: mergeCatalogProducts(blobState.products || staticProducts, blobState.removedProductIds || []),
+        removedProductIds: blobState.removedProductIds || [],
         settings: blobState.settings ? { ...SETTINGS_DEFAULTS, ...blobState.settings } : SETTINGS_DEFAULTS,
         slides: blobState.slides || DEFAULT_SLIDES,
         popup: blobState.popup ? { ...DEFAULT_POPUP, ...blobState.popup } : DEFAULT_POPUP,
@@ -89,7 +109,7 @@ export async function loadDbOnServer(): Promise<DbState> {
           category = 'phones'; breadcrumb = ['Electronics', 'Phones'];
         } else if (category === 'headphones') {
           category = 'accessories'; breadcrumb = ['Electronics', 'Accessories'];
-        } else if (!['phones', 'computer', 'accessories', 'tablets', 'smart-watches', 'gaming'].includes(category)) {
+        } else if (!['phones', 'computer', 'accessories', 'tablets', 'smart-watches', 'gaming', 'speakers', 'ring-light', 'gimbal', 'airpods-pro-2gen', 'headset'].includes(category)) {
           category = 'phones'; breadcrumb = ['Electronics', 'Phones'];
         }
         return { ...p, category, breadcrumb };
@@ -128,14 +148,15 @@ export async function loadDbOnServer(): Promise<DbState> {
           category = 'phones'; breadcrumb = ['Electronics', 'Phones'];
         } else if (category === 'headphones') {
           category = 'accessories'; breadcrumb = ['Electronics', 'Accessories'];
-        } else if (!['phones', 'computer', 'accessories', 'tablets', 'smart-watches', 'gaming'].includes(category)) {
+        } else if (!['phones', 'computer', 'accessories', 'tablets', 'smart-watches', 'gaming', 'speakers', 'ring-light', 'gimbal', 'airpods-pro-2gen', 'headset'].includes(category)) {
           category = 'phones'; breadcrumb = ['Electronics', 'Phones'];
         }
         return { ...p, category, breadcrumb };
       });
 
       state = {
-        products,
+        products: mergeCatalogProducts(products, parsed.removedProductIds || []),
+        removedProductIds: parsed.removedProductIds || [],
         settings: parsed.settings ? { ...SETTINGS_DEFAULTS, ...parsed.settings } : state.settings,
         slides: parsed.slides || state.slides,
         popup: parsed.popup ? { ...DEFAULT_POPUP, ...parsed.popup } : state.popup,
@@ -161,6 +182,8 @@ async function saveDbOnServer(state: DbState) {
       globalFromPersistence = true;
     } catch (err) {
       console.error('Could not write to Vercel Blob:', err instanceof Error ? err.message : String(err));
+      globalServerMemoryDb = null;
+      throw new Error('Could not save the store data. Check the Vercel Blob connection and try again.');
     }
   } else {
     try {
@@ -171,6 +194,7 @@ async function saveDbOnServer(state: DbState) {
       globalFromPersistence = true;
     } catch (err) {
       console.warn('Could not write db.json (filesystem read-only?), keeping in memory:', err);
+      throw new Error('Could not save the store data. Try again.');
     }
   }
 }
@@ -181,10 +205,28 @@ export const getServerDb = createServerFn({ method: 'GET' }).handler(async () =>
 });
 
 export const saveServerDb = createServerFn({ method: 'POST' })
-  .inputValidator((data: Partial<DbState>) => data)
+  .inputValidator((data: Partial<DbState> & { adminToken?: string }) => data)
   .handler(async ({ data }) => {
+    const isAdminMutation = data.products !== undefined || data.settings !== undefined || data.slides !== undefined || data.popup !== undefined;
+    if (isAdminMutation && !(await verifyAdminSession(data.adminToken))) {
+      throw new Error('Your admin session has expired. Sign in again to save changes.');
+    }
     const current = await loadDbOnServer();
-    const updated = { ...current, ...data };
+    const { adminToken: _adminToken, removedProductIds: _removedProductIds, ...changes } = data;
+    const removedProductIds = new Set(current.removedProductIds || []);
+    if (data.products) {
+      const currentIds = new Set(data.products.map((product) => product.id));
+      for (const product of staticProducts) {
+        if (currentIds.has(product.id)) removedProductIds.delete(product.id);
+        else removedProductIds.add(product.id);
+      }
+    }
+    const updated: DbState = {
+      ...current,
+      ...changes,
+      removedProductIds: [...removedProductIds],
+    };
+    if (data.products) updated.products = mergeCatalogProducts(data.products, updated.removedProductIds);
     await saveDbOnServer(updated);
     return { success: true };
   });
@@ -192,8 +234,11 @@ export const saveServerDb = createServerFn({ method: 'POST' })
 // Upload a product image to Vercel Blob (public) and return its URL.
 // Falls back to returning the base64 data URL in local dev (no blob token).
 export const saveImageToBlob = createServerFn({ method: 'POST' })
-  .inputValidator((data: { base64: string; filename: string }) => data)
+  .inputValidator((data: { base64: string; filename: string; adminToken?: string }) => data)
   .handler(async ({ data }) => {
+    if (!(await verifyAdminSession(data.adminToken))) {
+      throw new Error('Your admin session has expired. Sign in again to upload images.');
+    }
     if (!hasBlobToken()) {
       return { url: data.base64 };
     }

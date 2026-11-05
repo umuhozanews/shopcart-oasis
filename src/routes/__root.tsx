@@ -88,17 +88,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Hippo Technology — Premium Audio & Electronics Rwanda" },
+      { title: "Hippo Technology | Phone Shop in Kigali, Rwanda" },
       {
         name: "description",
         content:
-          "Shop premium headphones, earbuds, and electronics at Hippo Technology Rwanda. Free delivery, genuine products, 30-day returns.",
+          "Shop phones and electronics at Hippo Technology, a phone shop in Kigali, Rwanda. Browse smartphones, accessories and more with free delivery across Rwanda.",
       },
+      { name: "keywords", content: "phone shop Kigali, best phone shop in Kigali, phones in Kigali, phone shop Rwanda, phones in Rwanda, buy phones Rwanda, smartphone shop Kigali, electronics store Kigali, Hippo Technology" },
       { property: "og:title", content: "Hippo Technology — Your World, Upgraded." },
       {
         property: "og:description",
         content:
-          "Rwanda's premier destination for premium audio and electronics.",
+          "Shop smartphones and electronics in Kigali, Rwanda, with free nationwide delivery from Hippo Technology.",
       },
       { property: "og:type", content: "website" },
       { property: "og:image", content: "https://www.hippotech.rw/hippo-logo.png" },
@@ -115,9 +116,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap",
       },
-      { rel: "shortcut icon", href: "/hippo-logo.png" },
-      { rel: "icon", href: "/hippo-logo.png", type: "image/png" },
-      { rel: "apple-touch-icon", href: "/hippo-logo.png" },
+      { rel: "shortcut icon", href: "/favicon.ico" },
+      { rel: "icon", href: "/favicon.png", type: "image/png", sizes: "256x256" },
+      { rel: "apple-touch-icon", href: "/favicon.png", sizes: "256x256" },
     ],
   }),
   shellComponent: RootShell,
@@ -155,10 +156,12 @@ function RootComponent() {
   // to localStorage on this browser.
   if (typeof window !== 'undefined' && !_didSyncFromServer && db) {
     _didSyncFromServer = true;
-    if (db.products && db.products.length > 0) {
-      productStore.sync(db.products);
+    if (db._fromPersistence && db.products && db.products.length > 0) {
+      productStore.sync(db.products, db.removedProductIds);
     }
     if (db.orders) {
+      orderStore.sync(db.orders);
+    }
       orderStore.sync(db.orders);
     }
     siteSettingsStore.sync(db.settings);

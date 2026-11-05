@@ -1,12 +1,12 @@
 import { createFileRoute, Link, notFound } from '@tanstack/react-router';
 import { useMemo, useState } from 'react';
-import { Search, X } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { ProductCard } from '@/components/ProductCard';
 import { useProducts } from '@/lib/product-store';
 import { Toaster } from '@/components/ui/sonner';
-import { categories, brands } from '@/lib/products';
+import { categories } from '@/lib/products';
 
 export const Route = createFileRoute('/category/$slug')({
   loader: ({ params }) => {
@@ -25,10 +25,14 @@ export const Route = createFileRoute('/category/$slug')({
     }
     const cat = categories.find((c) => c.slug === slug);
     const name = cat?.name ?? 'All Products';
+    const description = slug === 'phones'
+      ? 'Shop phones in Kigali and across Rwanda at Hippo Technology. Browse smartphones with free delivery nationwide.'
+      : `Shop ${name} at Hippo Technology in Kigali, Rwanda. Browse our electronics and enjoy free delivery across Rwanda.`;
     return {
       meta: [
         { title: `${name} — Hippo Technology` },
-        { name: 'description', content: `Shop ${name} at Hippo Technology. Free delivery across Rwanda.` },
+        { name: 'description', content: description },
+        { name: 'keywords', content: `${name}, ${name} Kigali, ${name} Rwanda, electronics shop Kigali, Hippo Technology` },
       ],
     };
   },
@@ -43,14 +47,6 @@ export const Route = createFileRoute('/category/$slug')({
   component: CategoryPage,
 });
 
-const PRICE_RANGES = [
-  { label: 'Under 100k', min: 0, max: 100000 },
-  { label: '100k – 500k', min: 100000, max: 500000 },
-  { label: '500k – 1M', min: 500000, max: 1000000 },
-  { label: '1M – 2M', min: 1000000, max: 2000000 },
-  { label: 'Over 2M', min: 2000000, max: Infinity },
-];
-
 function CategoryPage() {
   const { slug } = Route.useLoaderData();
   let normalizedSlug = slug;
@@ -61,14 +57,6 @@ function CategoryPage() {
   const allProducts = useProducts();
 
   const [query, setQuery] = useState('');
-  const [priceRange, setPriceRange] = useState<number | null>(null);
-  const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
-
-  const categoriesWithCounts = categories.map((c) => ({
-    ...c,
-    count: c.slug === 'all' ? allProducts.length : allProducts.filter((p) => p.category === c.slug).length,
-  }));
-
   const baseFiltered = useMemo(
     () => (normalizedSlug === 'all' ? allProducts : allProducts.filter((p) => p.category === normalizedSlug)),
     [allProducts, normalizedSlug],
@@ -77,22 +65,15 @@ function CategoryPage() {
   const filtered = useMemo(() => {
     return baseFiltered.filter((p) => {
       if (query && !p.name.toLowerCase().includes(query.toLowerCase()) && !p.tagline.toLowerCase().includes(query.toLowerCase())) return false;
-      if (priceRange !== null) {
-        const r = PRICE_RANGES[priceRange];
-        if (p.price < r.min || p.price > r.max) return false;
-      }
-      if (selectedBrand && !p.name.toLowerCase().startsWith(selectedBrand.toLowerCase())) return false;
       return true;
     });
-  }, [baseFiltered, query, priceRange, selectedBrand]);
+  }, [baseFiltered, query]);
 
   const clearAll = () => {
     setQuery('');
-    setPriceRange(null);
-    setSelectedBrand(null);
   };
 
-  const hasFilters = query || priceRange !== null || selectedBrand;
+  const hasFilters = query;
 
   return (
     <div className="min-h-screen bg-background">
@@ -106,82 +87,7 @@ function CategoryPage() {
           <span className="text-foreground font-medium">{cat?.name ?? 'All Products'}</span>
         </nav>
 
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[260px_1fr]">
-          {/* Sidebar */}
-          <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
-            {/* Categories */}
-            <div className="rounded-2xl bg-surface-muted p-5 ring-1 ring-border/60">
-              <h3 className="mb-3 text-sm font-bold">Categories</h3>
-              <ul className="space-y-1.5">
-                {categoriesWithCounts.map((c) => (
-                  <li key={c.slug}>
-                    <Link
-                      to="/category/$slug"
-                      params={{ slug: c.slug }}
-                      className={`flex items-center justify-between rounded-lg px-3 py-2 text-sm transition ${
-                        c.slug === normalizedSlug || (normalizedSlug === 'all' && c.slug === 'all')
-                          ? 'bg-primary text-primary-foreground font-semibold'
-                          : 'hover:bg-background text-foreground/80'
-                      }`}
-                    >
-                      <span>{c.name}</span>
-                      <span className={`text-xs ${c.slug === normalizedSlug ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
-                        {c.count}
-                      </span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Price */}
-            <div className="rounded-2xl bg-surface-muted p-5 ring-1 ring-border/60">
-              <h3 className="mb-3 text-sm font-bold">Price Range</h3>
-              <div className="space-y-2">
-                {PRICE_RANGES.map((r, i) => (
-                  <label key={r.label} className="flex cursor-pointer items-center gap-2 text-sm">
-                    <input
-                      type="radio"
-                      name="price"
-                      checked={priceRange === i}
-                      onChange={() => setPriceRange(i)}
-                      className="accent-primary"
-                    />
-                    <span>{r.label}</span>
-                  </label>
-                ))}
-                {priceRange !== null && (
-                  <button onClick={() => setPriceRange(null)} className="mt-1 text-xs text-primary underline">
-                    Clear price
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Brands */}
-            <div className="rounded-2xl bg-surface-muted p-5 ring-1 ring-border/60">
-              <h3 className="mb-3 text-sm font-bold">Brands</h3>
-              <div className="flex flex-wrap gap-1.5">
-                {brands.map((b) => (
-                  <button
-                    key={b.slug}
-                    onClick={() => setSelectedBrand(selectedBrand === b.name ? null : b.name)}
-                    className={`rounded-full px-3 py-1 text-xs font-medium transition ${
-                      selectedBrand === b.name
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-background text-foreground/80 ring-1 ring-border/60 hover:ring-primary/40'
-                    }`}
-                  >
-                    {b.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-          </aside>
-
-          {/* Main */}
-          <div>
+        <div>
             <div className="mb-6 flex flex-wrap items-center gap-4">
               <h1 className="text-2xl font-extrabold tracking-tight">{cat?.name ?? 'All Products'}</h1>
               <span className="rounded-full bg-surface-muted px-3 py-1 text-xs font-medium text-muted-foreground ring-1 ring-border/60">
@@ -204,25 +110,44 @@ function CategoryPage() {
             {hasFilters && (
               <div className="mb-4 flex items-center gap-3 text-sm">
                 <span className="text-muted-foreground">Showing {filtered.length} of {baseFiltered.length} products</span>
-                <button onClick={clearAll} className="flex items-center gap-1 text-primary hover:underline">
-                  <X size={14} /> Clear all
+                <button onClick={clearAll} className="text-primary hover:underline">
+                  Clear search
                 </button>
               </div>
             )}
 
             {filtered.length === 0 ? (
-              <div className="py-24 text-center text-muted-foreground">
-                <p className="text-lg font-medium">No products match your filters.</p>
-                <button onClick={clearAll} className="mt-4 text-primary underline">Clear filters</button>
-              </div>
+              baseFiltered.length === 0 ? (
+                <section className="rounded-3xl bg-surface-muted px-6 py-16 text-center ring-1 ring-border/60 sm:px-12">
+                  <span className="mx-auto mb-5 grid size-14 place-items-center rounded-full bg-primary/10 text-2xl" aria-hidden="true">
+                    {normalizedSlug === 'gimbal' ? '🎥' : normalizedSlug === 'airpods-pro-2gen' ? '🎧' : normalizedSlug === 'headset' ? '🎧' : '🛍️'}
+                  </span>
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">{cat?.name ?? 'Our collection'}</p>
+                  <h2 className="mt-3 text-2xl font-extrabold tracking-tight text-foreground">This collection is coming soon</h2>
+                  <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-muted-foreground">
+                    We’re preparing products for this category. In the meantime, browse the items currently available in the Hippo shop.
+                  </p>
+                  <Link
+                    to="/category/$slug"
+                    params={{ slug: 'all' }}
+                    className="mt-7 inline-flex rounded-full bg-primary px-6 py-3 text-sm font-bold text-primary-foreground transition hover:opacity-90"
+                  >
+                    Browse all products
+                  </Link>
+                </section>
+              ) : (
+                <div className="py-24 text-center text-muted-foreground">
+                  <p className="text-lg font-medium">No products match your filters.</p>
+                  <button onClick={clearAll} className="mt-4 text-primary underline">Clear filters</button>
+                </div>
+              )
             ) : (
-              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+              <div className="grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-3">
                 {filtered.map((p) => (
                   <ProductCard key={p.id} product={p} />
                 ))}
               </div>
             )}
-          </div>
         </div>
       </main>
       <Footer />

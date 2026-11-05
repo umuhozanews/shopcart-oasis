@@ -6,6 +6,8 @@ export type CartItem = {
   price: number;
   image: string;
   color?: string;
+  condition?: 'new' | 'dubai' | 'used';
+  specs?: Record<string, string>;
   qty: number;
 };
 

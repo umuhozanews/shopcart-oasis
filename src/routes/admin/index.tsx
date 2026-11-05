@@ -145,6 +145,7 @@ function AdminDashboard() {
             <div key={p.id} className="flex items-center gap-3 rounded-xl bg-surface-muted p-3">
               <img
                 src={p.image}
+                onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = '/product-image-fallback.svg'; }}
                 alt={p.name}
                 className="h-10 w-10 flex-shrink-0 rounded-lg bg-background object-contain p-1"
               />

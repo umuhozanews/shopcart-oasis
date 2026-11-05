@@ -5,6 +5,7 @@ import { useProducts, productStore } from '@/lib/product-store';
 import { saveImageToBlob } from '@/lib/server-db';
 import type { Product } from '@/lib/products';
 import { formatRWF } from '@/lib/currency';
+import { getAdminSessionToken } from '@/lib/admin-auth';
 
 export const Route = createFileRoute('/admin/products')({
   component: AdminProducts,
@@ -100,7 +101,7 @@ function ImageUploader({
     }
     try {
       const safeName = file.name.replace(/[^a-z0-9.-]/gi, '-').toLowerCase();
-      const { url } = await saveImageToBlob({ data: { base64, filename: safeName } });
+      const { url } = await saveImageToBlob({ data: { base64, filename: safeName, adminToken: getAdminSessionToken() ?? undefined } });
       onChange(url);
     } catch (err) {
       console.error('Image upload failed:', err);
@@ -136,7 +137,7 @@ function ImageUploader({
 
       {value ? (
         <div className="relative w-full aspect-square max-w-[180px] rounded-xl overflow-hidden border border-border bg-surface-muted group">
-          <img src={value} alt="Product" className="h-full w-full object-contain p-2" />
+          <img src={value} alt="Product" onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = '/product-image-fallback.svg'; }} className="h-full w-full object-contain p-2" />
           <button
             type="button"
             onClick={() => onChange('')}
@@ -193,12 +194,15 @@ function AdminProducts() {
   const [editId, setEditId] = useState<string | null>(null);
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState<FormState>(blank);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
 
   function setField(key: keyof FormState) {
     return (v: string) => setForm((prev) => ({ ...prev, [key]: v }));
   }
 
   function startEdit(p: Product) {
+    setSaveError('');
     setEditId(p.id);
     const g = p.gallery ?? [];
     setForm({
@@ -230,13 +234,25 @@ function AdminProducts() {
     return gallery.length > 0 ? gallery : [{ label: 'Main', src: main }];
   }
 
-  function saveEdit() {
+  async function saveEdit() {
     if (!editId) return;
+    const name = form.name.trim();
+    const normalizedName = name.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+    if (!name) { setSaveError('Enter a product name.'); return; }
+    if (products.some((product) => product.id !== editId && product.name.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim() === normalizedName)) {
+      setSaveError('A product with this name already exists.');
+      return;
+    }
+    const price = Number(form.price);
+    if (!Number.isFinite(price) || price <= 0) { setSaveError('Enter a valid price.'); return; }
     const image = form.imageData || undefined;
-    productStore.update(editId, {
-      name: form.name.trim() || undefined,
+    setSaving(true);
+    setSaveError('');
+    try {
+      await productStore.update(editId, {
+      name,
       tagline: form.tagline,
-      price: parseFloat(form.price) || 0,
+      price,
       stock: form.inStock ? (parseInt(form.stock, 10) || 1) : 0,
       image,
       category: form.category,
@@ -244,31 +260,45 @@ function AdminProducts() {
       gallery: image ? buildGallery(image) : undefined,
       breadcrumb: ['Electronics', form.category.charAt(0).toUpperCase() + form.category.slice(1)],
     });
-    setEditId(null);
-    setForm(blank);
+      setEditId(null);
+      setForm(blank);
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : 'Could not save the product. Please try again.');
+    } finally {
+      setSaving(false);
+    }
   }
 
   function cancelEdit() {
     setEditId(null);
     setForm(blank);
+    setSaveError('');
   }
 
   function openAdd() {
+    setSaveError('');
     setShowAdd(true);
     setForm(blank);
     setEditId(null);
   }
 
-  function saveAdd() {
+  async function saveAdd() {
     const name = form.name.trim();
     if (!name) return;
     const slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-    const mainImage = form.imageData || 'https://placehold.co/800x800/f5f5f5/999999?text=Product';
+    const mainImage = form.imageData;
+    const price = Number(form.price);
+    if (!mainImage || !Number.isFinite(price) || price <= 0) { setSaveError('Add a product image and a valid price.'); return; }
+    const normalizedName = name.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+    if (products.some((product) => product.name.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim() === normalizedName)) {
+      setSaveError('A product with this name already exists. Edit the existing listing instead.');
+      return;
+    }
     const newProduct: Product = {
       id: `${slug}-${Date.now()}`,
       name,
       tagline: form.tagline,
-      price: parseFloat(form.price) || 0,
+      price,
       stock: form.inStock ? (parseInt(form.stock, 10) || 1) : 0,
       rating: 5,
       reviews: 0,
@@ -278,14 +308,26 @@ function AdminProducts() {
       category: form.category,
       condition: form.condition,
     };
-    productStore.add(newProduct);
-    setShowAdd(false);
-    setForm(blank);
+    setSaving(true);
+    setSaveError('');
+    try {
+      await productStore.add(newProduct);
+      setShowAdd(false);
+      setForm(blank);
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : 'Could not add the product. Please try again.');
+    } finally {
+      setSaving(false);
+    }
   }
 
-  function handleDelete(id: string) {
+  async function handleDelete(id: string) {
     if (window.confirm('Delete this product? This cannot be undone.')) {
-      productStore.delete(id);
+      try {
+        await productStore.delete(id);
+      } catch (err) {
+        window.alert(err instanceof Error ? err.message : 'Could not delete the product. Please try again.');
+      }
     }
   }
 
@@ -305,6 +347,7 @@ function AdminProducts() {
           Add Product
         </button>
       </div>
+      {saveError && <p role="alert" className="rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive">{saveError}</p>}
 
       {/* Add Product Form */}
       {showAdd && (
@@ -342,6 +385,12 @@ function AdminProducts() {
                 <option value="smart-watches">Smart Watches</option>
                 <option value="accessories">Accessories</option>
                 <option value="gaming">Gaming</option>
+                <option value="speakers">Speakers</option>
+                <option value="chargers">Chargers & Power</option>
+                <option value="ring-light">Ring Light</option>
+                <option value="gimbal">Gimbal</option>
+                <option value="airpods-pro-2gen">AirPods Pro 2nd Gen</option>
+                <option value="headset">Headset</option>
               </select>
             </div>
             <div>
@@ -422,11 +471,11 @@ function AdminProducts() {
           <div className="flex gap-2 pt-1">
             <button
               onClick={saveAdd}
-              disabled={!form.name.trim()}
+              disabled={saving || !form.name.trim() || !form.imageData || !Number.isFinite(Number(form.price)) || Number(form.price) <= 0}
               className="flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition"
             >
               <Check size={14} />
-              Save Product
+              {saving ? 'Saving…' : 'Save Product'}
             </button>
             <button
               onClick={() => setShowAdd(false)}
@@ -475,6 +524,12 @@ function AdminProducts() {
                 <option value="smart-watches">Smart Watches</option>
                 <option value="accessories">Accessories</option>
                 <option value="gaming">Gaming</option>
+                <option value="speakers">Speakers</option>
+                <option value="chargers">Chargers & Power</option>
+                <option value="ring-light">Ring Light</option>
+                <option value="gimbal">Gimbal</option>
+                <option value="airpods-pro-2gen">AirPods Pro 2nd Gen</option>
+                <option value="headset">Headset</option>
               </select>
             </div>
             <div>
@@ -555,10 +610,11 @@ function AdminProducts() {
           <div className="flex gap-2">
             <button
               onClick={saveEdit}
+              disabled={saving}
               className="flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition"
             >
               <Check size={14} />
-              Save Changes
+              {saving ? 'Saving…' : 'Save Changes'}
             </button>
             <button
               onClick={cancelEdit}
@@ -600,6 +656,7 @@ function AdminProducts() {
                     <div className="flex items-center gap-3">
                       <img
                         src={p.image}
+                        onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = '/product-image-fallback.svg'; }}
                         alt={p.name}
                         className="h-12 w-12 flex-shrink-0 rounded-lg bg-surface-muted object-contain p-1"
                       />

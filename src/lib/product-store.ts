@@ -1,20 +1,49 @@
 import { useSyncExternalStore } from 'react';
 import { products as staticProducts, type Product } from './products';
 import { saveServerDb } from './server-db';
+import { getAdminSessionToken } from './admin-auth';
 
-const KEY = 'shopcart_products_v5';
+const KEY = 'shopcart_products_v6';
+const CATALOG_IMPORT_KEY = 'shopcart_clean_catalog_imported_v6';
+const APPLE_MAC_IMPORT_KEY = 'shopcart_apple_mac_catalog_imported_v3';
 const listeners = new Set<() => void>();
 let cache: Product[] | null = null;
+
+function uniqueProducts(products: Product[]): Product[] {
+  const ids = new Set<string>();
+  const names = new Set<string>();
+  return products.filter((product) => {
+    const name = product.name.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+    if (ids.has(product.id) || !name || names.has(name)) return false;
+    ids.add(product.id);
+    names.add(name);
+    return true;
+  });
+}
+
+function mergeImportedCatalog(products: Product[]): Product[] {
+  if (typeof window === 'undefined') return products;
+
+  let merged = products;
+  if (localStorage.getItem(CATALOG_IMPORT_KEY) !== '1') {
+    merged = uniqueProducts([...staticProducts, ...merged]);
+    localStorage.setItem(CATALOG_IMPORT_KEY, '1');
+  }
+  if (localStorage.getItem(APPLE_MAC_IMPORT_KEY) !== '1') {
+    const appleMacProducts = staticProducts.filter((product) => product.id.startsWith('apple-'));
+    merged = uniqueProducts([...merged, ...appleMacProducts]);
+    localStorage.setItem(APPLE_MAC_IMPORT_KEY, '1');
+  }
+  if (merged.length !== products.length) localStorage.setItem(KEY, JSON.stringify(merged));
+  return merged;
+}
 
 function read(): Product[] {
   if (cache !== null) return cache;
   if (typeof window === 'undefined') return staticProducts;
   try {
     const raw = localStorage.getItem(KEY);
-    let products = raw ? (JSON.parse(raw) as Product[]) : staticProducts;
-    if (!products || products.length === 0) {
-      products = staticProducts;
-    }
+    let products = uniqueProducts(mergeImportedCatalog(raw ? (JSON.parse(raw) as Product[]) : staticProducts));
     
     // Migrate old legacy categories and heal broken image URLs
     let migrated = false;
@@ -28,7 +57,7 @@ function read(): Product[] {
         migrated = true;
       }
 
-      if (['iphone', 'samsung', 'budget', 'smartphones'].includes(category)) {
+      if (category === 'iphone' || category === 'samsung' || category === 'budget' || category === 'smartphones') {
         category = 'phones';
         breadcrumb = ['Electronics', 'Phones'];
         migrated = true;
@@ -36,15 +65,35 @@ function read(): Product[] {
         category = 'accessories';
         breadcrumb = ['Electronics', 'Accessories'];
         migrated = true;
-      } else if (!['phones', 'computer', 'accessories', 'tablets', 'smart-watches', 'gaming'].includes(category)) {
+      } else if (![
+        'phones',
+        'computer',
+        'accessories',
+        'tablets',
+        'smart-watches',
+        'gaming',
+        'speakers',
+        'ring-light',
+        'gimbal',
+        'airpods-pro-2gen',
+        'headset',
+        'chargers',
+      ].includes(category)) {
         category = 'phones';
         breadcrumb = ['Electronics', 'Phones'];
         migrated = true;
       }
-      return { ...p, category, breadcrumb, image };
+      if (migrated) {
+        return { ...p, category, breadcrumb, image };
+      }
+      return p;
     });
 
-    if (migrated || !raw) {
+    if (migrated) {
+      localStorage.setItem(KEY, JSON.stringify(products));
+    }
+
+    if (raw && products.length !== (JSON.parse(raw) as Product[]).length) {
       localStorage.setItem(KEY, JSON.stringify(products));
     }
 
@@ -65,29 +114,44 @@ function write(products: Product[]): void {
 export const productStore = {
   getAll: read,
   getById: (id: string) => read().find((p) => p.id === id),
-  sync(products: Product[]) {
-    write(products);
+  sync(products: Product[], removedProductIds: string[] = []) {
+    localStorage.setItem(CATALOG_IMPORT_KEY, '1');
+    localStorage.setItem(APPLE_MAC_IMPORT_KEY, '1');
+    const removed = new Set(removedProductIds);
+    write(uniqueProducts(products.filter((product) => !removed.has(product.id))));
   },
-  add(p: Product) {
-    const updated = [...read(), p];
+  async add(p: Product) {
+    const previous = read();
+    const updated = [...previous, p];
     write(updated);
-    saveServerDb({ data: { products: updated } }).catch((err) =>
-      console.error('Failed to sync added product to server:', err)
-    );
+    try {
+      await saveServerDb({ data: { products: updated, adminToken: getAdminSessionToken() ?? undefined } });
+    } catch (err) {
+      write(previous);
+      throw err;
+    }
   },
-  update(id: string, patch: Partial<Pick<Product, 'name' | 'tagline' | 'price' | 'stock' | 'image' | 'gallery' | 'category' | 'breadcrumb' | 'condition'>>) {
-    const updated = read().map((p) => (p.id === id ? { ...p, ...patch } : p));
+  async update(id: string, patch: Partial<Pick<Product, 'name' | 'tagline' | 'price' | 'stock' | 'image' | 'gallery' | 'category' | 'breadcrumb' | 'condition'>>) {
+    const previous = read();
+    const updated = previous.map((p) => (p.id === id ? { ...p, ...patch } : p));
     write(updated);
-    saveServerDb({ data: { products: updated } }).catch((err) =>
-      console.error('Failed to sync updated product to server:', err)
-    );
+    try {
+      await saveServerDb({ data: { products: updated, adminToken: getAdminSessionToken() ?? undefined } });
+    } catch (err) {
+      write(previous);
+      throw err;
+    }
   },
-  delete(id: string) {
-    const updated = read().filter((p) => p.id !== id);
+  async delete(id: string) {
+    const previous = read();
+    const updated = previous.filter((p) => p.id !== id);
     write(updated);
-    saveServerDb({ data: { products: updated } }).catch((err) =>
-      console.error('Failed to sync deleted product to server:', err)
-    );
+    try {
+      await saveServerDb({ data: { products: updated, adminToken: getAdminSessionToken() ?? undefined } });
+    } catch (err) {
+      write(previous);
+      throw err;
+    }
   },
   subscribe(l: () => void) {
     listeners.add(l);

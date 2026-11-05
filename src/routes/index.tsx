@@ -1,12 +1,12 @@
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
-import { useState } from 'react';
-import { ChevronDown, SlidersHorizontal, ShieldCheck, Award, Truck, Lock, MessageCircle } from 'lucide-react';
+import { createFileRoute, Link } from '@tanstack/react-router';
+import { ShieldCheck, Award, Truck, Lock, MessageCircle } from 'lucide-react';
 import phoneImg from '@/assets/phones/iphone-15-pink.jpg';
 import tabletImg from '@/assets/tablets/ipad-air.jpg';
 import laptopImg from '@/assets/laptops/macbook-air.jpg';
 import watchImg from '@/assets/watches/apple-watch.jpg';
 import accessoryImg from '@/assets/accessories/airpods.jpg';
 import gamingImg from '@/assets/gaming/ps5.jpg';
+import chargerImg from '@/assets/accessories/charger.jpg';
 
 const CATEGORY_IMAGES: Record<string, string> = {
   phones: phoneImg,
@@ -15,6 +15,9 @@ const CATEGORY_IMAGES: Record<string, string> = {
   'smart-watches': watchImg,
   accessories: accessoryImg,
   gaming: gamingImg,
+  chargers: chargerImg,
+  speakers: '/products/speakers/jbl-boombox-3.jpg',
+  gimbal: '/products/gadgets/dji-osmo-mobile-6.jpg',
 };
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -25,14 +28,16 @@ import { categories, brands } from '@/lib/products';
 import { useProducts } from '@/lib/product-store';
 import { Toaster } from '@/components/ui/sonner';
 import { JsonLd, SITE_URL } from '@/components/JsonLd';
+import { INSTAGRAM_URL, SHOP_ADDRESS, SHOP_PHONES } from '@/lib/contact';
 
 export const Route = createFileRoute('/')({
   head: () => ({
     meta: [
-      { title: 'Hippo Technology — Original Smartphones & Electronics in Rwanda' },
-      { name: 'description', content: 'Shop original iPhones, Samsung, Google Pixel, Xiaomi, Huawei, Tecno and Infinix smartphones, laptops, tablets, accessories and more at Hippo Technology Rwanda. Genuine products, warranty, fast delivery.' },
-      { property: 'og:title', content: 'Hippo Technology — Original Smartphones & Electronics in Rwanda' },
-      { property: 'og:description', content: 'Rwanda\'s premier destination for original smartphones and electronics. Genuine products, warranty available, fast delivery across Rwanda.' },
+      { title: 'Phone Shop in Kigali, Rwanda | Hippo Technology' },
+      { name: 'description', content: 'Looking for phones in Kigali or across Rwanda? Shop smartphones, laptops and accessories at Hippo Technology in Kigali, with free delivery nationwide.' },
+      { name: 'keywords', content: 'phone shop Kigali, best phone shop in Kigali, phones in Kigali, phone shop Rwanda, phones in Rwanda, buy phones in Kigali, smartphones Rwanda, electronics shop Kigali, Hippo Technology' },
+      { property: 'og:title', content: 'Phone Shop in Kigali, Rwanda | Hippo Technology' },
+      { property: 'og:description', content: 'Shop smartphones, laptops and accessories at Hippo Technology in Kigali. Free delivery across Rwanda.' },
       { property: 'og:url', content: SITE_URL },
     ],
     links: [{ rel: 'canonical', href: `${SITE_URL}/` }],
@@ -43,10 +48,19 @@ export const Route = createFileRoute('/')({
 const siteLd = [
   {
     '@context': 'https://schema.org',
-    '@type': 'Organization',
+    '@type': 'ElectronicsStore',
     name: 'Hippo Technology',
     url: SITE_URL,
     logo: `${SITE_URL}/hippo-logo.png`,
+    telephone: SHOP_PHONES[0],
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: SHOP_ADDRESS,
+      addressLocality: 'Kigali',
+      addressCountry: 'RW',
+    },
+    sameAs: [INSTAGRAM_URL],
+    areaServed: { '@type': 'Country', name: 'Rwanda' },
   },
   {
     '@context': 'https://schema.org',
@@ -61,14 +75,8 @@ const siteLd = [
   },
 ];
 
-const SORT_OPTIONS = ['Featured', 'Price: Low to High', 'Price: High to Low'];
-
 function Home() {
   const allProducts = useProducts();
-  const navigate = useNavigate();
-  const [activeCategory, setActiveCategory] = useState('all');
-  const [sort, setSort] = useState('Featured');
-  const [showSort, setShowSort] = useState(false);
 
   const categoriesWithCounts = categories.map((c) => ({
     ...c,
@@ -77,15 +85,7 @@ function Home() {
       : allProducts.filter((p) => p.category === c.slug).length,
   }));
 
-  const filtered = activeCategory === 'all'
-    ? allProducts
-    : allProducts.filter((p) => p.category === activeCategory);
-
-  const sorted = [...filtered].sort((a, b) => {
-    if (sort === 'Price: Low to High') return a.price - b.price;
-    if (sort === 'Price: High to Low') return b.price - a.price;
-    return 0;
-  });
+  const sorted = allProducts;
 
   return (
     <div className="min-h-screen bg-background">
@@ -93,77 +93,28 @@ function Home() {
       <Toaster position="top-right" />
       <Header />
 
-      <main className="mx-auto max-w-7xl px-4 pt-6 md:px-6">
+      <main className="w-full pt-6">
         {/* Hero Slider */}
         <HeroSlider />
+        <div className="mx-auto max-w-7xl px-4 md:px-6">
         <StockPopup />
 
-        {/* Category filter pills */}
-        <section className="mt-8 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <button
-              onClick={() => setActiveCategory('all')}
-              className={`rounded-full px-4 py-2 text-xs font-medium transition ${
-                activeCategory === 'all'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'border border-border bg-background text-foreground/80 hover:border-primary hover:text-primary'
-              }`}
-            >
-              All
-            </button>
-            {categoriesWithCounts.filter((c) => c.slug !== 'all').map((c) => {
-              return (
-                <button
-                  key={c.slug}
-                  onClick={() => setActiveCategory(c.slug)}
-                  className={`rounded-full px-4 py-2 text-xs font-medium transition ${
-                    activeCategory === c.slug
-                      ? 'bg-primary text-primary-foreground'
-                      : 'border border-border bg-background text-foreground/80 hover:border-primary hover:text-primary'
-                  }`}
-                >
-                  {c.name}
-                </button>
-              );
-            })}
-            <Link
-              to="/category/$slug"
-              params={{ slug: 'all' }}
-              className="flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-xs font-medium text-foreground/80 hover:border-primary hover:text-primary"
-            >
-              Browse All <SlidersHorizontal size={12} />
-            </Link>
-          </div>
-
-          {/* Sort */}
-          <div className="relative">
-            <button
-              onClick={() => setShowSort((v) => !v)}
-              className="flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-xs font-medium text-foreground/80 hover:border-primary hover:text-primary"
-            >
-              {sort} <ChevronDown size={14} className={`transition-transform ${showSort ? 'rotate-180' : ''}`} />
-            </button>
-            {showSort && (
-              <div className="absolute right-0 top-full mt-2 w-44 rounded-2xl bg-background p-1.5 shadow-xl ring-1 ring-border/60 z-30">
-                {SORT_OPTIONS.map((opt) => (
-                  <button
-                    key={opt}
-                    onClick={() => { setSort(opt); setShowSort(false); }}
-                    className={`w-full rounded-xl px-3 py-2 text-left text-xs font-medium transition hover:bg-surface-muted ${sort === opt ? 'text-primary' : ''}`}
-                  >
-                    {opt}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+        <section className="mt-7 rounded-2xl border border-primary/10 bg-surface-muted px-5 py-5 sm:px-7 sm:py-6">
+          <h2 className="text-lg font-bold tracking-tight text-foreground sm:text-xl">Looking for a phone shop in Kigali?</h2>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
+            Hippo Technology offers smartphones, laptops and accessories from our Kigali store at {SHOP_ADDRESS}. Shop online for free delivery across Rwanda.
+          </p>
+          <Link to="/category/$slug" params={{ slug: 'phones' }} className="mt-3 inline-flex min-h-10 items-center rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90">
+            Browse phones
+          </Link>
         </section>
 
-        {/* Products */}
-        <section className="mt-8">
+        {/* Deals */}
+        <section className="mt-8 rounded-3xl bg-[#edf4ed] p-4 sm:p-6 lg:p-7">
+        <section className="mt-1">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold tracking-tight text-foreground">
-              {activeCategory === 'all' ? 'All Products' : categoriesWithCounts.find((c) => c.slug === activeCategory)?.name ?? 'Products'}
+            <h2 className="text-3xl font-bold tracking-tight text-foreground md:text-4xl">
+              Hot deals
               <span className="ml-2 text-sm font-normal text-muted-foreground">({sorted.length})</span>
             </h2>
           </div>
@@ -174,12 +125,13 @@ function Home() {
               <p className="mt-1 text-sm text-muted-foreground">Products will appear here once the admin adds them.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
               {sorted.map((p) => (
                 <ProductCard key={p.id} product={p} />
               ))}
             </div>
           )}
+        </section>
         </section>
 
         {/* Categories */}
@@ -244,6 +196,7 @@ function Home() {
             ))}
           </div>
         </section>
+        </div>
       </main>
 
       <Footer />

@@ -9,6 +9,9 @@
     "build:dev": "vite build --mode development",
     "start": "node .output/server/index.mjs",
     "preview": "vite preview",
+    "seo:sitemap": "node scripts/generate-sitemap.mjs",
+    "catalog:sync": "node scripts/build-clean-catalog.mjs",
+    "catalog:download": "node scripts/download-stock-images.mjs",
     "lint": "eslint .",
     "format": "prettier --write ."
   },
@@ -43,7 +46,7 @@
     "@tailwindcss/vite": "^4.2.1",
     "@tanstack/react-query": "^5.101.1",
     "@tanstack/react-router": "^1.170.16",
-    "@tanstack/react-start": "^1.168.26",
+    "@tanstack/react-start": "1.168.60",
     "@tanstack/router-plugin": "^1.168.18",
     "@vercel/analytics": "^2.0.1",
     "@vercel/blob": "^2.6.1",

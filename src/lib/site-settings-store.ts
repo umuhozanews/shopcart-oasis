@@ -7,6 +7,7 @@ import {
   SHOP_ADDRESS,
 } from './contact';
 import { saveServerDb } from './server-db';
+import { getAdminSessionToken } from './admin-auth';
 
 export type SiteSettings = {
   siteName: string;
@@ -91,7 +92,7 @@ export const siteSettingsStore = {
   save(patch: Partial<SiteSettings>) {
     const updated = { ...read(), ...patch };
     write(updated);
-    saveServerDb({ data: { settings: updated } }).catch((err) =>
+    saveServerDb({ data: { settings: updated, adminToken: getAdminSessionToken() ?? undefined } }).catch((err) =>
       console.error('Failed to sync settings changes to server:', err)
     );
   },
@@ -99,7 +100,7 @@ export const siteSettingsStore = {
     cache = SETTINGS_DEFAULTS;
     localStorage.removeItem(KEY);
     listeners.forEach((l) => l());
-    saveServerDb({ data: { settings: SETTINGS_DEFAULTS } }).catch((err) =>
+    saveServerDb({ data: { settings: SETTINGS_DEFAULTS, adminToken: getAdminSessionToken() ?? undefined } }).catch((err) =>
       console.error('Failed to sync settings reset to server:', err)
     );
   },

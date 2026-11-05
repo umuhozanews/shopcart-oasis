@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router';
+﻿import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -7,7 +7,7 @@ import { Phone, Mail, MapPin, Clock, CheckCircle2 } from 'lucide-react';
 export const Route = createFileRoute('/contact')({
   head: () => ({
     meta: [
-      { title: 'Contact Us — Hippo Technology' },
+      { title: 'Contact Us â€” Hippo Technology' },
       { name: 'description', content: 'Get in touch with Hippo Technology. Call, email, or visit us in Kigali, Rwanda.' },
     ],
   }),
@@ -54,7 +54,7 @@ function Contact() {
           ) : (
             <form onSubmit={handleSubmit} className="rounded-2xl bg-background p-8 ring-1 ring-border/60 space-y-4">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <Field label="Your Name" placeholder="Jane Doe" value={form.name} onChange={setField('name')} required />
+                <Field label="Your Name" placeholder="Full name" value={form.name} onChange={setField('name')} required />
                 <Field label="Email Address" placeholder="you@example.com" type="email" value={form.email} onChange={setField('email')} required />
               </div>
               <div>
@@ -99,7 +99,7 @@ function Contact() {
               { icon: Phone, label: 'Phone', value: '+250 793 051 054', href: 'tel:+250793051054' },
               { icon: Mail, label: 'Email', value: 'info@hippotech.rw', href: 'mailto:info@hippotech.rw' },
               { icon: MapPin, label: 'Address', value: 'KG 501 St, Kigali, Rwanda', href: '#' },
-              { icon: Clock, label: 'Hours', value: 'Mon–Sat: 8am – 6pm', href: '#' },
+              { icon: Clock, label: 'Hours', value: 'Monâ€“Sat: 8am â€“ 6pm', href: '#' },
             ].map(({ icon: Icon, label, value, href }) => (
               <a
                 key={label}
@@ -139,3 +139,4 @@ function Field({
     </label>
   );
 }
+

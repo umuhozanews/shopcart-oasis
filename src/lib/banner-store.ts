@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from 'react';
 import { saveServerDb } from './server-db';
+import { getAdminSessionToken } from './admin-auth';
 import iphone16Img from '@/assets/phones/iphone-16-pro-max-black.jpg';
 import samsungS25Img from '@/assets/phones/samsung-s25-ultra-black.jpg';
 import iphone15Img from '@/assets/phones/iphone-15-pink.jpg';
@@ -134,21 +135,21 @@ export const bannerStore = {
   save(patch: Partial<BannerData>) {
     const updated = { ...read(), ...patch };
     write(updated);
-    saveServerDb({ data: { slides: updated.slides, popup: updated.popup } }).catch((err) =>
+    saveServerDb({ data: { slides: updated.slides, popup: updated.popup, adminToken: getAdminSessionToken() ?? undefined } }).catch((err) =>
       console.error('Failed to sync banners changes to server:', err)
     );
   },
   saveSlides(slides: HeroSlide[]) {
     const updated = { ...read(), slides };
     write(updated);
-    saveServerDb({ data: { slides } }).catch((err) =>
+    saveServerDb({ data: { slides, adminToken: getAdminSessionToken() ?? undefined } }).catch((err) =>
       console.error('Failed to sync slides changes to server:', err)
     );
   },
   savePopup(popup: StockPopup) {
     const updated = { ...read(), popup };
     write(updated);
-    saveServerDb({ data: { popup } }).catch((err) =>
+    saveServerDb({ data: { popup, adminToken: getAdminSessionToken() ?? undefined } }).catch((err) =>
       console.error('Failed to sync popup changes to server:', err)
     );
   },

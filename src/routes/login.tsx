@@ -22,15 +22,21 @@ function Login() {
     }
   }, []);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError('');
-    const ok = adminLogin(email, password);
-    if (ok) {
-      window.location.href = '/admin';
-    } else {
-      setError('Invalid email or password.');
+    try {
+      const ok = await adminLogin(email, password);
+      if (ok) {
+        window.location.href = '/admin';
+      } else {
+        setError('Invalid email or password.');
+        setLoading(false);
+      }
+    } catch (err) {
+      console.error('Admin login failed:', err);
+      setError('Sign in is temporarily unavailable. Please try again.');
       setLoading(false);
     }
   }

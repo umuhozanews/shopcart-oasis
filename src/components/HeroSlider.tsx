@@ -11,9 +11,14 @@ function Slide({ slide, active }: { slide: HeroSlide; active: boolean }) {
       className={`absolute inset-0 transition-opacity duration-700 ${active ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
       aria-hidden={!active}
     >
+      {/* Keep the promotion visual on small screens without reducing text contrast. */}
+      <div className="pointer-events-none absolute inset-0 flex justify-end overflow-hidden md:hidden" aria-hidden="true">
+        <img src={imgSrc} alt="" className="relative z-10 h-full w-3/5 object-contain object-right opacity-100 drop-shadow-lg" />
+        <div className="absolute inset-0 z-0 bg-gradient-to-r from-accent via-accent/75 to-accent/5" />
+      </div>
       <div className="grid h-full grid-cols-1 items-center gap-4 px-8 py-6 md:grid-cols-2 md:px-14 md:py-8">
         {/* Text */}
-        <div className="flex flex-col justify-center">
+        <div className="relative z-20 flex max-w-[78%] flex-col justify-center sm:max-w-[72%] md:max-w-none">
           {slide.badge && (
             <span className="mb-3 inline-block self-start rounded-full bg-primary px-4 py-1.5 text-xs font-extrabold tracking-widest text-primary-foreground">
               {slide.badge}
@@ -78,7 +83,7 @@ export function HeroSlider() {
 
   return (
     <section
-      className="relative overflow-hidden rounded-3xl bg-accent"
+      className="relative w-full overflow-hidden rounded-none bg-accent md:rounded-3xl"
       style={{ minHeight: '380px' }}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
