@@ -30,22 +30,6 @@ function Slide({ slide, active }: { slide: HeroSlide; active: boolean }) {
           {slide.subtitle && (
             <p className="mt-3 max-w-sm text-sm text-foreground/70 leading-relaxed">{slide.subtitle}</p>
           )}
-          {slide.buttonText && slide.buttonLink && (
-            <div className="mt-4 flex flex-wrap gap-2">
-              <Link
-                to={slide.buttonLink as '/'}
-                className="inline-flex items-center rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90 sm:px-6 sm:py-2.5 sm:text-sm"
-              >
-                {slide.buttonText}
-              </Link>
-              <Link
-                to="/deals"
-                className="inline-flex items-center rounded-full border border-primary px-4 py-2 text-xs font-semibold text-primary transition hover:bg-primary/5 sm:px-6 sm:py-2.5 sm:text-sm"
-              >
-                See All Deals
-              </Link>
-            </div>
-          )}
         </div>
 
         {/* Image */}
