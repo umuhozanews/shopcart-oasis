@@ -67,6 +67,21 @@ export function HeroSlider() {
     >
       {/* Slides */}
       <div className="relative" style={{ minHeight: 'clamp(240px, 55vw, 380px)' }}>
+        {/* Product images placed BEFORE slide divs with no z-index — this keeps them in the
+            section's stacking context so mix-blend-multiply composites against the peach bg */}
+        {active.map((slide, i) => {
+          const imgSrc = slide.imageData || heroWoman;
+          return (
+            <div
+              key={`pimg-${slide.id}`}
+              aria-hidden="true"
+              className={`pointer-events-none absolute inset-y-0 right-0 hidden w-5/12 items-center justify-end pr-4 md:flex transition-opacity duration-700 ${i === current ? 'opacity-100' : 'opacity-0'}`}
+              style={{ mixBlendMode: 'multiply' }}
+            >
+              <img src={imgSrc} alt="" className="h-full max-h-72 w-auto object-contain lg:max-h-80" />
+            </div>
+          );
+        })}
         {active.map((slide, i) => (
           <Slide key={slide.id} slide={slide} active={i === current} />
         ))}
