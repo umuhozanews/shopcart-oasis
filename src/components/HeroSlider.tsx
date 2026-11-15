@@ -11,36 +11,36 @@ function Slide({ slide, active }: { slide: HeroSlide; active: boolean }) {
       className={`absolute inset-0 transition-opacity duration-700 ${active ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
       aria-hidden={!active}
     >
-      {/* Keep the promotion visual on small screens without reducing text contrast. */}
+      {/* Mobile background image — kept small and behind a strong gradient so text is always readable */}
       <div className="pointer-events-none absolute inset-0 flex justify-end overflow-hidden md:hidden" aria-hidden="true">
-        <img src={imgSrc} alt="" className="relative z-10 h-full w-3/5 object-contain object-right opacity-100 drop-shadow-lg" />
-        <div className="absolute inset-0 z-0 bg-gradient-to-r from-accent via-accent/75 to-accent/5" />
+        <img src={imgSrc} alt="" className="relative z-10 h-full w-2/5 object-contain object-right opacity-80 drop-shadow-lg" />
+        <div className="absolute inset-0 z-0 bg-gradient-to-r from-accent from-[55%] via-accent/90 via-[75%] to-accent/10" />
       </div>
-      <div className="grid h-full grid-cols-1 items-center gap-4 px-8 py-6 md:grid-cols-2 md:px-14 md:py-8">
+      <div className="grid h-full grid-cols-1 items-center gap-4 px-6 py-5 md:grid-cols-2 md:px-14 md:py-8">
         {/* Text */}
-        <div className="relative z-20 flex max-w-[78%] flex-col justify-center sm:max-w-[72%] md:max-w-none">
+        <div className="relative z-20 flex max-w-[58%] flex-col justify-center sm:max-w-[65%] md:max-w-none">
           {slide.badge && (
             <span className="mb-3 inline-block self-start rounded-full bg-primary px-4 py-1.5 text-xs font-extrabold tracking-widest text-primary-foreground">
               {slide.badge}
             </span>
           )}
-          <h1 className="font-display text-2xl font-extrabold leading-tight tracking-tight text-primary sm:text-3xl md:text-4xl">
+          <h1 className="font-display text-lg font-extrabold leading-tight tracking-tight text-primary sm:text-2xl md:text-4xl">
             {slide.title}
           </h1>
           {slide.subtitle && (
             <p className="mt-3 max-w-sm text-sm text-foreground/70 leading-relaxed">{slide.subtitle}</p>
           )}
           {slide.buttonText && slide.buttonLink && (
-            <div className="mt-5 flex flex-wrap gap-3">
+            <div className="mt-4 flex flex-wrap gap-2">
               <Link
                 to={slide.buttonLink as '/'}
-                className="inline-flex items-center rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90"
+                className="inline-flex items-center rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90 sm:px-6 sm:py-2.5 sm:text-sm"
               >
                 {slide.buttonText}
               </Link>
               <Link
                 to="/deals"
-                className="inline-flex items-center rounded-full border border-primary px-6 py-2.5 text-sm font-semibold text-primary transition hover:bg-primary/5"
+                className="inline-flex items-center rounded-full border border-primary px-4 py-2 text-xs font-semibold text-primary transition hover:bg-primary/5 sm:px-6 sm:py-2.5 sm:text-sm"
               >
                 See All Deals
               </Link>
@@ -84,12 +84,12 @@ export function HeroSlider() {
   return (
     <section
       className="relative w-full overflow-hidden rounded-none bg-accent md:rounded-3xl"
-      style={{ minHeight: '380px' }}
+      style={{ minHeight: 'clamp(240px, 55vw, 380px)' }}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
       {/* Slides */}
-      <div className="relative" style={{ minHeight: '380px' }}>
+      <div className="relative" style={{ minHeight: 'clamp(240px, 55vw, 380px)' }}>
         {active.map((slide, i) => (
           <Slide key={slide.id} slide={slide} active={i === current} />
         ))}
