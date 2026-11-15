@@ -16,9 +16,9 @@ function Slide({ slide, active }: { slide: HeroSlide; active: boolean }) {
         <img src={imgSrc} alt="" className="relative z-10 h-full w-2/5 object-contain object-right opacity-80 drop-shadow-lg" />
         <div className="absolute inset-0 z-0 bg-gradient-to-r from-accent from-[55%] via-accent/90 via-[75%] to-accent/10" />
       </div>
-      <div className="grid h-full grid-cols-1 items-center gap-4 px-6 py-5 md:grid-cols-2 md:px-14 md:py-8">
+      <div className="grid h-full grid-cols-1 items-center gap-4 px-6 py-5 md:px-14 md:py-8">
         {/* Text */}
-        <div className="relative z-20 flex max-w-[58%] flex-col justify-center sm:max-w-[65%] md:max-w-none">
+        <div className="relative z-20 flex max-w-lg flex-col justify-center">
           {slide.badge && (
             <span className="mb-3 inline-block self-start rounded-full bg-primary px-4 py-1.5 text-xs font-extrabold tracking-widest text-primary-foreground">
               {slide.badge}
@@ -33,13 +33,6 @@ function Slide({ slide, active }: { slide: HeroSlide; active: boolean }) {
         </div>
 
         {/* Image */}
-        <div className="hidden md:flex items-end justify-center h-full pt-4">
-          <img
-            src={imgSrc}
-            alt={slide.title}
-            className="h-full max-h-72 w-auto object-contain drop-shadow-xl lg:max-h-80"
-          />
-        </div>
       </div>
     </div>
   );
