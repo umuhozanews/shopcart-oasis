@@ -16,15 +16,15 @@ function Slide({ slide, active }: { slide: HeroSlide; active: boolean }) {
         <img src={imgSrc} alt="" className="relative z-10 h-full w-2/5 object-contain object-right opacity-80 drop-shadow-lg" />
         <div className="absolute inset-0 z-0 bg-gradient-to-r from-accent from-[55%] via-accent/90 via-[75%] to-accent/10" />
       </div>
-      <div className="grid h-full grid-cols-1 items-center gap-4 px-6 py-5 md:px-14 md:py-8">
+      <div className="grid h-full grid-cols-1 items-center gap-4 px-5 py-6 sm:px-6 md:px-14 md:py-8">
         {/* Text */}
-        <div className="relative z-20 flex max-w-lg flex-col justify-center">
+        <div className="relative z-20 flex w-[78%] max-w-lg flex-col justify-center sm:w-full">
           {slide.badge && (
             <span className="mb-3 inline-block self-start rounded-full bg-primary px-4 py-1.5 text-xs font-extrabold tracking-widest text-primary-foreground">
               {slide.badge}
             </span>
           )}
-          <h1 className="font-display text-lg font-extrabold leading-tight tracking-tight text-primary sm:text-2xl md:text-4xl">
+          <h1 className="font-display text-[clamp(1.125rem,5vw,2.25rem)] font-extrabold leading-tight tracking-tight text-pretty text-violet-700 dark:text-violet-300">
             {slide.title}
           </h1>
           {slide.subtitle && (
@@ -61,12 +61,12 @@ export function HeroSlider() {
   return (
     <section
       className="relative w-full overflow-hidden rounded-none bg-accent md:rounded-3xl"
-      style={{ minHeight: 'clamp(240px, 55vw, 380px)' }}
+      style={{ minHeight: 'clamp(260px, 42vw, 380px)' }}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
       {/* Slides */}
-      <div className="relative" style={{ minHeight: 'clamp(240px, 55vw, 380px)' }}>
+      <div className="relative" style={{ minHeight: 'clamp(260px, 42vw, 380px)' }}>
         {/* Product images placed BEFORE slide divs with no z-index — this keeps them in the
             section's stacking context so mix-blend-multiply composites against the peach bg */}
         {active.map((slide, i) => {
